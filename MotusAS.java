@@ -30,7 +30,7 @@ class MotATrouver {
     }
 }
 
-public class MotusSouede {
+public class MotusAS {
     private static final int essaisMax = 6;  // Définir le nombre d'essais maximum globalement
     private static final String GRAS = "\033[1m";
     private static final String RESET = "\033[0m";
