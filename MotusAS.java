@@ -162,4 +162,5 @@ public class MotusAS {
     private static String[] getListeMotsPossibles() {
         return new String[]{"avion", "voiture", "maison", "ordinateur", "bureau", "table", "chaise", "fenetre"};
     }
+
 }
