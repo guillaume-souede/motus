@@ -10,29 +10,7 @@ public class MotusAS {
     private static final int essaisMax = 6;  // Définir le nombre d'essais maximum globalement
     private static final String GRAS = "\033[1m";
     private static final String RESET = "\033[0m";
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
 
-        do {
-            System.out.println("Bienvenue dans ⓂⓄⓉⓊⓈ !");
-            System.out.println("Choisissez un mode : 1️⃣(🫵 vous devinez) ou 2️⃣ (🤖 l'ordinateur devine)");
-            int mode = scanner.nextInt();
-            scanner.nextLine();
-
-            if (mode == 1) {
-                joueurDevine(scanner);
-            } else if (mode == 2) {
-                ordinateurDevine(scanner);
-            } else {
-                System.out.println("Mode invalide.");
-            }
-
-            System.out.println("⏯️ Jouer à nouveau ? 1️⃣ : oui, 2️⃣ : non");
-        } while (scanner.nextLine().equalsIgnoreCase("1"));
-
-        scanner.close();
-        System.out.println("👋 Au revoir.");
-    }
 
     public static void joueurDevine(Scanner scanner) {
         String[] motsPossibles = getListeMotsPossibles();
@@ -139,4 +117,28 @@ public class MotusAS {
         return new String[]{"avion", "voiture", "maison", "ordinateur", "bureau", "table", "chaise", "fenetre"};
     }
 
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        do {
+            System.out.println("Bienvenue dans ⓂⓄⓉⓊⓈ !");
+            System.out.println("Choisissez un mode : 1️⃣(🫵 vous devinez) ou 2️⃣ (🤖 l'ordinateur devine)");
+            int mode = scanner.nextInt();
+            scanner.nextLine();
+
+            if (mode == 1) {
+                joueurDevine(scanner);
+            } else if (mode == 2) {
+                ordinateurDevine(scanner);
+            } else {
+                System.out.println("Mode invalide.");
+            }
+
+            System.out.println("⏯️ Jouer à nouveau ? 1️⃣ : oui, 2️⃣ : non");
+        } while (scanner.nextLine().equalsIgnoreCase("1"));
+
+        scanner.close();
+        System.out.println("👋 Au revoir.");
+    }
 }
