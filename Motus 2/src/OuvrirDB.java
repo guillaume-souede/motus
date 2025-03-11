@@ -28,7 +28,7 @@ public class OuvrirDB {
             while(contentLine != null){
                 if (contentLine != null)  {
                     int fooKey = contentLine.length();
-                    if (phrase.get(fooKey) != null) {
+                    if (phrase.get(fooKey) == null) {
                         phrase.put(fooKey, new Mots(contentLine));
                     }
                     else {
