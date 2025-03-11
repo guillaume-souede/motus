@@ -50,14 +50,14 @@ public class MotATrouver {
         for (int i = 0; i < etatMot.length; i++) {
             char lettre = proposition.charAt(i);
             if (lettre == motSecret.charAt(i)) {
-                affichage.append("🟥").append(lettre);
+                affichage.append("🟥");
             } else if (motSecret.contains(String.valueOf(lettre))) {
-                affichage.append("🟡").append(lettre);
+                affichage.append("🟡");
             } else {
-                affichage.append("🟦").append(lettre);
+                affichage.append("🟦");
             }
         }
-        System.out.println(affichage);
+        System.out.println(affichage+"\n"+motSecret);
     }
 
     public char[] getEtatMot() {

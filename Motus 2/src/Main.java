@@ -3,6 +3,7 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        OuvrirDB db = new OuvrirDB(); // ici on a l'ouverture + création de la DB
 
         do {
             System.out.println("Bienvenue dans ⓂⓄⓉⓊⓈ !");
@@ -11,11 +12,11 @@ public class Main {
             scanner.nextLine();
 
             if (mode == 1) {
-                JeuJoueur.joueurDevine(scanner);
+                JeuJoueur.joueurDevine(scanner, db);
             } else if (mode == 2) {
                 System.out.println("Entrez un mot secret pour l'ordinateur : ");
                 String motSecret = scanner.nextLine();
-                JeuOrdinateur.ordinateurDevine(motSecret, scanner);
+                JeuOrdinateur.ordinateurDevine(motSecret, scanner, db);
             } else {
                 System.out.println("Mode invalide.");
             }

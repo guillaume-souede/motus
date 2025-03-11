@@ -5,12 +5,11 @@ public class JeuOrdinateur {
     private static final String GRAS = "\033[1m";
     private static final String RESET = "\033[0m";
 
-    public static void ordinateurDevine(String motSecret, Scanner scanner) {
-        String[] dictionnaire = JeuJoueur.getListeMotsPossibles();
-        List<String> motsPossibles = new ArrayList<>(Arrays.asList(dictionnaire));
-        motsPossibles.removeIf(m -> m.length() != motSecret.length());
+    public static void ordinateurDevine(String motSecret, Scanner scanner, OuvrirDB db) {
+        ArrayList<String> dictionnaire = db.getPhrase().get(motSecret.length()).line; 
+        // prend tout les mots de taille a rechercher
 
-        if (motsPossibles.isEmpty()) {
+        if (dictionnaire.isEmpty()) {
             System.out.println("ℹ Mot impossible à jouer.");
             return;
         }
@@ -20,10 +19,10 @@ public class JeuOrdinateur {
         MotATrouver motATrouver = new MotATrouver(motSecret);
 
         int essais = 0;
-        while (essais < essaisMax && !motsPossibles.isEmpty()) {
+        while (essais < essaisMax && !dictionnaire.isEmpty()) {
             String proposition;
             do {
-                proposition = motsPossibles.get(random.nextInt(motsPossibles.size()));
+                proposition = dictionnaire.get(random.nextInt(dictionnaire.size()));
             } while (motsEssayes.contains(proposition));
 
             motsEssayes.add(proposition);
@@ -35,7 +34,7 @@ public class JeuOrdinateur {
                 return;
             }
 
-            motsPossibles.removeIf(mot -> !JeuOrdinateur.correspondAEtat(mot, motATrouver.getEtatMot()));
+            dictionnaire.removeIf(mot -> !JeuOrdinateur.correspondAEtat(mot, motATrouver.getEtatMot()));
             essais++;
         }
 
