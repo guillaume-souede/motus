@@ -9,6 +9,7 @@ public class OuvrirDB {
     private HashMap<Integer,Mots> phrase; // int = taille du mot
 
 
+
     public HashMap<Integer, Mots> getPhrase() {
         return phrase;
     }

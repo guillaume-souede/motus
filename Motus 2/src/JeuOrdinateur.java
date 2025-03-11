@@ -6,21 +6,21 @@ public class JeuOrdinateur {
     private static final String RESET = "\033[0m";
 
     public static void ordinateurDevine(String motSecret, Scanner scanner, OuvrirDB db) {
+        String proposition;     int essais = 0;
         ArrayList<String> dictionnaire = db.getPhrase().get(motSecret.length()).line; 
         // prend tout les mots de taille a rechercher
+        Set<String> motsEssayes = new HashSet<>();
+        Random random = new Random();
+        MotATrouver motATrouver = new MotATrouver(motSecret);
 
         if (dictionnaire.isEmpty()) {
             System.out.println("ℹ Mot impossible à jouer.");
             return;
         }
 
-        Set<String> motsEssayes = new HashSet<>();
-        Random random = new Random();
-        MotATrouver motATrouver = new MotATrouver(motSecret);
 
-        int essais = 0;
         while (essais < essaisMax && !dictionnaire.isEmpty()) {
-            String proposition;
+            
             do {
                 proposition = dictionnaire.get(random.nextInt(dictionnaire.size()));
             } while (motsEssayes.contains(proposition));
