@@ -1,9 +1,6 @@
 import java.util.ArrayList;
 
 public class EtatMot {
-    
-    static String motSecret;
-
     /*
      * à partir d'une proposition test quels sont les bons caractère
      * renvoie 2 String : 
@@ -12,26 +9,24 @@ public class EtatMot {
      */
 
     
-    static public String checkEtatMot(String proposition){
+    static public String checkEtatMot(String proposition, String motSecret){
         // étape 1 création du premier String 
-
-        String SilouetteMot = "";              // la construction du premier String
+        String SilouetteMot = "";                   // la construction du premier String
         char lettreActu;                            // le char a vérifier
         for (int i = 0; i < motSecret.length(); i++) {
             if (proposition.charAt(i) == motSecret.charAt(i)) {
                 lettreActu = proposition.charAt(i); // si bon => met dans la chaine le char
-                SilouetteMot += lettreActu;      // la concaténation
+                SilouetteMot += lettreActu;         // la concaténation
             } else {
-                SilouetteMot += '*';             //si pas bon met une étoile
+                SilouetteMot += '*';                //si pas bon met une étoile
             }
         }
         return SilouetteMot;
     }
 
-
         // étape 2 création du String de mots mal placé
-    static public String checkWrongPlacement(String proposition){
-        String silouetteMot = checkEtatMot(proposition);
+    static public String checkWrongPlacement(String proposition, String motSecret){
+        String silouetteMot = checkEtatMot(proposition, motSecret);
         ArrayList<Integer> positionFausses= new ArrayList<Integer>();
         String motMalPlace = "";
 
@@ -49,16 +44,6 @@ public class EtatMot {
             motSecretTrimmed += motSecret.charAt(positions)+"";
         }
 
-        // //c. final, chercher si la lettre de la proposition existe mais mal placé
-        // for (int i = 0; i < propositionTrimmed.length(); i++) {
-        //     char tempChar = propositionTrimmed.charAt(i);
-        //     for (int j = 0; j < motSecretTrimmed.length(); j++) {
-        //         if (tempChar == motSecretTrimmed.charAt(j)) {
-        //             motMalPlace += tempChar;                        // exemple de concaténation sans le //
-        //         }
-        //     }
-        // }
-
         // avec un while pour un code de sortie
         for (int i = 0; i < propositionTrimmed.length(); i++) {
             char tempChar = propositionTrimmed.charAt(i);
@@ -71,14 +56,32 @@ public class EtatMot {
                 j ++;
             }
         }
-
         return motMalPlace;
-    
+    }
+
+    static String emojiRepresentation(String proposition, String motSecret) {
+        // passer de StringBuilder à juste String car plus simple a comprendre
+        String affichageEmoji = "";
+        for (int i = 0; i < motSecret.length(); i++) {
+            char lettre = proposition.charAt(i);
+            if (lettre == motSecret.charAt(i)) {
+                affichageEmoji +=("🟦");
+            } else if (motSecret.contains(String.valueOf(lettre))) {
+                affichageEmoji+=("🟡");
+            } else {
+                affichageEmoji+=("🟥");
+            }
+        }
+        return affichageEmoji;
     }
 
     public static void main(String[] args) {
-        motSecret = "patate";
-        checkWrongPlacement("partir");
+        // bloc de test
+        String propostion= "partir";
+        String motSecret = "patate";
+        System.out.println(checkEtatMot(propostion, motSecret));
+        System.out.println(checkWrongPlacement(propostion, motSecret));
+        System.out.println(emojiRepresentation(propostion, motSecret));
     }
 
 }
