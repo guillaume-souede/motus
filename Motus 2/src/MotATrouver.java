@@ -11,10 +11,11 @@ public class MotATrouver {
         Arrays.fill(this.etatMot, '_');
 
         this.occurrencesRestantes = new HashMap<>();
-        for (char c : mot.toCharArray()) {
-            occurrencesRestantes.put(c, occurrencesRestantes.getOrDefault(c, 0) + 1);
-        }
+        // for (char c : mot.toCharArray()) {
+        EtatMot.checkWrongPlacement(proposition, motSecret, etatMot, occurrencesTemp);
+        // }
     }
+
 
     public boolean verifierProposition(String proposition) {
         if (proposition.equals(motSecret)) {
@@ -32,17 +33,7 @@ public class MotATrouver {
             }
         }
 
-        for (int i = 0; i < motSecret.length(); i++) {
-            char lettre = proposition.charAt(i);
-            if (etatMot[i] == lettre) continue;
-
-            if (occurrencesTemp.getOrDefault(lettre, 0) > 0) {
-                etatMot[i] = Character.toLowerCase(lettre);
-                occurrencesTemp.put(lettre, occurrencesTemp.get(lettre) - 1);
-            }
-        }
-
-        return false;
+        EtatMot.checkEtatMot(proposition, motSecret, etatMot, occurrencesTemp);
     }
 
     public void afficherEtatMot(String proposition) {
@@ -74,7 +65,4 @@ public class MotATrouver {
         System.out.println(affichageEmoji + "\n");
     }
 
-    public char[] getEtatMot() {
-        return etatMot;
-    }
 }
