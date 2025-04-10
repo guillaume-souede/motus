@@ -1,6 +1,4 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.*;
@@ -89,19 +87,16 @@ public class EcranParametres extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(jouerButton, gbc);
 
-        jouerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (ordiButton.isSelected()) {
-                    String mot = motTextField.getText();
-                    JOptionPane.showMessageDialog(f, "Mode Ordinateur. Mot : " + mot);
-                } else if (joueurButton.isSelected()) {
-                    JOptionPane.showMessageDialog(f, "Mode Joueur.");
-                } else if (mortelButton.isSelected()) {
-                    JOptionPane.showMessageDialog(f, "Au revoir. \n - VGE, 1981");
-                } else {
-                    JOptionPane.showMessageDialog(f, "Sélectionnez un mode de jeu.");
-                }
+        jouerButton.addActionListener(e -> {
+            if (ordiButton.isSelected()) {
+                String mot = motTextField.getText();
+                JOptionPane.showMessageDialog(f, "Mode Ordinateur. Mot : " + mot);
+            } else if (joueurButton.isSelected()) {
+                JOptionPane.showMessageDialog(f, "Mode Joueur.");
+            } else if (mortelButton.isSelected()) {
+                JOptionPane.showMessageDialog(f, "Au revoir. \n - VGE, 1981");
+            } else {
+                JOptionPane.showMessageDialog(f, "Sélectionnez un mode de jeu.");
             }
         });
 

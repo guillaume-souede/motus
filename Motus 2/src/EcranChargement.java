@@ -2,7 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 
 public class EcranChargement extends JFrame {
-    private JProgressBar barreChargement;
+    private final JProgressBar barreChargement;
     private int progress = 0;
 
     public EcranChargement() {

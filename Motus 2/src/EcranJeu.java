@@ -1,19 +1,19 @@
-import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import javax.swing.*;
 
 public class EcranJeu extends JPanel {
-    private Image background;
-    private char[][] lettres;
+    private final Image background;
+    private final char[][] lettres;
 
     private int gridX;
     private int gridY;
     private int caseSize;
-    private int spacing = 10;
-    private int rows = 3;
-    private int cols = 9;
+    private final int spacing = 10;
+    private final int rows = 3;
+    private final int cols = 9;
 
-    public ImageOverlayPanel(String bgPath, String[] mots) {
+    public EcranJeu(String bgPath, String[] mots) {
         File imageFile = new File(bgPath);
         if (!imageFile.exists()) {
             System.err.println("Image non trouvée : " + bgPath);
@@ -53,5 +53,21 @@ public class EcranJeu extends JPanel {
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+        // Path to the background image
+        String bgPath = "images/apImage.png";
+
+        String[] mots = {"MOTUS", "JAVA", "GRILLE"};
+
+        JFrame frame = new JFrame("Motus");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+
+        EcranJeu panel = new EcranJeu(bgPath, mots);
+        frame.add(panel);
+
+        frame.setVisible(true);
     }
 }
