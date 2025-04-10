@@ -30,7 +30,24 @@ public class OuvrirDB {
                 if (contentLine != null)  {
                     int fooKey = contentLine.length();
                     if (phrase.get(fooKey) == null) {
-                        contentLine = contentLine.replace(",", "");
+                        contentLine = contentLine.replace(",", "")
+                        .replace("œ", "oe")
+                        .replace("æ", "ae")
+                        .replace("é", "e")
+                        .replace("è", "e")
+                        .replace("ê", "e")
+                        .replace("ë", "e")
+                        .replace("à", "a")
+                        .replace("â", "a")
+                        .replace("ä", "a")
+                        .replace("ç", "c")
+                        .replace("î", "i")
+                        .replace("ï", "i")
+                        .replace("ô", "o")
+                        .replace("ö", "o")
+                        .replace("ù", "u")
+                        .replace("û", "u")
+                        .replace("ü", "u");
                         phrase.put(fooKey, new Mots(contentLine));
                     }
                     else {
