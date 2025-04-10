@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class EtatMot {
     
     String motSecret;
@@ -10,24 +12,37 @@ public class EtatMot {
      */
 
     
-    public String checkEtatMot(String proposition){
+    static public String checkEtatMot(String proposition){
         // étape 1 création du premier String 
 
-        String occurrencesTemp = null;              // la construction du premier String
+        String SilouetteMot = null;              // la construction du premier String
         char lettreActu;                            // le char a vérifier
         for (int i = 0; i < motSecret.length(); i++) {
             if (proposition.charAt(i) == motSecret.charAt(i)) {
                 lettreActu = proposition.charAt(i); // si bon => met dans la chaine le char
-                occurrencesTemp += lettreActu;      // la concaténation
+                SilouetteMot += lettreActu;      // la concaténation
             } else {
-                occurrencesTemp += '*';             //si pas bon met une étoile
+                SilouetteMot += '*';             //si pas bon met une étoile
             }
         }
-        return occurrencesTemp;
+        return SilouetteMot;
     }
 
         // étape 2 création du String de mots mal placé
-    public String checkWrongPlacement(String proposition){
+    static public String checkWrongPlacement(String proposition){
+        String silouetteMot = checkEtatMot(proposition);
+        ArrayList<Integer> positionFausses= new ArrayList<Integer>();
+
+        // a. get les positions non justes
+        for (int i = 0; i < silouetteMot.length(); i++) {
+            if (silouetteMot.charAt(i) != '*'){
+                positionFausses.add(i);
+            }
+        }// en sortie on a les position fausses dasn positionsFausses
+
+        // b. 
+
+
         for (int i = 0; i < proposition.length(); i++) {
             String lettreActu = proposition.charAt(i)+""; // le `+ ""` == toString()
             
