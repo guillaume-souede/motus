@@ -37,7 +37,7 @@ public class EcranChargement extends JFrame {
     }
 
     // Méthode pour le % de la barre de chargement
-    // C'est une barre artificielle alors dépend sur le timer
+    // C'est une barre artificielle alors elle dépend du timer
     private void updateProgress(Timer timer) {
         if (progress < 100) {
             progress += 3;
