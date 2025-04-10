@@ -11,26 +11,36 @@ public class Main {
                 int mode = scanner.nextInt();
                 scanner.nextLine();
 
+            // Sélection du mode de jeu avec le switch (cas 1 ou 2)
             switch (mode) {
-                case 1 -> JeuJoueur.joueurDevine(scanner, db);
+                case 1 -> 
+                    // Cas 1 : Mode Joueur (contre Ordinateur)
+                    JeuJoueur.joueurDevine(scanner, db);
                 case 2 -> {
+                    // Cas 2 : Mode Ordinateur (contre Joueur)
                     String motSecret;
                     do {
-                        System.out.println("Entrez un mot secret pour l'ordinateur (6, 7, 8 ou 9 lettres) : ");
+                        // Demande et Saisie du mot secret au Joueur
+                        System.out.println("Entrez un mot secret pour l'ordinateur (6 à 9 lettres) : ");
                         motSecret = scanner.nextLine();
+                        // Tester si longueur OK ?
                         if (motSecret.length() < 6 || motSecret.length() > 9) {
-                            System.out.println("❌ Mot invalide. Le mot doit contenir 6, 7, 8 ou 9 lettres.");
+                            System.out.println("❌ Mot invalide. Taille nécessaire : 6 à 9 lettres.");
                         }
                     } while (motSecret.length() < 6 || motSecret.length() > 9);
 
+                    // Début jeu ordinateur
                     JeuOrdinateur.ordinateurDevine(motSecret, scanner, db);
                 }
-                default -> System.out.println("Mode invalide.");
+                default -> 
+                    // Cas "AUTRE" : si choix invalide.
+                    System.out.println("Mode invalide.");
             }
 
+            // Rejouer ?
             System.out.println("⏯️ Jouer à nouveau ? 1️⃣ : oui, 2️⃣ : non");
+            // Si 1 oui, si autre chose non !
         } while (scanner.nextLine().equalsIgnoreCase("1"));
-
             System.out.println("👋 Au revoir.");
         }
     }
