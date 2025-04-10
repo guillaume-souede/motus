@@ -25,7 +25,7 @@ public class JeuOrdinateur {
             /*
              * progressionMot = les positions connues justes
              * lettresConnu = les lettres mal placées connues 
-             * lettresImpossible
+             * lettresImpossible = les lettres abscente dans le mot a trouver
              */
             String progressionMot = "", lettresConnu = "", lettresImpossible = "";
             
@@ -64,15 +64,6 @@ public class JeuOrdinateur {
         System.out.println("😢 Défaite après " + essaisMax + " essais.");
     }
 
-    /* non utilisé */
-    // private static boolean correspondAEtat(String mot, char[] etatMot) {
-    //     for (int i = 0; i < etatMot.length; i++) {
-    //         if (etatMot[i] == '*') continue;
-    //         if (Character.isUpperCase(etatMot[i]) && mot.charAt(i) != Character.toLowerCase(etatMot[i])) return false;
-    //         if (Character.isLowerCase(etatMot[i]) && !mot.contains(String.valueOf(etatMot[i]))) return false;
-    //     }
-    //     return true;
-    // }
 public static void main(String[] args) {
     OuvrirDB db = new OuvrirDB();
     Scanner scanner = new Scanner(System.in);
