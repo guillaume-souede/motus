@@ -4,6 +4,10 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 // cf. https://www.jmdoudoux.fr/java/dej/chap-swing.htm
+// RADIO BUTTONS FOR PC OR PLAYER MODE.
+// JTextField FOR THE WORD TO FIND (PC MODE ONLY).
+// BUTTON TO START THE GAME.
+
 
 public class EcranParametres extends JFrame {
 
