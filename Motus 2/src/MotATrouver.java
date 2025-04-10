@@ -46,18 +46,32 @@ public class MotATrouver {
     }
 
     public void afficherEtatMot(String proposition) {
-        StringBuilder affichage = new StringBuilder();
+        StringBuilder affichageProgres = new StringBuilder();
+        for (int i = 0; i < etatMot.length; i++) {
+            char lettre = etatMot[i];
+            if (lettre == '_') {
+                affichageProgres.append("*");
+            } else if (Character.toLowerCase(proposition.charAt(i)) == Character.toLowerCase(motSecret.charAt(i))) {
+                affichageProgres.append(Character.toUpperCase(lettre));
+            } else {
+                affichageProgres.append('*'); // peut être lettre
+            }
+        }
+        System.out.println(affichageProgres + "\n");
+
+        // Emoji display logic
+        StringBuilder affichageEmoji = new StringBuilder();
         for (int i = 0; i < etatMot.length; i++) {
             char lettre = proposition.charAt(i);
             if (lettre == motSecret.charAt(i)) {
-                affichage.append("🟥");
+                affichageEmoji.append("🟥");
             } else if (motSecret.contains(String.valueOf(lettre))) {
-                affichage.append("🟡");
+                affichageEmoji.append("🟡");
             } else {
-                affichage.append("🟦");
+                affichageEmoji.append("🟦");
             }
         }
-        System.out.println(affichage+"\n"+motSecret);
+        System.out.println(affichageEmoji + "\n");
     }
 
     public char[] getEtatMot() {

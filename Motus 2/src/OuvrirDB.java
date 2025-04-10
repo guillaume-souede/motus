@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class OuvrirDB {
 
-    private HashMap<Integer,Mots> phrase; // int = taille du mot
+    private final HashMap<Integer,Mots> phrase; // int = taille du mot
 
 
 
