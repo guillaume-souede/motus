@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class EtatMot {
     
-    String motSecret;
+    static String motSecret;
 
     /*
      * à partir d'une proposition test quels sont les bons caractère
@@ -28,10 +28,12 @@ public class EtatMot {
         return SilouetteMot;
     }
 
+
         // étape 2 création du String de mots mal placé
     static public String checkWrongPlacement(String proposition){
         String silouetteMot = checkEtatMot(proposition);
         ArrayList<Integer> positionFausses= new ArrayList<Integer>();
+        String motMalPlace = "";
 
         // a. get les positions non justes
         for (int i = 0; i < silouetteMot.length(); i++) {
@@ -40,13 +42,23 @@ public class EtatMot {
             }
         }// en sortie on a les position fausses dasn positionsFausses
 
-        // b. 
-
-
-        for (int i = 0; i < proposition.length(); i++) {
-            String lettreActu = proposition.charAt(i)+""; // le `+ ""` == toString()
-            
+        // b. sortir les 2 chars des fausses positions
+        String propositionTrimmed = "", motSecretTrimmed = "";
+        for (int positions : positionFausses) {
+            propositionTrimmed += proposition.charAt(positions)+""; // techniquement le +"" n'est pas nécécaire pour la concaténation
+            motSecretTrimmed += motSecret.charAt(positions)+"";
         }
+
+        //c. final, chercher si la lettre de la proposition existe mais mal placé
+        for (int i = 0; i < propositionTrimmed.length(); i++) {
+            char tempChar = propositionTrimmed.charAt(i);
+            for (int j = 0; j < motSecretTrimmed.length(); j++) {
+                if (tempChar == motSecretTrimmed.charAt(j)) {
+                    motMalPlace += tempChar;                        // exemple de concaténation sans le //
+                }
+            }
+        }
+        return motMalPlace;
     }
 
 
