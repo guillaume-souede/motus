@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class OuvrirDB {
+public final class OuvrirDB {
 
     private final HashMap<Integer,Mots> phrase; // int = taille du mot
 
@@ -39,7 +39,7 @@ public class OuvrirDB {
                 contentLine = buf.readLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Erreur sur le fichier : " + e.getMessage());
         }
     }
 

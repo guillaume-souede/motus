@@ -59,7 +59,7 @@ public class MotATrouver {
         }
         System.out.println(affichageProgres + "\n");
 
-        // Emoji display logic
+        // Solution Emoji
         StringBuilder affichageEmoji = new StringBuilder();
         for (int i = 0; i < etatMot.length; i++) {
             char lettre = proposition.charAt(i);
