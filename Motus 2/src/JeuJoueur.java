@@ -9,7 +9,7 @@ public class JeuJoueur {
         ArrayList<String> listMot = new ArrayList<>();
         Random random = new Random();
         int tailleMots = random.nextInt(3)+6;   // get random length
-        listMot = db.getPhrase().get(tailleMots).line;  
+        listMot = db.getAllPhrase().get(tailleMots).line;  
         String motSecret = listMot.get(random.nextInt(listMot.size())); // get random mot
         MotATrouver motATrouver = new MotATrouver(motSecret);
             // la on a ouvert la db, et choisis un mot au hazard

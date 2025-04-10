@@ -13,7 +13,7 @@ public class EtatMot {
         // étape 1 création du premier String 
         String SilouetteMot = "";                   // la construction du premier String
         char lettreActu;                            // le char a vérifier
-        for (int i = 0; i < motSecret.length(); i++) {
+        for (int i = 0; i < proposition.length(); i++) {
             if (proposition.charAt(i) == motSecret.charAt(i)) {
                 lettreActu = proposition.charAt(i); // si bon => met dans la chaine le char
                 SilouetteMot += lettreActu;         // la concaténation
@@ -75,6 +75,21 @@ public class EtatMot {
         return affichageEmoji;
     }
 
+    static String extractImpossiblechar(String proposition, String motSecret){
+        String outString = ""; // stocke les char impossible pour le mot
+        for (int i = 0; i < proposition.length(); i++) {
+            if (motSecret.contains(proposition.charAt(i)+"") == false) {
+                outString += proposition.charAt(i);
+            }
+        }
+        return outString;
+    }
+
+    static void pprint(String proposition, String motSecret){
+        System.out.println(checkEtatMot(proposition, motSecret));
+        System.out.println(checkWrongPlacement(proposition, motSecret));
+        System.out.println(emojiRepresentation(proposition, motSecret));
+    }
     public static void main(String[] args) {
         // bloc de test
         String propostion= "partir";
