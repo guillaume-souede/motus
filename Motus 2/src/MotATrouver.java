@@ -51,24 +51,27 @@ public class MotATrouver {
             char lettre = etatMot[i];
             if (lettre == '_') {
                 affichageProgres.append("*");
-            } else {
+            } else if (Character.toLowerCase(proposition.charAt(i)) == Character.toLowerCase(motSecret.charAt(i))) {
                 affichageProgres.append(Character.toUpperCase(lettre));
+            } else {
+                affichageProgres.append('*'); // peut être lettre
             }
         }
         System.out.println(affichageProgres + "\n");
 
         // Emoji display logic
         StringBuilder affichageEmoji = new StringBuilder();
-        Map<Character, Integer> occurrencesTemp = new HashMap<>(occurrencesRestantes);
-
         for (int i = 0; i < etatMot.length; i++) {
             char lettre = proposition.charAt(i);
+<<<<<<< HEAD
+            if (lettre != motSecret.charAt(i)) {
+                affichage.append("🟥");
+=======
             if (lettre == motSecret.charAt(i)) {
                 affichageEmoji.append("🟥");
-                occurrencesTemp.put(lettre, occurrencesTemp.get(lettre) - 1);
-            } else if (occurrencesTemp.getOrDefault(lettre, 0) > 0) {
+>>>>>>> 02d48c579d2e573e5040b59630b12227c7062baa
+            } else if (motSecret.contains(String.valueOf(lettre))) {
                 affichageEmoji.append("🟡");
-                occurrencesTemp.put(lettre, occurrencesTemp.get(lettre) - 1);
             } else {
                 affichageEmoji.append("🟦");
             }
