@@ -7,7 +7,7 @@ public class JeuOrdinateur {
 
     public static void ordinateurDevine(String motSecret, Scanner scanner, OuvrirDB db) {
 
-        int essais = 0;
+        int essais = 0; boolean trying = true;
         ArrayList<String> dictionnaire = db.getOnePhrase(motSecret.length()); // prend tout les mots de taille a rechercher
         
         // Set<String> motsEssayes = new HashSet<>(); ==> normalement on peut juste enlever direct dans la BD de mot au fir et a meusure
@@ -21,7 +21,7 @@ public class JeuOrdinateur {
         }
 
 
-        while (essais < essaisMax && !dictionnaire.isEmpty()) {
+        while (essais < essaisMax && !dictionnaire.isEmpty() && trying) {
             /*
              * progressionMot = les positions connues justes
              * lettresConnu = les lettres mal placées connues 
@@ -46,22 +46,23 @@ public class JeuOrdinateur {
             // 3. get un mot du dico et le supprime après
             proposition = dictionnaire.get(random.nextInt(dictionnaire.size()));
             dictionnaire.remove(proposition);
+            essais++;
 
             // 4. test si juste ou non (majoritairement juste de l'affichage)
 
             System.out.println("Essai " + (essais + 1) + " : L'ordinateur propose " + GRAS + proposition + RESET);
             EtatMot.pprint(proposition, motSecret);
             //a. si vrai
-            if (proposition == motSecret) {
+            if (proposition.equals(motSecret)) {
                 System.out.println("🥳 ⓂⓄⓉⓊⓈ de l'ordinateur en " + (essais + 1) + " essai(s) !");
-                return;
+                trying = false;
             }
-
             //b. si faux (rien de plus)
-            essais++;
+            
         }
-
-        System.out.println("😢 Défaite après " + essaisMax + " essais.");
+        if (trying == true) {
+            System.out.println("😢 Défaite après " + essaisMax + " essais.");
+        }
     }
 
 public static void main(String[] args) {
