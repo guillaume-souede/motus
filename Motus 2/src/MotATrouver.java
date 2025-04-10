@@ -63,13 +63,8 @@ public class MotATrouver {
         StringBuilder affichageEmoji = new StringBuilder();
         for (int i = 0; i < etatMot.length; i++) {
             char lettre = proposition.charAt(i);
-<<<<<<< HEAD
             if (lettre != motSecret.charAt(i)) {
-                affichage.append("🟥");
-=======
-            if (lettre == motSecret.charAt(i)) {
                 affichageEmoji.append("🟥");
->>>>>>> 02d48c579d2e573e5040b59630b12227c7062baa
             } else if (motSecret.contains(String.valueOf(lettre))) {
                 affichageEmoji.append("🟡");
             } else {
