@@ -15,7 +15,7 @@ public class EtatMot {
     static public String checkEtatMot(String proposition){
         // étape 1 création du premier String 
 
-        String SilouetteMot = null;              // la construction du premier String
+        String SilouetteMot = "";              // la construction du premier String
         char lettreActu;                            // le char a vérifier
         for (int i = 0; i < motSecret.length(); i++) {
             if (proposition.charAt(i) == motSecret.charAt(i)) {
@@ -37,7 +37,7 @@ public class EtatMot {
 
         // a. get les positions non justes
         for (int i = 0; i < silouetteMot.length(); i++) {
-            if (silouetteMot.charAt(i) != '*'){
+            if (silouetteMot.charAt(i) == '*'){
                 positionFausses.add(i);
             }
         }// en sortie on a les position fausses dasn positionsFausses
@@ -49,17 +49,36 @@ public class EtatMot {
             motSecretTrimmed += motSecret.charAt(positions)+"";
         }
 
-        //c. final, chercher si la lettre de la proposition existe mais mal placé
+        // //c. final, chercher si la lettre de la proposition existe mais mal placé
+        // for (int i = 0; i < propositionTrimmed.length(); i++) {
+        //     char tempChar = propositionTrimmed.charAt(i);
+        //     for (int j = 0; j < motSecretTrimmed.length(); j++) {
+        //         if (tempChar == motSecretTrimmed.charAt(j)) {
+        //             motMalPlace += tempChar;                        // exemple de concaténation sans le //
+        //         }
+        //     }
+        // }
+
+        // avec un while pour un code de sortie
         for (int i = 0; i < propositionTrimmed.length(); i++) {
             char tempChar = propositionTrimmed.charAt(i);
-            for (int j = 0; j < motSecretTrimmed.length(); j++) {
+            boolean pasTrouve = true;           int j = 0;
+            while ( j < motSecretTrimmed.length() && pasTrouve) {
                 if (tempChar == motSecretTrimmed.charAt(j)) {
-                    motMalPlace += tempChar;                        // exemple de concaténation sans le //
+                    motMalPlace += tempChar;
+                    pasTrouve = false;
                 }
+                j ++;
             }
         }
+
         return motMalPlace;
+    
     }
 
+    public static void main(String[] args) {
+        motSecret = "patate";
+        checkWrongPlacement("partir");
+    }
 
 }
