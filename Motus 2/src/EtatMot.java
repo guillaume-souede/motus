@@ -11,17 +11,17 @@ public class EtatMot {
     
     static public String checkEtatMot(String proposition, String motSecret){
         // étape 1 création du premier String 
-        String SilouetteMot = "";                   // la construction du premier String
+        String SilhouetteMot = "";                   // la construction du premier String
         char lettreActu;                            // le char a vérifier
         for (int i = 0; i < proposition.length(); i++) {
             if (proposition.charAt(i) == motSecret.charAt(i)) {
                 lettreActu = proposition.charAt(i); // si bon => met dans la chaine le char
-                SilouetteMot += lettreActu;         // la concaténation
+                SilhouetteMot += lettreActu;         // la concaténation
             } else {
-                SilouetteMot += '*';                //si pas bon met une étoile
+                SilhouetteMot += '*';                //si pas bon met une étoile
             }
         }
-        return SilouetteMot;
+        return SilhouetteMot;
     }
 
         // étape 2 création du String de mots mal placé
