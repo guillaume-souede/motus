@@ -30,6 +30,7 @@ public class OuvrirDB {
                 if (contentLine != null)  {
                     int fooKey = contentLine.length();
                     if (phrase.get(fooKey) == null) {
+                        contentLine = contentLine.replace(",", "");
                         phrase.put(fooKey, new Mots(contentLine));
                     }
                     else {
