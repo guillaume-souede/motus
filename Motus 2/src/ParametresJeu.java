@@ -3,8 +3,8 @@ public class ParametresJeu {
         ORDI, JOUEUR, MORTEL
     }
 /* Il faut intégrer ces horreurs à EcranParametres ! */
-    private Mode mode;
-    private String mot;
+    private final Mode mode;
+    private final String mot;
 
     public ParametresJeu(Mode mode, String mot) {
         this.mode = mode;
