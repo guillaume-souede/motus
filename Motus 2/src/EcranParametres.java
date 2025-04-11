@@ -49,7 +49,7 @@ public class EcranParametres extends JFrame {
         gbc.gridy = 1;
         panel.add(ordiButton, gbc);
 
-        JTextField motTextField = new JTextField("6 à 9 lettres", 15);
+        JTextField motTextField = new JTextField("mot de 6 à 9 lettres", 15);
         motTextField.setEnabled(false);
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -59,7 +59,7 @@ public class EcranParametres extends JFrame {
         motTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-            if (motTextField.getText().trim().equalsIgnoreCase("6 à 9 lettres")) {
+            if (motTextField.getText().trim().equalsIgnoreCase("mot de 6 à 9 lettres")) {
                 motTextField.setText("");
             }
             }
@@ -87,6 +87,7 @@ public class EcranParametres extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(jouerButton, gbc);
 
+        // ActionListener
         jouerButton.addActionListener(e -> {
             if (ordiButton.isSelected()) {
                 String mot = motTextField.getText();
