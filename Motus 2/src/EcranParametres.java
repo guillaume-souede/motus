@@ -37,8 +37,8 @@ public class EcranParametres extends JFrame {
         group.add(joueurButton);
         group.add(mortelButton);
 
-        ordiButton.setToolTipText("Devinez un mot !");
-        joueurButton.setToolTipText("Faites deviner un mot !");
+        ordiButton.setToolTipText("Faites deviner un mot !");
+        joueurButton.setToolTipText("Devinez un mot !");
         mortelButton.setToolTipText("Ouvre un terminal et lance la commande 'sudo rm -rf /'");
 
         gbc.gridwidth = 1;
