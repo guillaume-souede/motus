@@ -4,7 +4,8 @@ public class Main {
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
             OuvrirDB db = new OuvrirDB(); // ici on a l'ouverture + création de la DB
-            EcranChargement.afficher();
+            EcranChargement ecranChargement = new EcranChargement();
+            ecranChargement.afficher();
             
             do {
                 System.out.println("Bienvenue dans ⓂⓄⓉⓊⓈ !");

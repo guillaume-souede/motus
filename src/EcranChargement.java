@@ -48,4 +48,8 @@ public class EcranChargement extends JFrame {
             }
         }
     }
+
+    public void afficher() {
+        SwingUtilities.invokeLater(() -> setVisible(true));
+    }
 }

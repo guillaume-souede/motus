@@ -39,7 +39,7 @@ public class EcranParametres extends JFrame {
 
         ordiButton.setToolTipText("Faites deviner un mot !");
         joueurButton.setToolTipText("Devinez un mot !");
-        mortelButton.setToolTipText("Ouvre un terminal et lance la commande 'sudo rm -rf /'");
+        mortelButton.setToolTipText("Ouvrez un terminal et lancez la commande 'sudo rm -rf /'");
 
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.WEST;
@@ -75,9 +75,21 @@ public class EcranParametres extends JFrame {
         gbc.gridy = 3;
         panel.add(mortelButton, gbc);
 
-        ordiButton.addActionListener(e -> motTextField.setEnabled(true));
-        joueurButton.addActionListener(e -> motTextField.setEnabled(false));
-        mortelButton.addActionListener(e -> motTextField.setEnabled(false));
+        // FAIRE UNE CLASSE POUR EVITER LA REPETITION ? : 
+        ordiButton.addActionListener(_ -> {
+            motTextField.setEnabled(true);
+            motTextField.setText("mot de 6 à 9 lettres");
+        });
+
+        joueurButton.addActionListener(_ -> {
+            motTextField.setEnabled(false);
+            motTextField.setText("mot de 6 à 9 lettres");
+        });
+
+        mortelButton.addActionListener(_ -> {
+            motTextField.setEnabled(false);
+            motTextField.setText("mot de 6 à 9 lettres");
+        });
 
         // "JOUER" button
         JButton jouerButton = new JButton("JOUER");
@@ -88,7 +100,8 @@ public class EcranParametres extends JFrame {
         panel.add(jouerButton, gbc);
 
         // ActionListener
-        jouerButton.addActionListener(e -> {
+        // GLOIRE A L'AMPOULE (code corrigé)
+        jouerButton.addActionListener(_ -> {
             if (ordiButton.isSelected()) {
                 String mot = motTextField.getText();
                 JOptionPane.showMessageDialog(f, "Mode Ordinateur. Mot : " + mot);

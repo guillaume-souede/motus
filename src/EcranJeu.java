@@ -6,9 +6,10 @@ public class EcranJeu extends JPanel {
     private final Image background;
     private final char[][] lettres;
 
-    private int gridX;
-    private int gridY;
-    private int caseSize;
+    private int grilleX;
+    private int grilleY;
+    private int caseLargeur;
+    private int caseHauteur;
     private final int spacing = 10;
     private final int rows = 3;
     private final int cols = 9;
@@ -31,25 +32,37 @@ public class EcranJeu extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
-        
-        caseSize = Math.min(getWidth(), getHeight()) / 12;
-        int fontSize = caseSize * 2 / 3;
 
-        // Ajuster la position de la grille pour qu'elle commence à (300px, 255px)
-        gridX = 255;
-        gridY = 300;
-        
+        // Image de base : (1536x1024)
+        double echelleX = getWidth() / 1536.0;
+        double echelleY = getHeight() / 1024.0;
+
+        // Cases
+        caseLargeur = (int) (89 * echelleX);
+        caseHauteur = (int) (96 * echelleY);
+
+        // Espacement cases
+        int espacementFinalX = (int) (10 * echelleX);
+        int espacementFinalY = (int) (10 * echelleY);
+
+        // Coin sup G gauche de la 1ière case
+        grilleX = (int) (348 * echelleX);
+        grilleY = (int) (507 * echelleY);
+
+        int fontSize = caseHauteur * 2 / 3;
+
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                int x = gridX + j * (caseSize + spacing);
-                int y = gridY + i * (caseSize + spacing);
-                
-                g.setColor(Color.BLACK);
-                g.drawRect(x, y, caseSize, caseSize);
-                
+                int x = grilleX + j * (caseLargeur + espacementFinalX);
+                int y = grilleY + i * (caseHauteur + espacementFinalY);
+
+                // BORDURES CASES
+                // g.setColor(Color.BLACK);
+                // g.drawRect(x, y, caseLargeur, caseHauteur);
+
                 if (lettres[i][j] != '\0') {
                     g.setFont(new Font("Arial", Font.BOLD, fontSize));
-                    g.drawString(String.valueOf(lettres[i][j]), x + caseSize / 4, y + caseSize * 2 / 3);
+                    g.drawString(String.valueOf(lettres[i][j]), x + caseLargeur / 4, y + caseHauteur * 2 / 3);
                 }
             }
         }
@@ -57,9 +70,9 @@ public class EcranJeu extends JPanel {
 
     public static void main(String[] args) {
         // Path to the background image
-        String bgPath = "images/apImage.png";
+        String bgPath = "images/apImage2.png";
 
-        String[] mots = {"MOTUS", "JAVA", "GRILLE"};
+        String[] mots = {"MOTUS", "AMOUROUX", "SOUEDE"};
 
         JFrame frame = new JFrame("Motus");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
