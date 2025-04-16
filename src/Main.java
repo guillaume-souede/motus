@@ -1,10 +1,10 @@
-import java.util.*;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
             OuvrirDB db = new OuvrirDB(); // ici on a l'ouverture + création de la DB
-            EcranChargement ecranChargement = new EcranChargement();
+            EcranChargement ecranChargement = new EcranChargement(null);
             ecranChargement.afficher();
             
             do {
