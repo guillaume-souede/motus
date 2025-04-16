@@ -1,8 +1,9 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class LogiqueBot {
 
-    static public ArrayList<String> choix(String progVraie, String charsMalPlace, String charImpossible, ArrayList<String> dicoMots){
+    static public ArrayList<String> choix(String progVraie, HashMap<Integer,Character> charsMalPlace, String charImpossible, ArrayList<String> dicoMots){
 
         ArrayList<String> outDict = new ArrayList<>(); // la sortie
         ArrayList<String> foodict = new ArrayList<>(); // sert de liste tampon à outdict pour pouvoir la construire dynamiquement 
@@ -21,7 +22,6 @@ public class LogiqueBot {
                  *  /!\ la modification du dico pendent la boucle est strictement interdit
                  *  nous allons donc crée un nouveau dico (nouvelle liste car dicon non pertinant)
                 */ 
-                
                 for (String mot : dicoMots) {
                     // nécécité de faire une boucle pour la taille du mot car Jan regarder la taille du dict de 3000 c'est pas possible
                     if (mot.charAt(i) == charAt) {
@@ -39,11 +39,11 @@ public class LogiqueBot {
          * en eux ==> aventage donne un poids :)
          */
 
-        
-
         if (outDict != null) {
             for (String mot : outDict) {
-                if (testCharMalPlace(mot, charsMalPlace) == true){
+                // mettre en stockage les lettres mal placé sans les position (legacy)
+                String charMalPlaceeString = charsMalPlace.values().toString();
+                if (testCharMalPlace(mot, charMalPlaceeString) == true){
                     foodict.add(mot);}
                 else {foodict.remove(mot);}
             }
@@ -68,7 +68,19 @@ public class LogiqueBot {
                 }
             }
         }
+        
+        foodict = new ArrayList<>(outDict);
 
+        // étape 5 : filtrer les mots ayant les lettres mal placées
+        for (String mot : foodict) {
+            // prendre les position des lettres mal placé 
+            for (Integer posiMal : charsMalPlace.keySet()) {
+                if (mot.charAt(posiMal) == charsMalPlace.get(posiMal)) {// test si à la position mauvaise ya le Char mal placé
+                    outDict.remove(mot);
+                }
+            }
+            
+        }
             return outDict;
         }
 
@@ -80,15 +92,17 @@ public class LogiqueBot {
             if (mot.contains(charActu) == false) {
                     return false;
                 }
-            
         }
         return true;
     }
 
+
+
     public static void main(String[] args) {
         OuvrirDB db = new OuvrirDB();
         ArrayList<String> dico = new ArrayList<>(db.getOnePhrase(6));
-        
-        choix("pa****", "tea", "zrq", dico);
+        HashMap<Integer,Character> charsMalPlace = new HashMap<>();
+        charsMalPlace = EtatMot.extractImpossiblechar2("partir", "patate");
+        choix("pa****", charsMalPlace, "zrq", dico);
     }
 }

@@ -8,7 +8,7 @@ public class MainTemporary {
         SwingUtilities.invokeLater(() -> {
             Runnable chargementFini = () -> {
                 
-                //on suppose que EcranParametres renvoie le mode de jeu
+                modeChoisi = EcranParametres.main(null); //on suppose que EcranParametres renvoie le mode de jeu
                 
             };
 
