@@ -3,11 +3,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.*;
 
-
-// TODO : vérifier que la taille du mot est correcte (6 à 9)
-// qqchose Listener... ?
-// TODO : faire en sorte qu'on NE puisse PAS jouer si mot incorrect
-
 public class EcranParametresC extends JFrame {
     private ParametresJeu parametresJeu; // Instance pour stocker les paramètres choisis
 
@@ -73,20 +68,25 @@ public class EcranParametresC extends JFrame {
         jouerButton.addActionListener(event -> {
             ParametresJeu.Mode mode;
             if (ordiButton.isSelected()) {
-                mode = ParametresJeu.Mode.ORDI;
-                String mot = motTextField.getText();
-                parametresJeu = new ParametresJeu(mode, mot);
+                String mot = motTextField.getText().trim();
+                if (mot.length() >= 6 && mot.length() <= 9) {
+                    mode = ParametresJeu.Mode.ORDI;
+                    parametresJeu = new ParametresJeu(mode, mot);
+                    dispose(); // Fermer la fenêtre après validation
+                } else {
+                    JOptionPane.showMessageDialog(this, "Le mot doit contenir entre 6 et 9 caractères.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
             } else if (joueurButton.isSelected()) {
                 mode = ParametresJeu.Mode.JOUEUR;
                 parametresJeu = new ParametresJeu(mode, null);
+                dispose(); // Fermer la fenêtre après validation
             } else if (mortelButton.isSelected()) {
                 mode = ParametresJeu.Mode.MORTEL;
                 parametresJeu = new ParametresJeu(mode, null);
+                dispose(); // Fermer la fenêtre après validation
             } else {
-                JOptionPane.showMessageDialog(this, "Sélectionnez MdJ.");
-                return;
+                JOptionPane.showMessageDialog(this, "Sélectionnez un mode de jeu.", "Erreur", JOptionPane.ERROR_MESSAGE);
             }
-            dispose();
         });
 
         getContentPane().add(panel);
