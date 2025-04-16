@@ -1,7 +1,10 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Scanner;
 
 public class JeuOrdinateur {
-    private static final int essaisMax = 9;
+    private static final int essaisMax = 7;
     private static final String GRAS = "\033[1m";
     private static final String RESET = "\033[0m";
 
@@ -13,7 +16,7 @@ public class JeuOrdinateur {
         // Set<String> motsEssayes = new HashSet<>(); ==> normalement on peut juste enlever direct dans la BD de mot au fir et a meusure
         Random random = new Random();
 
-        String proposition = motSecret.charAt(0)+"";     
+        String proposition = motSecret.charAt(0)+"";
 
         if (dictionnaire.isEmpty()) {
             System.out.println("ℹ Mot impossible à jouer.");
@@ -27,15 +30,15 @@ public class JeuOrdinateur {
              * lettresConnu = les lettres mal placées connues 
              * lettresImpossible = les lettres abscente dans le mot a trouver
              */
-            String progressionMot = "", lettresConnu = "", lettresImpossible = "";
-            
+            String progressionMot = "", lettresImpossible = "";
+            HashMap<Integer,Character> lettresConnu = new HashMap<>(); // hashmap car stocke et les chars et les
             // 1. get la situation actuelle du mot
             
             //a. get les positions justes
             progressionMot = EtatMot.checkEtatMot(proposition, motSecret);
             
             //b. get les chars mal placées
-            lettresConnu = EtatMot.checkWrongPlacement(proposition, motSecret);
+            lettresConnu = EtatMot.checkWrongPlacement2(proposition, motSecret);
 
             //c. lettres impossibles 
             lettresImpossible = EtatMot.extractImpossiblechar(proposition, motSecret);
@@ -74,7 +77,6 @@ public static void main(String[] args) {
     ArrayList<String> listMot = db.getAllPhrase().get(tailleMots).line;  // depuis la db, et choisis ceux de bonne taille
     String motSecret = listMot.get(random.nextInt(listMot.size())); // get random mot
     
-
     //ordinateurDevine("preferee", scanner , db);
     ordinateurDevine(motSecret, scanner , db);
 }

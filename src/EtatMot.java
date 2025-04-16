@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EtatMot {
     /*
@@ -76,6 +77,7 @@ public class EtatMot {
     }
 
     static String extractImpossiblechar(String proposition, String motSecret){
+        // legacy function
         String outString = ""; // stocke les char impossible pour le mot
         for (int i = 0; i < proposition.length(); i++) {
             if (motSecret.contains(proposition.charAt(i)+"") == false) {
@@ -84,6 +86,17 @@ public class EtatMot {
         }
         return outString;
     }
+
+        static HashMap<Integer,Character> checkWrongPlacement2(String proposition, String motSecret){
+            HashMap<Integer,Character> mauvaisePosBonChar = new HashMap<>();
+            for (int i = 0; i < proposition.length(); i++) {
+                if (motSecret.contains(proposition.charAt(i)+"") == false) {
+                    mauvaisePosBonChar.put(i, proposition.charAt(i)) ; // on ajoute la position en clef et le char mal plaé en valeur
+                }
+            }
+            return mauvaisePosBonChar;
+    }
+
 
     static void pprint(String proposition, String motSecret){
         System.out.println(checkEtatMot(proposition, motSecret));
