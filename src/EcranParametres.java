@@ -5,7 +5,12 @@ import javax.swing.*;
 
 public class EcranParametres extends JFrame {
     private ParametresJeu parametresJeu; // params du joueur MAIS ajouter ceux du bot ? plus de customisation ?
+    private static boolean commencerJeu = false;
 
+    public static boolean isCommencerJeu() {
+        return commencerJeu;
+    }
+    
     public EcranParametres() {
         setTitle("Paramètres");
         setSize(400, 200);
@@ -111,9 +116,11 @@ public class EcranParametres extends JFrame {
 
         ParametresJeu parametres = ecran.getParametresJeu();
         if (parametres != null) {
+            commencerJeu = true;
             System.out.println("Mode " + parametres.getMode());
             System.out.println("Mot " + parametres.getMot());
         } else {
+            commencerJeu = false;
             System.out.println("Ràs.");
         }
     }
