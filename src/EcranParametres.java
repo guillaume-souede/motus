@@ -16,6 +16,7 @@ public class EcranParametres extends JFrame {
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel();
+        // https://bbclone.developpez.com/fr/java/tutoriels/uiswing/gridbaglayout/?page=page_3
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
