@@ -10,7 +10,6 @@ public class EcranJeu extends JPanel {
     private int grilleY;
     private int caseLargeur;
     private int caseHauteur;
-    private final int spacing = 10;
     private final int rows = 3;
     private final int cols = 9;
 
@@ -38,8 +37,8 @@ public class EcranJeu extends JPanel {
         double echelleY = getHeight() / 1024.0;
 
         // Cases
-        caseLargeur = (int) (89 * echelleX);
-        caseHauteur = (int) (96 * echelleY);
+        caseLargeur = (int) (84 * echelleX);
+        caseHauteur = (int) (90 * echelleY);
 
         // Espacement cases
         int espacementFinalX = (int) (10 * echelleX);
@@ -56,7 +55,7 @@ public class EcranJeu extends JPanel {
                 int x = grilleX + j * (caseLargeur + espacementFinalX);
                 int y = grilleY + i * (caseHauteur + espacementFinalY);
 
-                // BORDURES CASES
+                // BORDURES CASES (p-ê ok pour debug !)
                 // g.setColor(Color.BLACK);
                 // g.drawRect(x, y, caseLargeur, caseHauteur);
 
@@ -69,7 +68,7 @@ public class EcranJeu extends JPanel {
     }
 
     public static void main(String[] args) {
-        // Path to the background image
+        // background (utiliser le 2)
         String bgPath = "images/apImage2.png";
 
         String[] mots = {"MOTUS", "AMOUROUX", "SOUEDE"};
