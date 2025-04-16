@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class JeuOrdinateur {
-    private static final int essaisMax = 32;
+    private static final int essaisMax = 9;
     private static final String GRAS = "\033[1m";
     private static final String RESET = "\033[0m";
 
@@ -45,16 +45,16 @@ public class JeuOrdinateur {
 
             // 3. get un mot du dico et le supprime après
             proposition = dictionnaire.get(random.nextInt(dictionnaire.size()));
-            dictionnaire.remove(proposition);
+            while(dictionnaire.remove(proposition)) { } // https://stackoverflow.com/questions/13565876/remove-all-occurrences-of-an-element-from-arraylist
             essais++;
 
             // 4. test si juste ou non (majoritairement juste de l'affichage)
 
-            System.out.println("Essai " + (essais + 1) + " : L'ordinateur propose " + GRAS + proposition + RESET);
+            System.out.println("Essai " + (essais) + " : L'ordinateur propose " + GRAS + proposition + RESET);
             EtatMot.pprint(proposition, motSecret);
             //a. si vrai
             if (proposition.equals(motSecret)) {
-                System.out.println("🥳 ⓂⓄⓉⓊⓈ de l'ordinateur en " + (essais + 1) + " essai(s) !");
+                System.out.println("🥳 ⓂⓄⓉⓊⓈ de l'ordinateur en " + (essais) + " essai(s) !");
                 trying = false;
             }
             //b. si faux (rien de plus)
@@ -68,8 +68,15 @@ public class JeuOrdinateur {
 public static void main(String[] args) {
     OuvrirDB db = new OuvrirDB();
     Scanner scanner = new Scanner(System.in);
+    Random random = new Random();
 
-    ordinateurDevine("patate", scanner , db);
+    int tailleMots = random.nextInt(3)+6;   // get random length
+    ArrayList<String> listMot = db.getAllPhrase().get(tailleMots).line;  // depuis la db, et choisis ceux de bonne taille
+    String motSecret = listMot.get(random.nextInt(listMot.size())); // get random mot
+    
+
+    //ordinateurDevine("preferee", scanner , db);
+    ordinateurDevine(motSecret, scanner , db);
 }
 
 }
