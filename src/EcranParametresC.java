@@ -100,6 +100,7 @@ public class EcranParametresC extends JFrame {
         EcranParametresC ecran = new EcranParametresC();
         ecran.setVisible(true);
 
+        // sans ça les param ne sont pas récupérés
         while (ecran.isVisible()) {
             try {
                 Thread.sleep(100);
