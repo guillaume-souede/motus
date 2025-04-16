@@ -2,7 +2,7 @@ public class ParametresJeu {
     public enum Mode {
         ORDI, JOUEUR, MORTEL
     }
-/* Il faut intégrer ces horreurs à EcranParametres ! */
+// Il faut intégrer ces horreurs à EcranParametres ! 
     private final Mode mode;
     private final String mot;
 

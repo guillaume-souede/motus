@@ -1,6 +1,11 @@
-import java.awt.*;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.io.File;
-import javax.swing.*;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 public class EcranJeu extends JPanel {
     private final Image background;
