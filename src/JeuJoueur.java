@@ -8,26 +8,27 @@ public class JeuJoueur {
     public static void joueurDevine(Scanner scanner, OuvrirDB db) {
         ArrayList<String> listMot = new ArrayList<>();
         Random random = new Random();
+
         int tailleMots = random.nextInt(3)+6;   // get random length
-        listMot = db.getAllPhrase().get(tailleMots).line;  
+        listMot = db.getAllPhrase().get(tailleMots).line;  // depuis la db, et choisis ceux de bonne taille
         String motSecret = listMot.get(random.nextInt(listMot.size())); // get random mot
-        // MotATrouver motATrouver = new MotATrouver(motSecret);
-            // la on a ouvert la db, et choisis un mot au hazard
+        
         System.out.println("🫵 Vous devez deviner un mot de " + GRAS + motSecret.length() + " lettres en " + essaisMax + " tentatives" + RESET + ".");
 
         for (int essai = 1; essai <= essaisMax; essai++) {
             System.out.print("Essai " + essai + "/" + essaisMax + " : ");
-            String proposition = scanner.nextLine().toLowerCase();
+            String proposition = scanner.nextLine().toLowerCase(); // prend l'input
 
             if (proposition.length() != motSecret.length()) {
                 System.out.println("Le mot doit contenir " + motSecret.length() + " lettres.");
                 essai--;
+                // si ya un oupsie, ne pénalise pas l'utilisateur et le fait réésayer
                 continue;
             }
 
-            EtatMot.pprint(proposition, motSecret);
+            EtatMot.pprint(proposition, motSecret); // afficher la progression à m'utilisateur
 
-            if (EtatMot.checkEtatMot(proposition, motSecret).equals(motSecret)) {
+            if (EtatMot.checkEtatMot(proposition, motSecret).equals(motSecret)) { // test victoire
                 System.out.println("🥳 Félicitations !" + GRAS + "ⓂⓄⓉⓊⓈ en " + essai + " essai(s) sur " + essaisMax + RESET + ".");
                 return;
             }
