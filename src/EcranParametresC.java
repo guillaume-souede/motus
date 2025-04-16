@@ -1,6 +1,4 @@
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.GridLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
@@ -18,7 +16,7 @@ import javax.swing.JTextField;
 // JTextField FOR THE WORD TO FIND (PC MODE ONLY).
 // BUTTON TO START THE GAME.
 
-public class EcranParametres extends JFrame {
+public class EcranParametresC extends JFrame {
 
     public static void main(String[] args) {
         JFrame f = new JFrame("Paramètres");
@@ -27,22 +25,17 @@ public class EcranParametres extends JFrame {
 
         JPanel panel = new JPanel();
         // https://bbclone.developpez.com/fr/java/tutoriels/uiswing/gridbaglayout/?page=page_3
-        panel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        panel.setLayout(new GridLayout(5,1)); // les 3 lignes
+
 
         JLabel modeDeJeuLabel = new JLabel("Mode de Jeu");
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 15;
-        gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(modeDeJeuLabel, gbc);
+        panel.add(modeDeJeuLabel);
 
         JRadioButton ordiButton = new JRadioButton("Ordinateur");
         JRadioButton joueurButton = new JRadioButton("Joueur");
         JRadioButton mortelButton = new JRadioButton("Mortel");
 
+        // attribution les groupes des 3 boutons exclusifs
         ButtonGroup group = new ButtonGroup();
         group.add(ordiButton);
         group.add(joueurButton);
@@ -52,19 +45,18 @@ public class EcranParametres extends JFrame {
         joueurButton.setToolTipText("Devinez un mot !");
         mortelButton.setToolTipText("Ouvrez un terminal et lancez la commande 'sudo rm -rf /'");
 
-        gbc.gridwidth = 1;
-        gbc.anchor = GridBagConstraints.WEST;
 
         // Ordinateur
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(ordiButton, gbc);
+        JPanel ordiFrame = new JPanel();
+        ordiFrame.setLayout(new GridLayout(1, 2)); // 2 colonnes : 1 pour la coche et un autre pour le texte
+
+        ordiFrame.add(ordiButton);                 // ajout du bouton mode ordi
 
         JTextField motTextField = new JTextField("mot de 6 à 9 lettres", 15);
         motTextField.setEnabled(false);
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        panel.add(motTextField, gbc);
+        ordiFrame.add(motTextField);               // ajout du textField
+
+        panel.add(ordiFrame);                      // ajout du sous groupe texte + coche
 
         // FocusListener 
         motTextField.addFocusListener(new FocusAdapter() {
@@ -76,15 +68,12 @@ public class EcranParametres extends JFrame {
             }
         });
 
+
         // Joueur
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(joueurButton, gbc);
+        panel.add(joueurButton);
 
         // Mortel
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(mortelButton, gbc);
+        panel.add(mortelButton);
 
         // FAIRE UNE CLASSE POUR EVITER LA REPETITION ? : 
         ordiButton.addActionListener(event -> {
@@ -104,11 +93,7 @@ public class EcranParametres extends JFrame {
 
         // "JOUER" button
         JButton jouerButton = new JButton("JOUER");
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(jouerButton, gbc);
+        panel.add(jouerButton);
 
         // ActionListener
         // GLOIRE A L'AMPOULE (code corrigé)
