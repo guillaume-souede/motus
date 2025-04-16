@@ -9,7 +9,7 @@ public class EtatMot {
      *  - Les secondRenvoie aussi les char mal placé
      */
 
-    
+
     static public String checkEtatMot(String proposition, String motSecret){
         // étape 1 création du premier String 
         String SilhouetteMot = "";                   // la construction du premier String
@@ -103,7 +103,7 @@ public class EtatMot {
         System.out.println(emojiRepresentation(proposition, motSecret));
     }
 
-    
+
     public static void main(String[] args) {
         // bloc de test
         String propostion= "partir";

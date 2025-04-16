@@ -102,7 +102,7 @@ public class LogiqueBot {
         OuvrirDB db = new OuvrirDB();
         ArrayList<String> dico = new ArrayList<>(db.getOnePhrase(6));
         HashMap<Integer,Character> charsMalPlace = new HashMap<>();
-        charsMalPlace = EtatMot.extractImpossiblechar2("partir", "patate");
+        charsMalPlace = EtatMot.checkWrongPlacement2("partir", "patate");
         choix("pa****", charsMalPlace, "zrq", dico);
     }
 }
