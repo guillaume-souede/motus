@@ -6,10 +6,9 @@ public class MainTemporary {
         ParametresJeu modeChoisi;
 
         SwingUtilities.invokeLater(() -> {
-            // When chargement is done, show parametres
             Runnable chargementFini = () -> {
                 
-                modeChoisi = EcranParametres.main(null); //on suppose que EcranParametres renvoie le mode de jeu
+                //on suppose que EcranParametres renvoie le mode de jeu
                 
             };
 

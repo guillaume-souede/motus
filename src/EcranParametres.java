@@ -10,7 +10,7 @@ public class EcranParametres extends JFrame {
     public static boolean isCommencerJeu() {
         return commencerJeu;
     }
-    
+
     public EcranParametres() {
         setTitle("Paramètres");
         setSize(400, 200);
@@ -74,12 +74,13 @@ public class EcranParametres extends JFrame {
             ParametresJeu.Mode mode;
             if (ordiButton.isSelected()) {
                 String mot = motTextField.getText().trim();
-                if (mot.length() >= 6 && mot.length() <= 9) {
+    
+                if (mot.matches("[a-zA-Z]{6,9}")) {
                     mode = ParametresJeu.Mode.ORDI;
                     parametresJeu = new ParametresJeu(mode, mot);
                     dispose(); // Fermer la fenêtre après validation
                 } else {
-                    JOptionPane.showMessageDialog(this, "Le mot doit contenir entre 6 et 9 caractères.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Saisir entre 6 et 9 caractères non-spéciaux.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 }
             } else if (joueurButton.isSelected()) {
                 mode = ParametresJeu.Mode.JOUEUR;
