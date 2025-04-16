@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 // JTextField FOR THE WORD TO FIND (PC MODE ONLY).
 // BUTTON TO START THE GAME.
 
-public class EcranParametresC extends JFrame {
+public class EcranParametres extends JFrame {
 
     public static void main(String[] args) {
         JFrame f = new JFrame("Paramètres");
@@ -64,8 +64,7 @@ public class EcranParametresC extends JFrame {
             public void focusGained(FocusEvent e) {
             if (motTextField.getText().trim().equalsIgnoreCase("mot de 6 à 9 lettres")) {
                 motTextField.setText("");
-            }
-            }
+            }}
         });
 
 
