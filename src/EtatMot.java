@@ -87,7 +87,7 @@ public class EtatMot {
 
     static void pprint(String proposition, String motSecret){
         System.out.println(checkEtatMot(proposition, motSecret));
-        System.out.println(checkWrongPlacement(proposition, motSecret));
+        System.out.println("lettres malplacées : "+checkWrongPlacement(proposition, motSecret));
         System.out.println(emojiRepresentation(proposition, motSecret));
     }
     public static void main(String[] args) {
