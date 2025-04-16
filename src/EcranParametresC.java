@@ -4,7 +4,7 @@ import java.awt.event.FocusEvent;
 import javax.swing.*;
 
 public class EcranParametresC extends JFrame {
-    private ParametresJeu parametresJeu; // params du joueur MAIS ajouter ceux du bot ?
+    private ParametresJeu parametresJeu; // params du joueur MAIS ajouter ceux du bot ? plus de customisation ?
 
     public EcranParametresC() {
         setTitle("Paramètres");
