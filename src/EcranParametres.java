@@ -97,7 +97,7 @@ public class EcranParametres extends JFrame {
     }
 
     public static void main(String[] args) {
-        EcranParametresC ecran = new EcranParametresC();
+        EcranParametres ecran = new EcranParametres();
         ecran.setVisible(true);
 
         // sans ça les param ne sont pas récupérés
