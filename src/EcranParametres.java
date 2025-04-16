@@ -76,17 +76,17 @@ public class EcranParametres extends JFrame {
         panel.add(mortelButton, gbc);
 
         // FAIRE UNE CLASSE POUR EVITER LA REPETITION ? : 
-        ordiButton.addActionListener(_ -> {
+        ordiButton.addActionListener(event -> {
             motTextField.setEnabled(true);
             motTextField.setText("mot de 6 à 9 lettres");
         });
 
-        joueurButton.addActionListener(_ -> {
+        joueurButton.addActionListener(event -> {
             motTextField.setEnabled(false);
             motTextField.setText("mot de 6 à 9 lettres");
         });
 
-        mortelButton.addActionListener(_ -> {
+        mortelButton.addActionListener(event -> {
             motTextField.setEnabled(false);
             motTextField.setText("mot de 6 à 9 lettres");
         });
@@ -101,7 +101,7 @@ public class EcranParametres extends JFrame {
 
         // ActionListener
         // GLOIRE A L'AMPOULE (code corrigé)
-        jouerButton.addActionListener(_ -> {
+        jouerButton.addActionListener(event -> {
             if (ordiButton.isSelected()) {
                 String mot = motTextField.getText();
                 JOptionPane.showMessageDialog(f, "Mode Ordinateur. Mot : " + mot);
