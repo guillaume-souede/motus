@@ -90,6 +90,8 @@ public class EtatMot {
         System.out.println("lettres malplacées : "+checkWrongPlacement(proposition, motSecret));
         System.out.println(emojiRepresentation(proposition, motSecret));
     }
+
+    
     public static void main(String[] args) {
         // bloc de test
         String propostion= "partir";
