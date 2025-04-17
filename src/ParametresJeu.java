@@ -1,14 +1,17 @@
 public class ParametresJeu {
+
     public enum Mode {
         ORDI, JOUEUR, MORTEL
     }
-// Il faut intégrer ces horreurs à EcranParametres ! 
-    private final Mode mode;
-    private final String mot;
 
-    public ParametresJeu(Mode mode, String mot) {
+    private Mode mode;
+    private String mot;
+    private String difficulte;
+
+    public ParametresJeu(Mode mode, String mot, String difficulte) {
         this.mode = mode;
         this.mot = mot;
+        this.difficulte = difficulte;
     }
 
     public Mode getMode() {
@@ -17,5 +20,9 @@ public class ParametresJeu {
 
     public String getMot() {
         return mot;
+    }
+
+    public String getDifficulte() {
+        return difficulte;
     }
 }
