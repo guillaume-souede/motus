@@ -1,0 +1,7 @@
+Le jeu repose sur la recherche de mots d'un nombre fixé de lettres. 
+
+Un candidat propose un mot et doit épeler celui-ci. Le mot doit contenir le bon nombre de lettres et être correctement orthographié, sinon il est refusé. Le mot apparaît alors sur une grille : 
+ - les lettres présentes et bien placées sont coloriées en rouge, 
+ - les lettres présentes mais mal placées sont cerclées de jaune. 
+ - si la lettre est bien placé elles apparaissent en bleu
+Pour une lettre, on ne peut avoir au maximum que le nombre d'occurrences de cette lettre dans le mot de coloriées.
