@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,6 +58,25 @@ public final class OuvrirDB {
         for (String string : cheminDB) {
             this.createDict(string);
         }
+    }
+
+    public static String lireRegle(String filePath) throws FileNotFoundException{
+        StringBuilder out = new StringBuilder();
+        try{
+            BufferedReader buf = new BufferedReader(new FileReader(filePath));
+            String line = buf.readLine();
+            while(line != null){
+                out.append(line+'\n');
+                line = buf.readLine();
+            }
+            buf.close();
+            }
+            catch (IOException e){
+            e.printStackTrace();
+            }
+
+        return out.toString();
+    
     }
 
 }

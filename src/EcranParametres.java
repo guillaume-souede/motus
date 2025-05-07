@@ -1,7 +1,16 @@
 import java.awt.GridLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import javax.swing.*;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 
 public class EcranParametres extends JFrame {
     private ParametresJeu parametresJeu;
@@ -116,9 +125,14 @@ public class EcranParametres extends JFrame {
         getContentPane().add(panel);
         pack();
         setLocationRelativeTo(null);
+        setVisible(true);
     }
 
     public ParametresJeu getParametresJeu() {
         return parametresJeu;
+    }
+
+    public static void main(String[] args) {
+        new EcranParametres();
     }
 }
