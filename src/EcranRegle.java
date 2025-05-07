@@ -1,32 +1,27 @@
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JScrollBar;
+import javax.swing.JTextArea;
 
 public class EcranRegle extends JFrame{
 
-    BufferedReader fichierregle = new BufferedReader(new FileReader("data/rules.txt"));
     
-    public EcranRegle() throws IOException{
+    public EcranRegle() throws FileNotFoundException{
         super("table des rêgles") ;
 
         // paramétrage de base du layout
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setLayout(new FlowLayout(1));
-        add(new JScrollBar());
+		setLayout(new BorderLayout());
 
 		// création des éléments du menu
-        JEditorPane paneRegles = new JEditorPane();
-        paneRegles.setContentType("text/plain");
-        paneRegles.read(fichierregle,null);
-        paneRegles.isEditable();
+        JTextArea paneRegles = new JTextArea();
+        String stringRegle = OuvrirDB.lireRegle("data/rules.txt");
+        paneRegles.setText(stringRegle);
 
         JButton quiterButton = new JButton("quitter");
 
@@ -41,11 +36,11 @@ public class EcranRegle extends JFrame{
         });
 
         // ajout des boutons 
-        add(paneRegles);
-        add(quiterButton);
+        add(paneRegles,BorderLayout.CENTER);
+        add(quiterButton,BorderLayout.PAGE_END);
 
 
-        pack();
+        setSize(700,250);
         setVisible(true);
 
     }
