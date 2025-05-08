@@ -34,6 +34,7 @@ public class MainMenu extends JFrame{
 		bouttonJouer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
+				// ouvrir la fenêtre de paramètre de jeu
 				new EcranParametres();
 				dispose();
             }
@@ -43,23 +44,25 @@ public class MainMenu extends JFrame{
             @Override
             public void actionPerformed(ActionEvent clic) {
 				try {
+					// ouvrir la fenêtre de règle
 					new EcranRegle();
+					dispose();
 				} catch (IOException e) {
 					dispose();
 					e.printStackTrace();
 				}
-				dispose();
             }
         });
 
 		// positionnement des bouttons
-
 		add(titre); 
 		bouttonFrame.add(bouttonJouer);	bouttonFrame.add(bouttonregle);
 		add(bouttonFrame);
 		add(buttonFermer);
 
+		// paramétrage taille et position de la fenêtre
 		setSize(200,250);
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 

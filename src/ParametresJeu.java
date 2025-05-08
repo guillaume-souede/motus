@@ -1,7 +1,9 @@
 public class ParametresJeu {
 
     public enum Mode {
-        ORDI, JOUEUR, MORTEL
+        ORDI, 
+        JOUEUR, 
+        MORTEL;
     }
 
     private Mode mode;

@@ -32,6 +32,19 @@ public class EcranJeu extends JPanel {
         }
     }
 
+    public EcranJeu(String bgPath) {
+        File imageFile = new File(bgPath);
+        if (!imageFile.exists()) {
+            System.err.println("Image non trouvée : " + bgPath);
+        }
+        background = new ImageIcon(bgPath).getImage();
+        
+        lettres = new char[rows][cols];
+        for (int i = 0; i < rows; i++) {
+        setVisible(true);
+        }
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);

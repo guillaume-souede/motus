@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class JeuOrdinateur {
-    private static final int essaisMax = 7;
+    private static final int essaisMax = 10;
     private static final String GRAS = "\033[1m";
     private static final String RESET = "\033[0m";
 

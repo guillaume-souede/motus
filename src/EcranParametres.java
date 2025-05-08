@@ -22,7 +22,7 @@ public class EcranParametres extends JFrame {
 
     public EcranParametres() {
         setTitle("Paramètres");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(6, 1));

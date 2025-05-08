@@ -22,11 +22,11 @@ public class EcranRegle extends JFrame{
         JTextArea paneRegles = new JTextArea();
         String stringRegle = OuvrirDB.lireRegle("data/rules.txt");
         paneRegles.setText(stringRegle);
+        paneRegles.setEditable(false);
 
-        JButton quiterButton = new JButton("quitter");
+        JButton quiterButton = new JButton("retour");
 
         // paramétrage du bouton
-
 		quiterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
@@ -39,10 +39,11 @@ public class EcranRegle extends JFrame{
         add(paneRegles,BorderLayout.CENTER);
         add(quiterButton,BorderLayout.PAGE_END);
 
-
+        // paramétrage fenêtre
         setSize(700,250);
+        setLocationRelativeTo(null);
         setVisible(true);
-
+    
     }
 
     public static void main(String[] args) throws IOException {

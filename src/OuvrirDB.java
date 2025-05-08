@@ -72,7 +72,7 @@ public final class OuvrirDB {
             buf.close();
             }
             catch (IOException e){
-            e.printStackTrace();
+                e.printStackTrace();
             }
 
         return out.toString();
