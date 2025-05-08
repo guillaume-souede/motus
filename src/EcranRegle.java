@@ -30,7 +30,7 @@ public class EcranRegle extends JFrame{
 		quiterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
-				new MainMenu();
+				new Main();
 				dispose();
             }
         });
