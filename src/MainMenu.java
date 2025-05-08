@@ -3,7 +3,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,7 +23,7 @@ public class MainMenu extends JFrame{
 		// création des éléments du menu
 		JLabel titre = new JLabel("Bienvenue dans motus racine(4)");
 		JButton bouttonJouer = new JButton("Jouer");
-		JButton bouttonregle = new JButton("Règles");
+		JButton bouttonRegles = new JButton("Règles");
 		JButton buttonFermer = new JButton("fermer");
 
 		JPanel bouttonFrame = new JPanel(new FlowLayout(FlowLayout.CENTER,15,0));
@@ -40,7 +39,7 @@ public class MainMenu extends JFrame{
             }
         });
 
-		bouttonregle.addActionListener(new ActionListener() {
+		bouttonRegles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
 				try {
@@ -56,7 +55,7 @@ public class MainMenu extends JFrame{
 
 		// positionnement des bouttons
 		add(titre); 
-		bouttonFrame.add(bouttonJouer);	bouttonFrame.add(bouttonregle);
+		bouttonFrame.add(bouttonJouer);	bouttonFrame.add(bouttonRegles);
 		add(bouttonFrame);
 		add(buttonFermer);
 
