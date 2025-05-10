@@ -21,7 +21,7 @@ public class EcranParametres extends JFrame {
     }
 
     public EcranParametres() {
-        setTitle("Paramètres");
+        super("Paramètres");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel();
@@ -52,6 +52,7 @@ public class EcranParametres extends JFrame {
         JLabel difficultyLabel = new JLabel("Difficulté :");
         String[] niveaux = {"Défaut", "Difficile", "Difficile+"};
         JComboBox<String> difficultySelector = new JComboBox<>(niveaux);
+
         difficultySelector.setEnabled(false);
         difficultyPanel.add(difficultyLabel);
         difficultyPanel.add(difficultySelector);
@@ -105,17 +106,22 @@ public class EcranParametres extends JFrame {
                 if (mot.matches("[a-zA-Z]{6,9}")) {
                     mode = ParametresJeu.Mode.ORDI;
                     parametresJeu = new ParametresJeu(mode, mot, difficulte);
+                    new EcranChargement();
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Saisir entre 6 et 9 caractères non-spéciaux.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 }
+                
             } else if (joueurButton.isSelected()) {
                 mode = ParametresJeu.Mode.JOUEUR;
                 parametresJeu = new ParametresJeu(mode, null, null);
+                new EcranChargement();
                 dispose();
+
             } else if (mortelButton.isSelected()) {
                 mode = ParametresJeu.Mode.MORTEL;
                 parametresJeu = new ParametresJeu(mode, null, null);
+                new EcranChargement();
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Sélectionnez un mode de jeu.", "Erreur", JOptionPane.ERROR_MESSAGE);
