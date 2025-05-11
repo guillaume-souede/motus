@@ -110,15 +110,156 @@ public class EcranJeu extends JFrame {
 
         // BoutonsD
         JPanel rightPanel = new JPanel();
-        JButton quitBtn = new JButton("⏻");
-        quitBtn.addActionListener(e -> System.exit(0));
-        rightPanel.add(quitBtn);
+        JButton optionsBtn = new JButton("⚙");
+
+        JPopupMenu popupMenu = new JPopupMenu();
+
+        // ROUE DES PARAMETRES
+        // Sous-menu "Essais"
+        JMenu essaisMenu = new JMenu("Essais");
+        ButtonGroup essaisGroup = new ButtonGroup();
+        for (int i = 1; i <= 6; i++) {
+            JRadioButtonMenuItem essaisOption = new JRadioButtonMenuItem(i + "");
+            int essaisValue = i;
+            essaisOption.addActionListener(e -> {
+                grillePanel.setLignes(essaisValue);
+                essaisMax = essaisValue; // MàJ nb d'essais max
+                propositions.clear();
+                grillePanel.majGrille(propositions, motSecret);
+            });
+            essaisGroup.add(essaisOption);
+            essaisMenu.add(essaisOption);
+        }
+
+        // Sous-menu "Taille"
+        JMenu tailleMenu = new JMenu("Taille");
+        ButtonGroup tailleGroup = new ButtonGroup();
+        for (int i = 6; i <= 9; i++) {
+            JRadioButtonMenuItem tailleOption = new JRadioButtonMenuItem(i + "");
+            int tailleValue = i;
+            tailleOption.addActionListener(e -> {
+                grillePanel.setColonnes(tailleValue);
+                propositions.clear();
+                grillePanel.majGrille(propositions, motSecret);
+            });
+            tailleGroup.add(tailleOption);
+            tailleMenu.add(tailleOption);
+        }
+
+        // Sous-menu "Mode"
+        JMenu modeMenu = new JMenu("Mode");
+        ButtonGroup modeGroup = new ButtonGroup();
+
+        JRadioButtonMenuItem humainOption = new JRadioButtonMenuItem("👨");
+        humainOption.setSelected(true); //
+        humainOption.addActionListener(e -> {
+            mettreAJourMotSecret("👨", grillePanel.getColonnes());
+        });
+        modeGroup.add(humainOption);
+        modeMenu.add(humainOption);
+
+        JRadioButtonMenuItem robotOption = new JRadioButtonMenuItem("🤖");
+        robotOption.addActionListener(e -> {
+            mettreAJourMotSecret("🤖", grillePanel.getColonnes());
+        });
+        modeGroup.add(robotOption);
+        modeMenu.add(robotOption);
+
+        popupMenu.add(modeMenu);
+
+        // Sous-menu "Thème"
+        JMenu themeMenu = new JMenu("Thème");
+        ButtonGroup themeGroup = new ButtonGroup();
+
+        // Thème "Hiver"
+        JRadioButtonMenuItem hiverOption = new JRadioButtonMenuItem("Hiver");
+        hiverOption.addActionListener(e -> {
+            grillePanel.setBackgroundImage("images/hiver.png");
+        });
+        themeGroup.add(hiverOption);
+        themeMenu.add(hiverOption);
+    
+        // Thème "Défaut"
+        JRadioButtonMenuItem defautOption = new JRadioButtonMenuItem("Défaut");
+        defautOption.addActionListener(e -> {
+            grillePanel.setBackgroundImage("images/defaut.png");
+        });
+        themeGroup.add(defautOption);
+        themeMenu.add(defautOption);
+
+        // Mode "Tutoriel"
+        JMenuItem tutorielItem = new JMenuItem("Tutoriel");
+        tutorielItem.addActionListener(e -> {
+            // MàJ fond (comme un Thème)
+            grillePanel.setBackgroundImage("images/tutoriel.png");
+
+            // 2 ESSAIS
+            grillePanel.setLignes(2);
+            essaisMax = 2;
+
+            // 6 LETTRES
+            grillePanel.setColonnes(6);
+            propositions.clear();
+            grillePanel.majGrille(propositions, motSecret);
+
+            // MàJ champs
+            progressionLabel.setText("0/6");
+            inputField.setEnabled(true);
+            validerBtn.setEnabled(false);
+            inputField.setText("");
+        });
+        popupMenu.add(tutorielItem);
+
+        // Option "Reset"
+        JMenuItem resetItem = new JMenuItem("Reset");
+        resetItem.addActionListener(e -> {
+            // Reset le jeu
+            String mode = "👨";
+            int taille = 6;
+            mettreAJourMotSecret(mode, taille);
+
+            // Reset grille
+            propositions.clear();
+            grillePanel.setColonnes(taille);
+            grillePanel.setLignes(taille);
+            grillePanel.majGrille(propositions, motSecret);
+
+            // Reset champs
+            progressionLabel.setText("0/" + taille);
+            inputField.setEnabled(true);
+            validerBtn.setEnabled(false);
+            inputField.setText("");
+        });
+
+        // Option "Quitter"
+        JMenuItem quitterItem = new JMenuItem("Quitter");
+        quitterItem.addActionListener(e -> System.exit(0));
+
+        // SOUS-MENU (ORDRE INVERSé !!)
+        popupMenu.add(themeMenu);
+        popupMenu.add(essaisMenu);
+        popupMenu.add(tailleMenu);
+        popupMenu.add(modeMenu);
+        popupMenu.add(tutorielItem);
+        popupMenu.add(resetItem);
+        popupMenu.add(quitterItem);
+
+        // survol bouton (écouter l' ampoule)
+        // 💡🙏 💡🙏 💡🙏
+        optionsBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                popupMenu.show(optionsBtn, optionsBtn.getWidth() / 2, -popupMenu.getPreferredSize().height);
+            }
+        });
+
+        rightPanel.add(optionsBtn);
 
         // Footer
         JPanel centerPanel = new JPanel();
         centerPanel.add(new JLabel("Proposition :"));
         centerPanel.add(inputField);
-        centerPanel.add(progressionLabel); // voir progrès mot
+        centerPanel.add(progressionLabel);
         centerPanel.add(validerBtn);
 
         inputField.addKeyListener(new KeyAdapter() {
@@ -166,10 +307,10 @@ public class EcranJeu extends JFrame {
     private void traiterProposition() {
         String prop = inputField.getText().trim().toUpperCase();
 
-        // Validate the length of the input word
+        // Au cas où...
         if (prop.length() != motSecret.length()) {
             JOptionPane.showMessageDialog(this, "Le mot doit contenir exactement " + motSecret.length() + " lettres.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            return; // Stop further processing
+            return;
         }
 
         if (propositions.size() >= essaisMax) return;
@@ -202,12 +343,12 @@ public class EcranJeu extends JFrame {
                 }
         } else if ("🤖".equals(mode)) {
             // Mode 🤖
-            motSecret = "CHIENNE"; // IMPLEMENTER LE ROBOT
+            motSecret = "CHIENNE"; // JAN : IMPLEMENTER LE ROBOT
         }
     }
 
     public static void main(String[] args) {
-        String bgPath = "images/apImage2.png";
+        String bgPath = "images/defaut.png";
         SwingUtilities.invokeLater(() -> new EcranJeu(bgPath));
     }
 }
@@ -249,15 +390,33 @@ class GrilleMotusPanel extends JPanel {
     }
 
     public void setColonnes(int colonnes) {
-        this.colonnes = colonnes; // Met à jour le nombre de colonnes
+        this.colonnes = colonnes;
         repaint(); // Redessine la grille
+    }
+
+    public void setLignes(int lignes) {
+        this.lignes = lignes;
+        repaint(); // Redessine la grille
+    }
+
+    public int getColonnes() {
+        return colonnes;
+    }
+
+    public void setBackgroundImage(String imagePath) {
+        try {
+            bgImage = new ImageIcon(imagePath).getImage();
+        } catch (Exception e) {
+            bgImage = null;
+        }
+        repaint(); // Redessiner la grille
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Arrière-plan
+        // Arrière-plan (AP)
         if (bgImage != null) {
             g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
         }
