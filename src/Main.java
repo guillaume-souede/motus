@@ -1,71 +1,95 @@
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class Main extends JFrame{
 
     /**
      * Menu principal qui est afficher au boot
      */
-    
+
     public Main(){
-		// paramétrage de base du layout
-		super("Menu principal Motus et bouche cousus");
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setLayout(new GridLayout(3,1,15,10));
+        // paramétrage de base du layout
+        super("Motus et bouche cousue");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		// création des éléments du menu
-		JLabel titre = new JLabel("Bienvenue dans motus racine(4)");
-		JButton bouttonJouer = new JButton("Jouer");
-		JButton bouttonRegles = new JButton("Règles");
-		JButton buttonFermer = new JButton("fermer");
+        // chargement de l'image de fond
+        ImageIcon icon = new ImageIcon("images/bienvenue.png");
+        Image backgroundImage = icon.getImage();
 
-		JPanel bouttonFrame = new JPanel(new FlowLayout(FlowLayout.CENTER,15,0));
+        // panneau principal avec image de fond
+        JPanel backgroundPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        backgroundPanel.setLayout(new GridLayout(3,1,15,10)); // même layout que l'ancien
+        setContentPane(backgroundPanel);
 
-		// paramétrage des boutons
+        // création des éléments du menu
+        JLabel titre = new JLabel("<html><center>Bienvenue dans Motus, une production √4 !</center></html>", JLabel.CENTER);
+        titre.setFont(new Font("SansSerif", Font.BOLD, 14));
+        titre.setForeground(Color.WHITE); // texte blanc pour la lisibilité
 
-		bouttonJouer.addActionListener(new ActionListener() {
+        JButton bouttonJouer = new JButton("Jouer");
+        JButton bouttonRegles = new JButton("Règles");
+        JButton buttonFermer = new JButton("Fermer");
+
+        // uniformisation des tailles de boutons
+        Dimension buttonSize = new Dimension(100, 30);
+        bouttonJouer.setPreferredSize(buttonSize);
+        bouttonRegles.setPreferredSize(buttonSize);
+        buttonFermer.setPreferredSize(buttonSize);
+
+        JPanel bouttonFrame = new JPanel(new FlowLayout(FlowLayout.CENTER,15,0));
+        bouttonFrame.setOpaque(false); // pour ne pas cacher l’image de fond
+
+        // paramétrage des boutons
+        bouttonJouer.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
-				// ouvrir la fenêtre de paramètre de jeu
-				new EcranParametres();
-				dispose();
+                // ouvrir la fenêtre de paramètre de jeu
+                new EcranParametres();
+                dispose();
             }
         });
 
-		bouttonRegles.addActionListener(new ActionListener() {
+        bouttonRegles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
-				try {
-					// ouvrir la fenêtre de règle
-					new EcranRegle();
-					dispose();
-				} catch (IOException e) {
-					dispose();
-					e.printStackTrace();
-				}
+                try {
+                    // ouvrir la fenêtre de règle
+                    new EcranRegle();
+                    dispose();
+                } catch (IOException e) {
+                    dispose();
+                    e.printStackTrace();
+                }
             }
         });
 
-		// positionnement des bouttons
-		add(titre); 
-		bouttonFrame.add(bouttonJouer);	bouttonFrame.add(bouttonRegles);
-		add(bouttonFrame);
-		add(buttonFermer);
+        buttonFermer.addActionListener(e -> dispose());
 
-		// paramétrage taille et position de la fenêtre
-		setSize(200,250);
-		setLocationRelativeTo(null);
-		setVisible(true);
-	}
+        // positionnement des bouttons
+        bouttonFrame.add(bouttonJouer);
+        bouttonFrame.add(bouttonRegles);
+        bouttonFrame.add(buttonFermer);
 
-	public static void main(String[] args) {
-		new Main();
-	}
+        backgroundPanel.add(titre); 
+        backgroundPanel.add(new JLabel()); // ligne vide pour espacement
+        backgroundPanel.add(bouttonFrame);
+
+        // paramétrage taille et position de la fenêtre
+        setSize(400, 300);
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new Main();
+    }
 }
