@@ -1,0 +1,980 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public final class OuvrirDB {
+
+    private final HashMap<Integer,Mots> phrase; // int = taille du mot
+
+    // HashMap : clé = taille du mot ; valeur = le mot
+    public HashMap<Integer, Mots> getAllPhrase() {
+        return phrase;
+    }
+
+    public ArrayList<String> getOnePhrase(int taille){
+        return phrase.get(taille).line;
+    }
+
+
+    public OuvrirDB() {
+        phrase = new HashMap<>();
+        this.initialisationDB();
+    }
+
+
+    public void createDict(String nomfichier) {
+        // Ouverture du fichier (création du BufferReader)
+        // Stockage des mots dans le HashMap :
+        // Clé = taille du mot ; Valeur = le mot
+        try (BufferedReader buf = new BufferedReader(new FileReader(nomfichier))) {
+            // Lecture ligne par ligne
+            String contentLine = buf.readLine();
+            while (contentLine != null) {
+                // Récupérer la taille de la ligne
+                int fooKey = contentLine.length();
+                // 
+                if (phrase.get(fooKey) == null) {
+                    phrase.put(fooKey, new Mots(contentLine));
+                } else {
+                    phrase.get(fooKey).extend(contentLine);
+                }
+                contentLine = buf.readLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Erreur sur le fichier : " + e.getMessage());
+        }
+    }
+
+
+    public void initialisationDB(){
+        ArrayList<String> cheminDB = new ArrayList<>();
+        // Ajout du fichier de mots
+        cheminDB.add("data/motsMotus.txt");
+
+        // Ouverture et Stockage des données/mots
+        for (String string : cheminDB) {
+            this.createDict(string);
+        }
+    }
+
+    public static String lireRegle(String filePath) throws FileNotFoundException{
+        StringBuilder out = new StringBuilder();
+        try{
+            BufferedReader buf = new BufferedReader(new FileReader(filePath));
+            String line = buf.readLine();
+            while(line != null){
+                out.append(line+'\n');
+                line = buf.readLine();
+            }
+            buf.close();
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+
+        return out.toString();
+    
+    }
+
+}import java.util.ArrayList;
+import java.util.HashMap;
+
+public class EtatMot {
+    /*
+     * à partir d'une proposition test quels sont les bons caractère
+     * renvoie 2 String : 
+     *  - Le premier composé de lettres aux bons endroits et '*' aux mauvais endroit.
+     *  - Les secondRenvoie aussi les char mal placé
+     */
+
+
+    static public String checkEtatMot(String proposition, String motSecret){
+        // étape 1 création du premier String 
+        String SilhouetteMot = "";                   // la construction du premier String
+        char lettreActu;                            // le char a vérifier
+        for (int i = 0; i < proposition.length(); i++) {
+            if (proposition.charAt(i) == motSecret.charAt(i)) {
+                lettreActu = proposition.charAt(i); // si bon => met dans la chaine le char
+                SilhouetteMot += lettreActu;         // la concaténation
+            } else {
+                SilhouetteMot += '*';                //si pas bon met une étoile
+            }
+        }
+        return SilhouetteMot;
+    }
+
+        // étape 2 création du String de mots mal placé
+    static public String checkWrongPlacement(String proposition, String motSecret){
+        String silouetteMot = checkEtatMot(proposition, motSecret);
+        ArrayList<Integer> positionFausses= new ArrayList<Integer>();
+        String motMalPlace = "";
+
+        // a. get les positions non justes
+        for (int i = 0; i < silouetteMot.length(); i++) {
+            if (silouetteMot.charAt(i) == '*'){
+                positionFausses.add(i);
+            }
+        }// en sortie on a les position fausses dasn positionsFausses
+
+        // b. sortir les 2 chars des fausses positions
+        String propositionTrimmed = "", motSecretTrimmed = "";
+        for (int positions : positionFausses) {
+            propositionTrimmed += proposition.charAt(positions)+""; // techniquement le +"" n'est pas nécécaire pour la concaténation
+            motSecretTrimmed += motSecret.charAt(positions)+"";
+        }
+
+        // avec un while pour un code de sortie
+        for (int i = 0; i < propositionTrimmed.length(); i++) {
+            char tempChar = propositionTrimmed.charAt(i);
+            boolean pasTrouve = true;           int j = 0;
+            while ( j < motSecretTrimmed.length() && pasTrouve) {
+                if (tempChar == motSecretTrimmed.charAt(j)) {
+                    motMalPlace += tempChar;
+                    pasTrouve = false;
+                }
+                j ++;
+            }
+        }
+        return motMalPlace;
+    }
+
+    static String emojiRepresentation(String proposition, String motSecret) {
+        // passer de StringBuilder à juste String car plus simple a comprendre
+        String affichageEmoji = "";
+        for (int i = 0; i < motSecret.length(); i++) {
+            char lettre = proposition.charAt(i);
+            if (lettre == motSecret.charAt(i)) {
+                affichageEmoji +=("🟦");
+            } else if (motSecret.contains(String.valueOf(lettre))) {
+                affichageEmoji+=("🟡");
+            } else {
+                affichageEmoji+=("🟥");
+            }
+        }
+        return affichageEmoji;
+    }
+
+    static String extractImpossiblechar(String proposition, String motSecret){
+        // legacy function
+        String outString = ""; // stocke les char impossible pour le mot
+        for (int i = 0; i < proposition.length(); i++) {
+            if (motSecret.contains(proposition.charAt(i)+"") == false) {
+                outString += proposition.charAt(i);
+            }
+        }
+        return outString;
+    }
+
+    static HashMap<Integer,Character> checkWrongPlacement2(String proposition, String motSecret){
+        HashMap<Integer,Character> mauvaisePosBonChar = new HashMap<>();
+        for (int i = 0; i < proposition.length(); i++) {
+            if (motSecret.contains(proposition.charAt(i)+"") == false) {
+            mauvaisePosBonChar.put(i, proposition.charAt(i)) ; // on ajoute la position en clef et le char mal plaé en valeur
+            }
+        }
+        return mauvaisePosBonChar;
+    }
+
+    static void pprint(String proposition, String motSecret){
+        System.out.println(checkEtatMot(proposition, motSecret));
+        System.out.println("lettres malplacées : "+checkWrongPlacement(proposition, motSecret));
+        System.out.println(emojiRepresentation(proposition, motSecret));
+    }
+
+
+    public static void main(String[] args) {
+        // bloc de test
+        String propostion= "partir";
+        String motSecret = "patate";
+        System.out.println(checkEtatMot(propostion, motSecret));
+        System.out.println(checkWrongPlacement(propostion, motSecret));
+        System.out.println(emojiRepresentation(propostion, motSecret));
+    }
+
+}import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+
+public class EcranRegle extends JFrame{
+
+    
+    public EcranRegle() throws FileNotFoundException{
+        super("table des rêgles") ;
+
+        // paramétrage de base du layout
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setLayout(new BorderLayout());
+
+		// création des éléments du menu
+        JTextArea paneRegles = new JTextArea();
+        String stringRegle = OuvrirDB.lireRegle("data/rules.txt");
+        paneRegles.setText(stringRegle);
+        paneRegles.setEditable(false);
+
+        JButton quiterButton = new JButton("retour");
+
+        // paramétrage du bouton
+		quiterButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent clic) {
+				new Main();
+				dispose();
+            }
+        });
+
+        // ajout des boutons 
+        add(paneRegles,BorderLayout.CENTER);
+        add(quiterButton,BorderLayout.PAGE_END);
+
+        // paramétrage fenêtre
+        setSize(700,250);
+        setLocationRelativeTo(null);
+        setVisible(true);
+    
+    }
+
+    public static void main(String[] args) throws IOException {
+        new EcranRegle();
+    }
+}import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Scanner;
+
+public class JeuOrdinateur {
+    private static final int essaisMax = 10;
+    private static final String GRAS = "\033[1m";
+    private static final String RESET = "\033[0m";
+
+    public static void ordinateurDevine(String motSecret, Scanner scanner, OuvrirDB db) {
+
+        int essais = 0; boolean trying = true;
+        ArrayList<String> dictionnaire = db.getOnePhrase(motSecret.length()); // prend tout les mots de taille a rechercher
+        
+        // Set<String> motsEssayes = new HashSet<>(); ==> normalement on peut juste enlever direct dans la BD de mot au fir et a meusure
+        Random random = new Random();
+
+        String proposition = motSecret.charAt(0)+"";
+
+        if (dictionnaire.isEmpty()) {
+            System.out.println("ℹ Mot impossible à jouer.");
+            return;
+        }
+
+
+        while (essais < essaisMax && !dictionnaire.isEmpty() && trying) {
+            /*
+             * progressionMot = les positions connues justes
+             * lettresConnu = les lettres mal placées connues 
+             * lettresImpossible = les lettres abscente dans le mot a trouver
+             */
+            String progressionMot = "", lettresImpossible = "";
+            HashMap<Integer,Character> lettresConnu = new HashMap<>(); // hashmap car stocke et les chars et les
+            // 1. get la situation actuelle du mot
+            
+            //a. get les positions justes
+            progressionMot = EtatMot.checkEtatMot(proposition, motSecret);
+            
+            //b. get les chars mal placées
+            lettresConnu = EtatMot.checkWrongPlacement2(proposition, motSecret);
+
+            //c. lettres impossibles 
+            lettresImpossible = EtatMot.extractImpossiblechar(proposition, motSecret);
+
+            // 2. filtrage du dictionnaire avec les possible
+            dictionnaire = LogiqueBot.choix(progressionMot, lettresConnu, lettresImpossible, dictionnaire);
+
+            // 3. get un mot du dico et le supprime après
+            proposition = dictionnaire.get(random.nextInt(dictionnaire.size()));
+            while(dictionnaire.remove(proposition)) { } // https://stackoverflow.com/questions/13565876/remove-all-occurrences-of-an-element-from-arraylist
+            essais++;
+
+            // 4. test si juste ou non (majoritairement juste de l'affichage)
+
+            System.out.println("Essai " + (essais) + " : L'ordinateur propose " + GRAS + proposition + RESET);
+            EtatMot.pprint(proposition, motSecret);
+            //a. si vrai
+            if (proposition.equals(motSecret)) {
+                System.out.println("🥳 ⓂⓄⓉⓊⓈ de l'ordinateur en " + (essais) + " essai(s) !");
+                trying = false;
+            }
+            //b. si faux (rien de plus)
+            
+        }
+        if (trying == true) {
+            System.out.println("😢 Défaite après " + essaisMax + " essais.");
+        }
+    }
+
+public static void main(String[] args) {
+    OuvrirDB db = new OuvrirDB();
+    Scanner scanner = new Scanner(System.in);
+    Random random = new Random();
+
+    int tailleMots = random.nextInt(3)+6;   // get random length
+    ArrayList<String> listMot = db.getAllPhrase().get(tailleMots).line;  // depuis la db, et choisis ceux de bonne taille
+    String motSecret = listMot.get(random.nextInt(listMot.size())); // get random mot
+    
+    //ordinateurDevine("preferee", scanner , db);
+    ordinateurDevine(motSecret, scanner , db);
+}
+
+}import java.util.*;
+
+public class JeuJoueur {
+    private static final int essaisMax = 9;
+    private static final String GRAS = "\033[1m";
+    private static final String RESET = "\033[0m";
+
+    public static void joueurDevine(Scanner scanner, OuvrirDB db) {
+        ArrayList<String> listMot = new ArrayList<>();
+        Random random = new Random();
+
+        int tailleMots = random.nextInt(3)+6;   // get random length
+        listMot = db.getAllPhrase().get(tailleMots).line;  // depuis la db, et choisis ceux de bonne taille
+        String motSecret = listMot.get(random.nextInt(listMot.size())); // get random mot
+        
+        System.out.println("🫵 Vous devez deviner un mot de " + GRAS + motSecret.length() + " lettres en " + essaisMax + " tentatives" + RESET + ".");
+
+        for (int essai = 1; essai <= essaisMax; essai++) {
+            System.out.print("Essai " + essai + "/" + essaisMax + " : ");
+            String proposition = scanner.nextLine().toLowerCase(); // prend l'input
+
+            if (proposition.length() != motSecret.length()) {
+                System.out.println("Le mot doit contenir " + motSecret.length() + " lettres.");
+                essai--;
+                // si ya un oupsie, ne pénalise pas l'utilisateur et le fait réésayer
+                continue;
+            }
+
+            EtatMot.pprint(proposition, motSecret); // afficher la progression à m'utilisateur
+
+            if (EtatMot.checkEtatMot(proposition, motSecret).equals(motSecret)) { // test victoire
+                System.out.println("🥳 Félicitations !" + GRAS + "ⓂⓄⓉⓊⓈ en " + essai + " essai(s) sur " + essaisMax + RESET + ".");
+                return;
+            }
+        }
+        System.out.println("😥 Perdu ! Le mot était : " + motSecret);
+    }
+
+    /* 
+    public static String[] getListeMotsPossibles() {
+        // a modifier pour intégrer les Arraylist et l'ouverture de la DB de mots 
+        // TLDR modifié et retrouvé dans OuvrirDB et Mots
+        return new String[]{"avion", "voiture", "maison", "ordinateur", "bureau", "table", "chaise", "fenetre"};
+    }
+    */
+
+    // un run de test
+    public static void main(String[] args) {
+        OuvrirDB db = new OuvrirDB(); // ouvrir les mots
+        Scanner scanner = new Scanner(System.in); // le scanner pour l'input (pour tester)
+        joueurDevine(scanner, db);
+    }
+}
+import java.util.ArrayList;
+
+public class Mots {
+
+    private int nChar;
+    ArrayList<String> line;
+
+    // Retourner la ligne
+    public ArrayList<String> getLine() {
+        return line;
+    }
+    // Retourner la taille du mot occupant la ligne
+    public int getnChar() {
+        return nChar;
+    }
+
+    // Liste de Mots
+    public Mots(String line){
+        this.line = new ArrayList<>();
+        this.line.add(line);
+    }
+
+    // Agrandir la liste de Mots
+    public void extend(String mot){
+        line.add(mot);
+    }
+
+}import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Image;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+
+public class EcranChargement extends JFrame {
+    private final JProgressBar barreChargement;
+    private int progress = 0;
+    private final Runnable onFinished;
+
+    public EcranChargement(Runnable onFinished) {
+        this.onFinished = onFinished;
+
+        setTitle("Chargement");
+        setSize(600, 400);
+        setUndecorated(true);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        ImageIcon originalIcon = new ImageIcon("images/chargementImage.png");
+        Image scaledImage = originalIcon.getImage().getScaledInstance(600, 400, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+
+        JLabel background = new JLabel(scaledIcon);
+        background.setLayout(new BorderLayout());
+
+        barreChargement = new JProgressBar();
+        barreChargement.setStringPainted(true);
+        barreChargement.setForeground(Color.GREEN);
+        barreChargement.setBackground(Color.DARK_GRAY);
+        barreChargement.setFont(new Font("Arial", Font.BOLD, 14));
+        barreChargement.setValue(0);
+
+        background.add(barreChargement, BorderLayout.SOUTH);
+        add(background);
+
+        Timer timer = new Timer(50, e -> updateProgress((Timer) e.getSource()));
+        timer.start();
+        setVisible(true);
+    }
+
+    public EcranChargement() {
+
+        setTitle("Chargement");
+        setSize(600, 400);
+        setUndecorated(true);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        ImageIcon originalIcon = new ImageIcon("images/chargementImage.png");
+        Image scaledImage = originalIcon.getImage().getScaledInstance(600, 400, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+
+        JLabel background = new JLabel(scaledIcon);
+        background.setLayout(new BorderLayout());
+
+        barreChargement = new JProgressBar();
+        this.onFinished = null;
+        barreChargement.setStringPainted(true);
+        barreChargement.setForeground(Color.GREEN);
+        barreChargement.setBackground(Color.DARK_GRAY);
+        barreChargement.setFont(new Font("Arial", Font.BOLD, 14));
+        barreChargement.setValue(0);
+
+        background.add(barreChargement, BorderLayout.SOUTH);
+        add(background);
+
+        Timer timer = new Timer(50, e -> updateProgress((Timer) e.getSource()));
+        timer.start();
+        setVisible(true);
+    }
+
+    private void updateProgress(Timer timer) {
+        if (progress < 100) {
+            progress += 3;
+            barreChargement.setValue(progress);
+        } else {
+            timer.stop();
+            new EcranJeu("images/apImage2.png");
+            dispose();
+            if (onFinished != null) {
+                onFinished.run(); // Trigger the next step
+            }
+        }
+    }
+
+    public void afficher() {
+        SwingUtilities.invokeLater(() -> setVisible(true));
+    }
+    public static void main(String[] args) {
+        new EcranChargement();
+    }
+}
+public class ParametresJeu {
+
+    public enum Mode {
+        ORDI, 
+        JOUEUR, 
+        MORTEL;
+    }
+
+    private Mode mode;
+    private String mot;
+    private String difficulte;
+
+    public ParametresJeu(Mode mode, String mot, String difficulte) {
+        this.mode = mode;
+        this.mot = mot;
+        this.difficulte = difficulte;
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
+    public String getMot() {
+        return mot;
+    }
+
+    public String getDifficulte() {
+        return difficulte;
+    }
+}
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class LogiqueBot {
+
+    static public ArrayList<String> choix(String progVraie, HashMap<Integer,Character> charsMalPlace, String charImpossible, ArrayList<String> dicoMots){
+
+        ArrayList<String> outDict = new ArrayList<>(); // la sortie
+        ArrayList<String> foodict = new ArrayList<>(); // sert de liste tampon à outdict pour pouvoir la construire dynamiquement 
+                                                       //outDict tout en lisant sa dernère image
+
+        int propositionTaille = progVraie.length();
+
+        // FILTRAGE DES MOTS IMPOSSIBLES EN 2 ETAPES : 
+        // étape 1 : filtrer les mots qui n'ont pas le bon caractère à la bonne position
+        for (int i = 0; i < propositionTaille; i++) {
+            // Stockage du caractère (!attention!) à la position actuelle
+            char charAt = progVraie.charAt(i);
+            // Test si le caractère est une lettre ou un astérisque (*)
+            if (charAt != '*'){
+                /*  Retrait des mots qui n'ont pas le caractère à la bonne position 
+                 *  /!\ la modification du dico pendent la boucle est strictement interdit
+                 *  nous allons donc crée un nouveau dico (nouvelle liste car dicon non pertinant)
+                */ 
+                for (String mot : dicoMots) {
+                    // nécécité de faire une boucle pour la taille du mot car Jan regarder la taille du dict de 3000 c'est pas possible
+                    if (mot.charAt(i) == charAt) {
+                        outDict.add(mot);}
+                    else {
+                        if (outDict.contains(mot) && mot.charAt(i) != charAt) { // si ya une lettre fixe qui existe pas exécution
+                            outDict.remove(mot);}
+                    }
+                }
+            }
+        }
+
+        // étape 2 : filtrer les mots qui n'ont pas le bon caractère à la mauvaise position
+        /* conséquence de mon ignorance, on ajoutera plusieurs fois les mots ayant plus de lettre
+         * en eux ==> aventage donne un poids :)
+         */
+
+        if (outDict != null) {
+            for (String mot : outDict) {
+                // mettre en stockage les lettres mal placé sans les position (legacy)
+                String charMalPlaceeString = charsMalPlace.values().toString();
+                if (testCharMalPlace(mot, charMalPlaceeString) == true){
+                    foodict.add(mot);}
+                else {foodict.remove(mot);}
+            }
+        }
+
+        // étape 3 : fusionner les 2 dico. Pas parfais car cherche pas a mettre toutes les lettres manquantes
+        for (String mot : foodict) {
+            outDict.add(mot);
+        }
+        
+        foodict = new ArrayList<>(outDict); // mise en cache de outDict
+
+        // ya eu filtrage des mots impossibles, retour à vous la télé
+        // Ici la télé, merci Jan.
+        // je suis Jan retour à vous Guillaume
+
+        // étape 4 extraire les lettres innexistante du mot et retirer toutes les possibilitées
+        for (String mot : foodict) {
+            for (int i = 0; i < charImpossible.length(); i++) {
+                if (mot.contains(charImpossible.charAt(i)+"")) {// test si le mot à un char impossible
+                    outDict.remove(mot);                        // suppression
+                }
+            }
+        }
+        
+        foodict = new ArrayList<>(outDict);
+
+        // étape 5 : filtrer les mots ayant les lettres mal placées
+        for (String mot : foodict) {
+            // prendre les position des lettres mal placé 
+            for (Integer posiMal : charsMalPlace.keySet()) {
+                if (mot.charAt(posiMal) == charsMalPlace.get(posiMal)) {// test si à la position mauvaise ya le Char mal placé
+                    outDict.remove(mot);
+                }
+            }
+            
+        }
+            return outDict;
+        }
+
+    // Test de la présence de caractères mal placés
+    private static Boolean testCharMalPlace (String mot, String lettres){
+        for (int i = 0; i < lettres.length(); i++) {
+            String charActu = lettres.substring(i, i+1);
+            // test si le mot contient bien le caractère
+            if (mot.contains(charActu) == false) {
+                    return false;
+                }
+        }
+        return true;
+    }
+
+
+
+    public static void main(String[] args) {
+        OuvrirDB db = new OuvrirDB();
+        ArrayList<String> dico = new ArrayList<>(db.getOnePhrase(6));
+        HashMap<Integer,Character> charsMalPlace = new HashMap<>();
+        charsMalPlace = EtatMot.checkWrongPlacement2("partir", "patate");
+        choix("pa****", charsMalPlace, "zrq", dico);
+    }
+}public class MotPropose {
+    private String proposition;
+    private char[] etatMot;
+
+    public MotPropose(String proposition, char[] etatMot) {
+        this.proposition = proposition;
+        this.etatMot = etatMot;
+    }
+
+    public String getProposition() {
+        return proposition;
+    }
+
+    public char[] getEtatMot() {
+        return etatMot;
+    }
+}
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public class EcranJeu extends JPanel {
+    private final Image background;
+    private final char[][] lettres;
+
+    private int grilleX;
+    private int grilleY;
+    private int caseLargeur;
+    private int caseHauteur;
+    private final int rows = 3;
+    private final int cols = 9;
+
+    public EcranJeu(String bgPath, String[] mots) {
+        File imageFile = new File(bgPath);
+        if (!imageFile.exists()) {
+            System.err.println("Image non trouvée : " + bgPath);
+        }
+        background = new ImageIcon(bgPath).getImage();
+        
+        lettres = new char[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            char[] motChars = mots[i].toCharArray();
+            System.arraycopy(motChars, 0, lettres[i], 0, Math.min(motChars.length, cols));
+        }
+    }
+
+    public EcranJeu(String bgPath) {
+        File imageFile = new File(bgPath);
+        if (!imageFile.exists()) {
+            System.err.println("Image non trouvée : " + bgPath);
+        }
+        background = new ImageIcon(bgPath).getImage();
+        
+        lettres = new char[rows][cols];
+        for (int i = 0; i < rows; i++) {
+        setVisible(true);
+        }
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
+
+        // Image de base : (1536x1024)
+        double echelleX = getWidth() / 1536.0;
+        double echelleY = getHeight() / 1024.0;
+
+        // Cases
+        caseLargeur = (int) (84 * echelleX);
+        caseHauteur = (int) (90 * echelleY);
+
+        // Espacement cases
+        int espacementFinalX = (int) (10 * echelleX);
+        int espacementFinalY = (int) (10 * echelleY);
+
+        // Coin sup G gauche de la 1ière case
+        grilleX = (int) (348 * echelleX);
+        grilleY = (int) (507 * echelleY);
+
+        int fontSize = caseHauteur * 2 / 3;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int x = grilleX + j * (caseLargeur + espacementFinalX);
+                int y = grilleY + i * (caseHauteur + espacementFinalY);
+
+                // BORDURES CASES (p-ê ok pour debug !)
+                // g.setColor(Color.BLACK);
+                // g.drawRect(x, y, caseLargeur, caseHauteur);
+
+                if (lettres[i][j] != '\0') {
+                    g.setFont(new Font("Arial", Font.BOLD, fontSize));
+                    g.drawString(String.valueOf(lettres[i][j]), x + caseLargeur / 4, y + caseHauteur * 2 / 3);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        // background (utiliser le 2)
+        String bgPath = "images/apImage2.png";
+
+        String[] mots = {"MOTUS", "AMOUROUX", "SOUEDE"};
+
+        JFrame frame = new JFrame("Motus");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+
+        EcranJeu panel = new EcranJeu(bgPath, mots);
+        frame.add(panel);
+
+        frame.setVisible(true);
+    }
+}import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+public class Main extends JFrame{
+
+    /**
+     * Menu principal qui est afficher au boot
+     */
+    
+    public Main(){
+		// paramétrage de base du layout
+		super("Menu principal Motus et bouche cousus");
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setLayout(new GridLayout(3,1,15,10));
+
+		// création des éléments du menu
+		JLabel titre = new JLabel("Bienvenue dans motus racine(4)");
+		JButton bouttonJouer = new JButton("Jouer");
+		JButton bouttonRegles = new JButton("Règles");
+		JButton buttonFermer = new JButton("fermer");
+
+		JPanel bouttonFrame = new JPanel(new FlowLayout(FlowLayout.CENTER,15,0));
+
+		// paramétrage des boutons
+
+		bouttonJouer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent clic) {
+				// ouvrir la fenêtre de paramètre de jeu
+				new EcranParametres();
+				dispose();
+            }
+        });
+
+		bouttonRegles.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent clic) {
+				try {
+					// ouvrir la fenêtre de règle
+					new EcranRegle();
+					dispose();
+				} catch (IOException e) {
+					dispose();
+					e.printStackTrace();
+				}
+            }
+        });
+
+		// positionnement des bouttons
+		add(titre); 
+		bouttonFrame.add(bouttonJouer);	bouttonFrame.add(bouttonRegles);
+		add(bouttonFrame);
+		add(buttonFermer);
+
+		// paramétrage taille et position de la fenêtre
+		setSize(200,250);
+		setLocationRelativeTo(null);
+		setVisible(true);
+	}
+
+	public static void main(String[] args) {
+		new Main();
+	}
+}import java.awt.GridLayout;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
+public class EcranParametres extends JFrame {
+    private ParametresJeu parametresJeu;
+    private static boolean commencerJeu = false;
+
+    public static boolean isCommencerJeu() {
+        return commencerJeu;
+    }
+
+    public EcranParametres() {
+        super("Paramètres");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(6, 1));
+
+        JLabel modeDeJeuLabel = new JLabel("Mode de Jeu");
+        panel.add(modeDeJeuLabel);
+
+        JRadioButton ordiButton = new JRadioButton("Ordinateur");
+        JRadioButton joueurButton = new JRadioButton("Joueur");
+        JRadioButton mortelButton = new JRadioButton("Mortel");
+
+        ButtonGroup group = new ButtonGroup();
+        group.add(ordiButton);
+        group.add(joueurButton);
+        group.add(mortelButton);
+
+        JPanel ordiFrame = new JPanel();
+        ordiFrame.setLayout(new GridLayout(1, 2));
+        ordiFrame.add(ordiButton);
+
+        JTextField motTextField = new JTextField("mot de 6 à 9 lettres", 15);
+        motTextField.setEnabled(false);
+        ordiFrame.add(motTextField);
+        panel.add(ordiFrame);
+
+        JPanel difficultyPanel = new JPanel();
+        JLabel difficultyLabel = new JLabel("Difficulté :");
+        String[] niveaux = {"Défaut", "Difficile", "Difficile+"};
+        JComboBox<String> difficultySelector = new JComboBox<>(niveaux);
+
+        difficultySelector.setEnabled(false);
+        difficultyPanel.add(difficultyLabel);
+        difficultyPanel.add(difficultySelector);
+        panel.add(difficultyPanel);
+
+        motTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (motTextField.getText().trim().equalsIgnoreCase("mot de 6 à 9 lettres")) {
+                    motTextField.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (motTextField.getText().trim().isEmpty()) {
+                    motTextField.setText("mot de 6 à 9 lettres");
+                }
+            }
+        });
+
+        panel.add(joueurButton);
+        panel.add(mortelButton);
+
+        ordiButton.addActionListener(event -> {
+            motTextField.setEnabled(true);
+            motTextField.setText("mot de 6 à 9 lettres");
+            difficultySelector.setEnabled(true);
+        });
+
+        joueurButton.addActionListener(event -> {
+            motTextField.setEnabled(false);
+            motTextField.setText("mot de 6 à 9 lettres");
+            difficultySelector.setEnabled(false);
+        });
+
+        mortelButton.addActionListener(event -> {
+            motTextField.setEnabled(false);
+            motTextField.setText("mot de 6 à 9 lettres");
+            difficultySelector.setEnabled(false);
+        });
+
+        JButton jouerButton = new JButton("JOUER !");
+        panel.add(jouerButton);
+
+        jouerButton.addActionListener(event -> {
+            ParametresJeu.Mode mode;
+            if (ordiButton.isSelected()) {
+                String mot = motTextField.getText().trim();
+                String difficulte = (String) difficultySelector.getSelectedItem();
+                if (mot.matches("[a-zA-Z]{6,9}")) {
+                    mode = ParametresJeu.Mode.ORDI;
+                    parametresJeu = new ParametresJeu(mode, mot, difficulte);
+                    new EcranChargement();
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Saisir entre 6 et 9 caractères non-spéciaux.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+                
+            } else if (joueurButton.isSelected()) {
+                mode = ParametresJeu.Mode.JOUEUR;
+                parametresJeu = new ParametresJeu(mode, null, null);
+                new EcranChargement();
+                dispose();
+
+            } else if (mortelButton.isSelected()) {
+                mode = ParametresJeu.Mode.MORTEL;
+                parametresJeu = new ParametresJeu(mode, null, null);
+                new EcranChargement();
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Sélectionnez un mode de jeu.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        getContentPane().add(panel);
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    public ParametresJeu getParametresJeu() {
+        return parametresJeu;
+    }
+
+    public static void main(String[] args) {
+        new EcranParametres();
+    }
+}
