@@ -1,18 +1,20 @@
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import javax.swing.*;
 
 public class EcranJeu extends JFrame {
-    private final int essaisMax = 9;
-    private final String motSecret;
+    private int essaisMax;
+    private String motSecret;
     private final ArrayList<String> propositions = new ArrayList<>();
     private final GrilleMotusPanel grillePanel;
     private final JTextField inputField = new JTextField(10);
     private final JButton validerBtn = new JButton("Valider");
+    private final JLabel progressionLabel = new JLabel("/"); // Par défaut, 0/6
 
-    public EcranJeu(String motSecret, String bgPath) {
-        super("Motus - GUI");
-        this.motSecret = motSecret.toUpperCase();
+    public EcranJeu(String bgPath) {
+        super("Motus");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -23,12 +25,16 @@ public class EcranJeu extends JFrame {
             public void componentResized(java.awt.event.ComponentEvent e) {
                 int width = getWidth();
                 int height = getHeight();
-                setTitle("Motus - GUI (" + width + "x" + height + ")");
+                setTitle("Motus (" + width + "x" + height + ")");
             }
         });
 
         // Grille et fond
-        grillePanel = new GrilleMotusPanel(6, motSecret.length(), bgPath);
+        int lignes = 6; // Par défaut
+        int colonnes = 6; // Par défaut
+        grillePanel = new GrilleMotusPanel(lignes, colonnes, bgPath);
+        essaisMax = lignes; // Le nombre d'essais max est égal au nombre de lignes
+
         JScrollPane scrollPane = new JScrollPane(grillePanel,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -43,10 +49,57 @@ public class EcranJeu extends JFrame {
 
         // BoutonsG
         JPanel leftPanel = new JPanel();
-        JButton paramBtn = new JButton("⎈"); // paramètres
-        JButton newGameBtn = new JButton("⟳"); // nouvelle partie
-        leftPanel.add(paramBtn);
-        leftPanel.add(newGameBtn);
+        JComboBox<Integer> tailleComboBox = new JComboBox<>(new Integer[]{6, 7, 8, 9});
+        tailleComboBox.setSelectedIndex(0); // Valeur par défaut : 6
+        JComboBox<String> modeComboBox = new JComboBox<>(new String[]{"👨", "🤖"});
+        modeComboBox.setSelectedIndex(0); // Valeur par défaut : 👨
+
+        // Bouton reset
+        JButton resetBtn = new JButton("⟳");
+        resetBtn.addActionListener(e -> {
+            // Réinitialiser le jeu
+            String mode = (String) modeComboBox.getSelectedItem();
+            int taille = (int) tailleComboBox.getSelectedItem();
+            mettreAJourMotSecret(mode, taille);
+
+            // Réinitialiser les propositions et la grille
+            propositions.clear();
+            grillePanel.majGrille(propositions, motSecret);
+
+            // Réactiver les champs de saisie
+            inputField.setEnabled(true);
+            validerBtn.setEnabled(true);
+            inputField.setText("");
+        });
+
+        // Déterminer le mot secret en fonction du mode
+        modeComboBox.addActionListener(e -> {
+            String mode = (String) modeComboBox.getSelectedItem();
+            int taille = (int) tailleComboBox.getSelectedItem();
+            mettreAJourMotSecret(mode, taille);
+
+            // Activer ou désactiver les champs en fonction du mode
+            inputField.setEnabled(true);
+            validerBtn.setEnabled(true);
+        });
+
+        // Ajout d'un ActionListener pour la JComboBox "Taille"
+        tailleComboBox.addActionListener(e -> {
+            String mode = (String) modeComboBox.getSelectedItem();
+            int taille = (int) tailleComboBox.getSelectedItem();
+            mettreAJourMotSecret(mode, taille);
+
+            // Mettre à jour la grille
+            grillePanel.setColonnes(taille);
+            grillePanel.repaint();
+        });
+
+        // Ajout des composants au panneau gauche
+        leftPanel.add(new JLabel("Taille:"));
+        leftPanel.add(tailleComboBox);
+        leftPanel.add(new JLabel("Mode:"));
+        leftPanel.add(modeComboBox);
+        leftPanel.add(resetBtn); // Ajouter le bouton reset
 
         // BoutonsD
         JPanel rightPanel = new JPanel();
@@ -55,11 +108,32 @@ public class EcranJeu extends JFrame {
         rightPanel.add(quitBtn);
 
         // Footer
-        // Resoudre polices d'écriture / taille !
         JPanel centerPanel = new JPanel();
         centerPanel.add(new JLabel("Proposition :"));
         centerPanel.add(inputField);
+        centerPanel.add(progressionLabel); // Ajouter le label de progression
         centerPanel.add(validerBtn);
+
+        inputField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // Calculer la progression
+                int currentLength = inputField.getText().length();
+                int targetLength = motSecret.length();
+
+                // Mettre à jour le label de progression
+                progressionLabel.setText(currentLength + "/" + targetLength);
+
+                // Activer ou désactiver le bouton "Valider"
+                if (currentLength == targetLength) {
+                    progressionLabel.setForeground(Color.GREEN); // Bonne taille
+                    validerBtn.setEnabled(true); // Activer le bouton "Valider"
+                } else {
+                    progressionLabel.setForeground(Color.RED); // Mauvaise taille
+                    validerBtn.setEnabled(false); // Désactiver le bouton "Valider"
+                }
+            }
+        });
 
         inputPanel.add(leftPanel, BorderLayout.WEST);
         inputPanel.add(centerPanel, BorderLayout.CENTER);
@@ -74,14 +148,15 @@ public class EcranJeu extends JFrame {
         setSize(900, 700);
         setLocationRelativeTo(null);
         setVisible(true);
+
+        // Initialiser le mot secret par défaut
+        modeComboBox.setSelectedIndex(0); // Déclencher l'initialisation
+        validerBtn.setEnabled(false); // Désactiver le bouton "Valider" au démarrage
     }
 
     private void traiterProposition() {
         String prop = inputField.getText().trim().toUpperCase();
-        if (prop.length() != motSecret.length()) {
-            JOptionPane.showMessageDialog(this, "Le mot doit faire " + motSecret.length() + " lettres.");
-            return;
-        }
+
         if (propositions.size() >= essaisMax) return;
 
         propositions.add(prop);
@@ -95,20 +170,38 @@ public class EcranJeu extends JFrame {
             JOptionPane.showMessageDialog(this, "Perdu ! Le mot était : " + motSecret);
             inputField.setEnabled(false);
             validerBtn.setEnabled(false);
+        } else {
+            validerBtn.setEnabled(false); // désactive le bouton "Valider" après 1 tentative (vu que tentative = mot forcément ok)
         }
         inputField.setText("");
     }
 
+    private void mettreAJourMotSecret(String mode, int taille) {
+        if ("👨".equals(mode)) {
+            // Mode 👨, mots tests
+            switch (taille) {
+                case 6 -> motSecret = "AVIONS";
+                case 7 -> motSecret = "BONJOUR";
+                case 8 -> motSecret = "CHOCOLAT";
+                case 9 -> motSecret = "FAMILIALE";
+            }
+        } else if ("🤖".equals(mode)) {
+            // Mode 🤖, mots tests
+            motSecret = "CHIENNE";
+        }
+    }
+
     public static void main(String[] args) {
         String bgPath = "images/apImage2.png";
-        SwingUtilities.invokeLater(() -> new EcranJeu("MOTUS", bgPath));
+        SwingUtilities.invokeLater(() -> new EcranJeu(bgPath));
     }
 }
 
 class GrilleMotusPanel extends JPanel {
-    // Permet le "remplissage" avec propostions du joueur
-    private final int lignes, colonnes;
-    private final String bgPath;
+    // REMPLIR PROPOSITIONS
+    private int lignes;
+    private int colonnes;
+    private String bgPath;
     private Image bgImage;
     private final Font font = new Font("Arial", Font.BOLD, 32);
 
@@ -140,6 +233,11 @@ class GrilleMotusPanel extends JPanel {
         repaint();
     }
 
+    public void setColonnes(int colonnes) {
+        this.colonnes = colonnes; // Met à jour le nombre de colonnes
+        repaint(); // Redessine la grille
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -149,7 +247,7 @@ class GrilleMotusPanel extends JPanel {
             g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
         }
 
-        // Mise à l'échelle
+        // Scaling de l'AP
         double echelleX = getWidth() / 1536.0;
         double echelleY = getHeight() / 1024.0;
 
@@ -157,7 +255,13 @@ class GrilleMotusPanel extends JPanel {
         caseHauteur = (int) (90 * echelleY);
         int espacementX = (int) (3 * echelleX);
         int espacementY = (int) (3 * echelleY);
-        grilleX = (int) (348 * echelleX);
+
+        // Centrage Grille sur l'AP
+        int largeurGrille = colonnes * caseLargeur + (colonnes - 1) * espacementX;
+        int intervalleMin = (int) (341 * echelleX);
+        int intervalleMax = (int) (1137 * echelleX);
+        grilleX = intervalleMin + (intervalleMax - intervalleMin - largeurGrille) / 2;
+
         grilleY = (int) (450 * echelleY); // ok
 
         int fontSize = caseHauteur * 2 / 3;
@@ -189,7 +293,7 @@ class GrilleMotusPanel extends JPanel {
                     g.setColor(Color.WHITE);
                     drawCenteredString(g, "" + c, x, y, caseLargeur, caseHauteur);
                 } else {
-                    // Cases vides bleu transparent
+                    // Cases vides == bleu transparent
                     g.setColor(bleu);
                     g.fillRect(x, y, caseLargeur, caseHauteur);
                 }

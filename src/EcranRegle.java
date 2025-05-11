@@ -59,6 +59,62 @@ public class EcranRegle extends JFrame {
         // Ajouter le titre et le panneau des jaquettes sous les règles
         add(jaquettesPanel, BorderLayout.PAGE_END);
 
+        // Ajouter un panneau pour la recherche de mots
+        JPanel searchPanel = new JPanel();
+        searchPanel.setLayout(new FlowLayout());
+
+        // Créer un JComboBox avec les lettres de l'alphabet
+        String[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        JComboBox<String> letterSelector = new JComboBox<>(alphabet);
+
+        // Ajouter un ActionListener au JComboBox
+        letterSelector.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String letter = (String) letterSelector.getSelectedItem();
+
+                try {
+                    java.util.List<String> mots = new java.util.ArrayList<>();
+                    java.nio.file.Files.lines(java.nio.file.Paths.get("data/motsMotus.txt"))
+                        .filter(line -> line.toUpperCase().startsWith(letter))
+                        .forEach(mots::add);
+
+                    if (mots.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Aucun mot trouvé pour la lettre : " + letter);
+                    } else {
+                        // Convertir les mots en tableau pour JTable
+                        String[][] data = new String[mots.size()][1];
+                        for (int i = 0; i < mots.size(); i++) {
+                            data[i][0] = mots.get(i);
+                        }
+
+                        // Colonnes du tableau
+                        String[] columnNames = {"Mots"};
+
+                        // Créer et afficher la JTable dans une nouvelle fenêtre
+                        JTable table = new JTable(data, columnNames);
+                        JScrollPane scrollPane = new JScrollPane(table);
+                        table.setFillsViewportHeight(true);
+
+                        JFrame tableFrame = new JFrame("Mots commençant par " + letter);
+                        tableFrame.add(scrollPane);
+                        tableFrame.setSize(400, 300);
+                        tableFrame.setLocationRelativeTo(null);
+                        tableFrame.setVisible(true);
+                    }
+                } catch (java.io.IOException ex) {
+                    JOptionPane.showMessageDialog(null, "Erreur : " + ex.getMessage());
+                }
+            }
+        });
+
+        // Ajouter les composants au panneau de recherche
+        searchPanel.add(new JLabel("Dico' rapide :"));
+        searchPanel.add(letterSelector);
+
+        // Ajouter le panneau de recherche au haut de la fenêtre
+        add(searchPanel, BorderLayout.NORTH);
+
         // Paramétrage fenêtre
         setSize(600, 600);
         setVisible(true);

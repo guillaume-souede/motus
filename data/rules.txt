@@ -1,13 +1,14 @@
-Le jeu repose sur la recherche de mots d'un nombre fixé de lettres.
+Le but du jeu est de deviner un mot composé d’un nombre de lettres fixé à l’avance.
 
-Un candidat propose un mot et doit épeler celui-ci. Le mot doit contenir le bon nombre de lettres
-et être correctement orthographié, sinon il est refusé. Le mot apparaît alors sur une grille :
+À chaque essai, le joueur propose un mot qu’il doit épeler.
+Le mot est accepté uniquement s’il contient le bon nombre de lettres et s’il est correctement orthographié.
 
- - les lettres présentes et bien placées sont coloriées en bleu,
- - les lettres présentes mais mal placées sont cerclées de jaune,
- - les lettres absentes ne sont pas colorées.
+Une fois validé, le mot s’affiche selon le code couleur :
 
-Pour une lettre, on ne peut colorier au maximum que le nombre d'occurrences de cette lettre dans le mot.
+🟥 Carré rouge = Lettre bien placée : présente dans le mot et à la bonne position, 
+🟡 Cercle jaune = Lettre mal placée : présente dans le mot mais ailleurs,
+🟦 Carré bleu = Lettre absente du mot.
 
+Remarque : pour chaque lettre, seules les occurrences réellement présentes dans le mot secret peuvent être colorées.
 
-Découvrez nos autres jeux !
+Découvrez aussi nos autres jeux !
