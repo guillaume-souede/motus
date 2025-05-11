@@ -54,47 +54,47 @@ public class EcranJeu extends JFrame {
         JComboBox<String> modeComboBox = new JComboBox<>(new String[]{"👨", "🤖"});
         modeComboBox.setSelectedIndex(0); // Valeur par défaut : 👨
 
-        // Bouton reset
+        // reset
         JButton resetBtn = new JButton("⟳");
         resetBtn.addActionListener(e -> {
-            // Réinitialiser le jeu
+            // du jeu
             String mode = (String) modeComboBox.getSelectedItem();
             int taille = (int) tailleComboBox.getSelectedItem();
             mettreAJourMotSecret(mode, taille);
 
-            // Réinitialiser les propositions et la grille
+            // des propositions et de grille
             propositions.clear();
             grillePanel.majGrille(propositions, motSecret);
 
-            // Réactiver les champs de saisie
+            // des champs
             inputField.setEnabled(true);
             validerBtn.setEnabled(true);
             inputField.setText("");
         });
 
-        // Déterminer le mot secret en fonction du mode
+        // Mot secret en fonction du mode
         modeComboBox.addActionListener(e -> {
             String mode = (String) modeComboBox.getSelectedItem();
             int taille = (int) tailleComboBox.getSelectedItem();
             mettreAJourMotSecret(mode, taille);
 
-            // Activer ou désactiver les champs en fonction du mode
+            // Champs activés selon mode
             inputField.setEnabled(true);
             validerBtn.setEnabled(true);
         });
 
-        // Ajout d'un ActionListener pour la JComboBox "Taille"
+        // ActionListener pour JComboBox "Taille"
         tailleComboBox.addActionListener(e -> {
             String mode = (String) modeComboBox.getSelectedItem();
             int taille = (int) tailleComboBox.getSelectedItem();
             mettreAJourMotSecret(mode, taille);
 
-            // Mettre à jour la grille
+            // MàJ grille
             grillePanel.setColonnes(taille);
             grillePanel.repaint();
         });
 
-        // Ajout des composants au panneau gauche
+        // ComposantsG
         leftPanel.add(new JLabel("Taille:"));
         leftPanel.add(tailleComboBox);
         leftPanel.add(new JLabel("Mode:"));
@@ -111,26 +111,28 @@ public class EcranJeu extends JFrame {
         JPanel centerPanel = new JPanel();
         centerPanel.add(new JLabel("Proposition :"));
         centerPanel.add(inputField);
-        centerPanel.add(progressionLabel); // Ajouter le label de progression
+        centerPanel.add(progressionLabel); // voir progrès mot
         centerPanel.add(validerBtn);
 
         inputField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                // Calculer la progression
+                // Progrès mot
                 int currentLength = inputField.getText().length();
                 int targetLength = motSecret.length();
 
-                // Mettre à jour le label de progression
+                // MàJ
                 progressionLabel.setText(currentLength + "/" + targetLength);
 
-                // Activer ou désactiver le bouton "Valider"
+                // Couleurs
+                // Si mot OK
                 if (currentLength == targetLength) {
-                    progressionLabel.setForeground(Color.GREEN); // Bonne taille
-                    validerBtn.setEnabled(true); // Activer le bouton "Valider"
+                    progressionLabel.setForeground(Color.GREEN);
+                    validerBtn.setEnabled(true);
+                // Sinon
                 } else {
-                    progressionLabel.setForeground(Color.RED); // Mauvaise taille
-                    validerBtn.setEnabled(false); // Désactiver le bouton "Valider"
+                    progressionLabel.setForeground(Color.RED);
+                    validerBtn.setEnabled(false);
                 }
             }
         });
@@ -187,7 +189,7 @@ public class EcranJeu extends JFrame {
             }
         } else if ("🤖".equals(mode)) {
             // Mode 🤖, mots tests
-            motSecret = "CHIENNE";
+            motSecret = "CHIENNE"; // ICI IMPLEMENTER CODE !
         }
     }
 
