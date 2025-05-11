@@ -54,7 +54,7 @@ public class EcranJeu extends JFrame {
         JComboBox<String> modeComboBox = new JComboBox<>(new String[]{"👨", "🤖"});
         modeComboBox.setSelectedIndex(0); // Valeur par défaut : 👨
 
-        // reset
+        // Reset
         JButton resetBtn = new JButton("⟳");
         resetBtn.addActionListener(e -> {
             // du jeu
@@ -87,11 +87,18 @@ public class EcranJeu extends JFrame {
         tailleComboBox.addActionListener(e -> {
             String mode = (String) modeComboBox.getSelectedItem();
             int taille = (int) tailleComboBox.getSelectedItem();
-            mettreAJourMotSecret(mode, taille);
 
-            // MàJ grille
+            // Reset jeu
+            mettreAJourMotSecret(mode, taille);
+            propositions.clear();
             grillePanel.setColonnes(taille);
-            grillePanel.repaint();
+            grillePanel.majGrille(propositions, motSecret);
+
+            // Reset champs
+            inputField.setEnabled(true);
+            validerBtn.setEnabled(false);
+            inputField.setText("");
+            progressionLabel.setText("0/" + taille);
         });
 
         // ComposantsG
@@ -152,12 +159,18 @@ public class EcranJeu extends JFrame {
         setVisible(true);
 
         // Initialiser le mot secret par défaut
-        modeComboBox.setSelectedIndex(0); // Déclencher l'initialisation
+        modeComboBox.setSelectedIndex(0);
         validerBtn.setEnabled(false); // Désactiver le bouton "Valider" au démarrage
     }
 
     private void traiterProposition() {
         String prop = inputField.getText().trim().toUpperCase();
+
+        // Validate the length of the input word
+        if (prop.length() != motSecret.length()) {
+            JOptionPane.showMessageDialog(this, "Le mot doit contenir exactement " + motSecret.length() + " lettres.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            return; // Stop further processing
+        }
 
         if (propositions.size() >= essaisMax) return;
 
@@ -180,16 +193,16 @@ public class EcranJeu extends JFrame {
 
     private void mettreAJourMotSecret(String mode, int taille) {
         if ("👨".equals(mode)) {
-            // Mode 👨, mots tests
-            switch (taille) {
-                case 6 -> motSecret = "AVIONS";
-                case 7 -> motSecret = "BONJOUR";
-                case 8 -> motSecret = "CHOCOLAT";
-                case 9 -> motSecret = "FAMILIALE";
-            }
+            // Mode 👨
+            try {
+                OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
+                motSecret = db.getRandomWord(taille);
+            } catch (Exception e) {
+                e.printStackTrace();
+                }
         } else if ("🤖".equals(mode)) {
-            // Mode 🤖, mots tests
-            motSecret = "CHIENNE"; // ICI IMPLEMENTER CODE !
+            // Mode 🤖
+            motSecret = "CHIENNE"; // IMPLEMENTER LE ROBOT
         }
     }
 
