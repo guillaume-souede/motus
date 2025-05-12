@@ -7,11 +7,13 @@ import javax.swing.*;
 public class EcranJeu extends JFrame {
     private int essaisMax;
     private String motSecret;
+    private String currentBackgroundImage = "images/defaut.png";
     private final ArrayList<String> propositions = new ArrayList<>();
     private final GrilleMotusPanel grillePanel;
     private final JTextField inputField = new JTextField(10);
     private final JButton validerBtn = new JButton("Valider");
     private final JLabel progressionLabel = new JLabel("/"); // Par défaut, 0/6
+    private boolean jeuTermine = false;
 
     public EcranJeu(String bgPath) {
         super("Motus");
@@ -57,19 +59,25 @@ public class EcranJeu extends JFrame {
         // Reset
         JButton resetBtn = new JButton("⟳");
         resetBtn.addActionListener(e -> {
-            // du jeu
+            // configuration actuelle
             String mode = (String) modeComboBox.getSelectedItem();
-            int taille = (int) tailleComboBox.getSelectedItem();
+            int taille = grillePanel.getColonnes();
+
+            // MàJ mot secret
             mettreAJourMotSecret(mode, taille);
 
-            // des propositions et de grille
+            // Reset propositions
             propositions.clear();
             grillePanel.majGrille(propositions, motSecret);
 
-            // des champs
+            // Reset de l'image de fond
+            grillePanel.setBackgroundImage(currentBackgroundImage);
+
+            // Reset des champs de saisie
             inputField.setEnabled(true);
-            validerBtn.setEnabled(true);
+            validerBtn.setEnabled(false);
             inputField.setText("");
+            progressionLabel.setText("0/" + taille);
         });
 
         // Mot secret en fonction du mode
@@ -174,7 +182,8 @@ public class EcranJeu extends JFrame {
         // Thème "Hiver"
         JRadioButtonMenuItem hiverOption = new JRadioButtonMenuItem("Hiver");
         hiverOption.addActionListener(e -> {
-            grillePanel.setBackgroundImage("images/hiver.png");
+            currentBackgroundImage = "images/hiver.png";
+            grillePanel.setBackgroundImage(currentBackgroundImage);
         });
         themeGroup.add(hiverOption);
         themeMenu.add(hiverOption);
@@ -182,7 +191,8 @@ public class EcranJeu extends JFrame {
         // Thème "Défaut"
         JRadioButtonMenuItem defautOption = new JRadioButtonMenuItem("Défaut");
         defautOption.addActionListener(e -> {
-            grillePanel.setBackgroundImage("images/defaut.png");
+            currentBackgroundImage = "images/defaut.png";
+            grillePanel.setBackgroundImage(currentBackgroundImage);
         });
         themeGroup.add(defautOption);
         themeMenu.add(defautOption);
@@ -223,6 +233,9 @@ public class EcranJeu extends JFrame {
             grillePanel.setColonnes(taille);
             grillePanel.setLignes(taille);
             grillePanel.majGrille(propositions, motSecret);
+
+            // Réinitialise l'image de fond
+            grillePanel.setBackgroundImage(currentBackgroundImage);
 
             // Reset champs
             progressionLabel.setText("0/" + taille);
@@ -307,9 +320,7 @@ public class EcranJeu extends JFrame {
     private void traiterProposition() {
         String prop = inputField.getText().trim().toUpperCase();
 
-        // Au cas où...
         if (prop.length() != motSecret.length()) {
-            JOptionPane.showMessageDialog(this, "Le mot doit contenir exactement " + motSecret.length() + " lettres.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -320,14 +331,18 @@ public class EcranJeu extends JFrame {
 
         if (prop.equals(motSecret)) {
             JOptionPane.showMessageDialog(this, "Bravo ! Motus trouvé en " + propositions.size() + " essais.");
+            grillePanel.setBackgroundImage("images/victoire.png");
             inputField.setEnabled(false);
             validerBtn.setEnabled(false);
+            jeuTermine = true; // Jeu terminé après une victoire
         } else if (propositions.size() == essaisMax) {
             JOptionPane.showMessageDialog(this, "Perdu ! Le mot était : " + motSecret);
+            grillePanel.setBackgroundImage("images/defaite.png");
             inputField.setEnabled(false);
             validerBtn.setEnabled(false);
+            jeuTermine = true; // Jeu terminé après une défaite
         } else {
-            validerBtn.setEnabled(false); // désactive le bouton "Valider" après 1 tentative (vu que tentative = mot forcément ok)
+            validerBtn.setEnabled(false);
         }
         inputField.setText("");
     }
