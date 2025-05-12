@@ -41,19 +41,21 @@ class GrilleMotusPanel extends JPanel {
     public void majGrille(ArrayList<String> props, String motSecret) {
         this.propositions = new ArrayList<>(props);
         this.motSecret = motSecret;
+        revalidate();
         repaint(); // Redessine la grille
-        // update the Graphical interface
         
     }
 
     public void setColonnes(int colonnes) {
         this.colonnes = colonnes;
+        revalidate();
         repaint(); // Redessine la grille
         // update the Graphical interface
     }
 
     public void setLignes(int lignes) {
         this.lignes = lignes;
+        revalidate();
         repaint(); // Redessine la grille
     }
 
@@ -67,6 +69,7 @@ class GrilleMotusPanel extends JPanel {
         } catch (Exception e) {
             bgImage = null;
         }
+        revalidate();
         repaint(); // Redessiner la grille
     }
 

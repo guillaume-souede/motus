@@ -83,7 +83,7 @@ public class EcranChargement extends JFrame {
             barreChargement.setValue(progress);
         } else {
             timer.stop();
-            new EcranJeu("images/apImage2.png");
+            new EcranJeu("images/defaut.png");
             dispose();
             if (onFinished != null) {
                 onFinished.run(); // Trigger the next step

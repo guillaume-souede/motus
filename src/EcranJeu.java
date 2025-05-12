@@ -24,7 +24,7 @@ public class EcranJeu extends JFrame {
     private int essaisMax;
     private String motSecret;
     private String currentBackgroundImage = "images/defaut.png";
-    private final ArrayList<String> propositions = new ArrayList<>();
+    private ArrayList<String> propositions = new ArrayList<>();
     private GrilleMotusPanel grillePanel;
     private final JTextField inputField = new JTextField(10);
     private final JButton validerBtn = new JButton("Valider");

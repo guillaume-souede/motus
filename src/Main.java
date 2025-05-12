@@ -64,7 +64,7 @@ public class Main extends JFrame{
             @Override
             public void actionPerformed(ActionEvent clic) {
                 // ouvrir la fenêtre de paramètre de jeu
-                new EcranParametres();
+                new EcranChargement();
                 dispose();
             }
         });
