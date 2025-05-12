@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class LogiqueBot {
 
@@ -96,10 +97,18 @@ public class LogiqueBot {
         return true;
     }
 
-
+    //un méthode pout tenter un mot aléatoire du dico
+    static String randomWord(ArrayList<String> dico) {
+        Random random = new Random();
+        // Générer un index aléatoire
+        // entre 0 et la taille du dictionnaire - 1
+        int randomIndex = random.nextInt(dico.size());
+        // Retourner le mot à l'index aléatoire
+        return dico.get(randomIndex);
+    }
 
     public static void main(String[] args) {
-        OuvrirDB db = new OuvrirDB();
+        OuvrirDB db = new OuvrirDB("data/rules.txt");
         ArrayList<String> dico = new ArrayList<>(db.getOnePhrase(6));
         HashMap<Integer,Character> charsMalPlace = new HashMap<>();
         charsMalPlace = EtatMot.checkWrongPlacement2("partir", "patate");

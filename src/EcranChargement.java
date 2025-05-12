@@ -24,7 +24,7 @@ public class EcranChargement extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        ImageIcon originalIcon = new ImageIcon("images/chargementImage.png");
+        ImageIcon originalIcon = new ImageIcon("images/defaut.png");
         Image scaledImage = originalIcon.getImage().getScaledInstance(600, 400, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
@@ -83,7 +83,7 @@ public class EcranChargement extends JFrame {
             barreChargement.setValue(progress);
         } else {
             timer.stop();
-            new EcranJeu("images/apImage2.png");
+            new EcranJeu("images/defaut.png");
             dispose();
             if (onFinished != null) {
                 onFinished.run(); // Trigger the next step

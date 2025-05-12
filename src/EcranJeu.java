@@ -1,7 +1,29 @@
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import javax.swing.*;
+import java.util.HashMap;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 public class EcranJeu extends JFrame {
     private int essaisMax;
@@ -13,6 +35,13 @@ public class EcranJeu extends JFrame {
     private final JButton validerBtn = new JButton("Valider");
     private final JLabel progressionLabel = new JLabel("/");
     private boolean jeuTermine = false;
+    protected String mode;
+
+    // variables pour le mode IA
+    protected String progVraie;
+    HashMap<Integer,Character> charsMalPlace = new HashMap<>();
+    String charImpossible;
+    ArrayList<String> dicoMots = new ArrayList<>();
 
     public EcranJeu(String bgPath) {
         super("Motus");
@@ -44,6 +73,7 @@ public class EcranJeu extends JFrame {
         JPanel leftPanel = new JPanel();
         JComboBox<Integer> tailleComboBox = new JComboBox<>(new Integer[]{6, 7, 8, 9});
         JComboBox<String> modeComboBox = new JComboBox<>(new String[]{"👨", "🤖"});
+        mode = modeComboBox.getSelectedItem()+"";
         JButton resetBtn = new JButton("⟳");
 
         leftPanel.add(new JLabel("Taille:"));
@@ -86,9 +116,16 @@ public class EcranJeu extends JFrame {
 
         modeComboBox.addActionListener(e -> {
             int taille = grillePanel.getColonnes();
-            mettreAJourMotSecret((String) modeComboBox.getSelectedItem(), taille);
-            inputField.setEnabled(true);
-            validerBtn.setEnabled(true);
+            String selectedMode = (String) modeComboBox.getSelectedItem();
+            mettreAJourMotSecret(selectedMode, taille);
+
+            if ("🤖".equals(selectedMode)) {
+                inputField.setEnabled(true); // Enable input field for AI mode
+                validerBtn.setEnabled(true); // Disable validation button until input is provided
+            } else {
+                inputField.setEnabled(true); // Disable input field for player mode
+                validerBtn.setEnabled(true);
+            }
         });
 
         resetBtn.addActionListener(e -> {
@@ -107,8 +144,8 @@ public class EcranJeu extends JFrame {
             }
         });
 
-        validerBtn.addActionListener(e -> traiterProposition());
-        inputField.addActionListener(e -> traiterProposition());
+        validerBtn.addActionListener(e -> traiterProposition(mode));
+        inputField.addActionListener(e -> traiterProposition(mode));
 
         setSize(900, 700);
         setLocationRelativeTo(null);
@@ -128,24 +165,29 @@ public class EcranJeu extends JFrame {
         progressionLabel.setText("0/" + taille);
     }
 
-    private void traiterProposition() {
-        String prop = inputField.getText().trim().toUpperCase();
-        if (prop.length() != motSecret.length() || propositions.size() >= essaisMax) return;
+    private void traiterProposition(String mode) {
+        if ("👨".equals(mode)) {
+            String prop = inputField.getText().trim().toUpperCase();
+            if (prop.length() != motSecret.length() || propositions.size() >= essaisMax) return;
 
-        propositions.add(prop);
-        grillePanel.majGrille(propositions, motSecret);
+            propositions.add(prop);
+            grillePanel.majGrille(propositions, motSecret);
 
-        if (prop.equals(motSecret)) {
-            JOptionPane.showMessageDialog(this, "Bravo ! Motus trouvé en " + propositions.size() + " essais.");
-            grillePanel.setBackgroundImage("images/victoire.png");
-        } else if (propositions.size() == essaisMax) {
-            JOptionPane.showMessageDialog(this, "Perdu ! Le mot était : " + motSecret);
-            grillePanel.setBackgroundImage("images/defaite.png");
+            if (prop.equals(motSecret)) {
+                JOptionPane.showMessageDialog(this, "Bravo ! Motus trouvé en " + propositions.size() + " essais.");
+                grillePanel.setBackgroundImage("images/victoire.png");
+            } else if (propositions.size() == essaisMax) {
+                JOptionPane.showMessageDialog(this, "Perdu ! Le mot était : " + motSecret);
+                grillePanel.setBackgroundImage("images/defaite.png");
+            }
+
+            inputField.setEnabled(!prop.equals(motSecret));
+            validerBtn.setEnabled(false);
+            inputField.setText("");
         }
-
-        inputField.setEnabled(!prop.equals(motSecret));
-        validerBtn.setEnabled(false);
-        inputField.setText("");
+        else {
+            propositions.add("null");
+        }
     }
 
     private void mettreAJourMotSecret(String mode, int taille) {
@@ -156,8 +198,30 @@ public class EcranJeu extends JFrame {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else {
-            motSecret = "CHIENNE"; // à remplacer par une IA plus tard
+        } 
+        else {// à remplacer par une IA plus tard
+            motSecret = inputField.getText().trim().toUpperCase();
+
+            // initialisation des variables pour le mode IA
+            progVraie = motSecret.trim(); // sde la doc : permet de faire du slicing et extraire la première lettre du mot
+            charsMalPlace = new HashMap<>();
+            charImpossible = "";
+            OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
+            dicoMots = new ArrayList<>(db.getOnePhrase(taille));
+            int essais = 0;
+
+            do {
+                dicoMots = LogiqueBot.choix(mode, charsMalPlace, mode, dicoMots);
+                String proposition = LogiqueBot.randomWord(dicoMots);
+                propositions.add(proposition);
+
+                if (proposition.equals(motSecret)) {
+                    
+                    jeuTermine = true;
+                    break;
+                }
+                essais++;
+            } while (!progVraie.equals(motSecret) && essais < essaisMax || jeuTermine == false);
         }
     }
 
@@ -194,8 +258,22 @@ public class EcranJeu extends JFrame {
             grillePanel.setBackgroundImage(currentBackgroundImage);
         });
 
+        JRadioButtonMenuItem reel = new JRadioButtonMenuItem("reel");
+        defaut.addActionListener(e -> {
+            currentBackgroundImage = "images/reel.png";
+            grillePanel.setBackgroundImage(currentBackgroundImage);
+        });
+
+        JRadioButtonMenuItem reelHiver = new JRadioButtonMenuItem("reelHiver");
+        defaut.addActionListener(e -> {
+            currentBackgroundImage = "images/reelHivert.png";
+            grillePanel.setBackgroundImage(currentBackgroundImage);
+        });
+
         themeGroup.add(hiver); themeGroup.add(defaut);
         themeMenu.add(hiver); themeMenu.add(defaut);
+        themeGroup.add(reel); themeGroup.add(reelHiver);
+        themeMenu.add(reel); themeMenu.add(reelHiver);
 
         JMenuItem tutorielItem = new JMenuItem("Tutoriel");
         tutorielItem.addActionListener(e -> {
@@ -204,6 +282,11 @@ public class EcranJeu extends JFrame {
             grillePanel.setColonnes(6);
             grillePanel.setBackgroundImage("images/tutoriel.png");
             resetChamp(6);
+            try {
+                new EcranRegle();
+            } catch (FileNotFoundException e1) {
+                e1.printStackTrace();
+            }
         });
 
         JMenuItem quitter = new JMenuItem("Quitter");

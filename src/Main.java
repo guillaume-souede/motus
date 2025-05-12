@@ -1,8 +1,19 @@
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import javax.swing.*;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class Main extends JFrame{
 
@@ -53,7 +64,7 @@ public class Main extends JFrame{
             @Override
             public void actionPerformed(ActionEvent clic) {
                 // ouvrir la fenêtre de paramètre de jeu
-                new EcranParametres();
+                new EcranChargement();
                 dispose();
             }
         });
