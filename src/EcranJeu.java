@@ -171,7 +171,55 @@ public class EcranJeu extends JFrame {
                     return;
                 }
                 motSecret = motMystere; // Définir le mot mystère pour le Bot
-                traiterProposition(mode); // Lancer la logique du Bot
+                inputField.setEnabled(false); // Désactiver le champ de saisie
+                validerBtn.setEnabled(false); // Désactiver le bouton valider
+
+                // Initialiser les variables pour le Bot
+                progVraie = "*".repeat(motSecret.length());
+                charsMalPlace.clear();
+                charImpossible = "";
+                OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
+                dicoMots = new ArrayList<>(db.getOnePhrase(motSecret.length()));
+
+                // Faire jouer le Bot
+                int essais = 0;
+                boolean motTrouve = false;
+                while (essais < essaisMax && !motTrouve) {
+                    dicoMots = LogiqueBot.choix(progVraie, charsMalPlace, charImpossible, dicoMots);
+                    if (dicoMots.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "Le Bot n'a plus de mots possibles !");
+                        break;
+                    }
+                    String proposition = LogiqueBot.randomWord(dicoMots);
+                    propositions.add(proposition);
+                    grillePanel.majGrille(propositions, motSecret);
+
+                    if (proposition.equals(motSecret)) {
+                        JOptionPane.showMessageDialog(this, "Le Bot a trouvé le mot : " + motSecret + " en " + (essais + 1) + " essais !");
+                        grillePanel.setBackgroundImage("images/victoire.png");
+                        motTrouve = true;
+                    } else {
+                        // Mettre à jour les indices pour le Bot
+                        charsMalPlace = EtatMot.checkWrongPlacement2(motSecret, proposition);
+                        charImpossible += EtatMot.getImpossibleChars(motSecret, proposition);
+                        progVraie = EtatMot.updateProgVraie(motSecret, proposition);
+                    }
+
+                    essais++;
+                    try {
+                        Thread.sleep(1000); // Pause pour simuler le temps de réflexion du Bot
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+
+                if (!motTrouve) {
+                    JOptionPane.showMessageDialog(this, "Le Bot n'a pas trouvé le mot. Le mot était : " + motSecret);
+                    grillePanel.setBackgroundImage("images/defaite.png");
+                }
+
+                inputField.setEnabled(false);
+                validerBtn.setEnabled(false);
             } else {
                 traiterProposition(mode); // Mode joueur
             }
@@ -198,10 +246,14 @@ public class EcranJeu extends JFrame {
 
     private void traiterProposition(String mode) {
         if ("🤖".equals(mode)) {
-            if (motSecret == null || motSecret.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Veuillez saisir un mot mystère pour le Bot.");
+            String motMystere = inputField.getText().trim().toUpperCase();
+            if (motMystere.length() < 6 || motMystere.length() > 9) {
+                JOptionPane.showMessageDialog(this, "Veuillez entrer un mot entre 6 et 9 caractères.");
                 return;
             }
+            motSecret = motMystere; // Définir le mot mystère pour le Bot
+            inputField.setEnabled(false); // Désactiver le champ de saisie
+            validerBtn.setEnabled(false); // Désactiver le bouton valider
 
             // Initialiser les variables pour le Bot
             progVraie = "*".repeat(motSecret.length());
@@ -215,6 +267,10 @@ public class EcranJeu extends JFrame {
             boolean motTrouve = false;
             while (essais < essaisMax && !motTrouve) {
                 dicoMots = LogiqueBot.choix(progVraie, charsMalPlace, charImpossible, dicoMots);
+                if (dicoMots.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Le Bot n'a plus de mots possibles !");
+                    break;
+                }
                 String proposition = LogiqueBot.randomWord(dicoMots);
                 propositions.add(proposition);
                 grillePanel.majGrille(propositions, motSecret);
@@ -318,13 +374,13 @@ public class EcranJeu extends JFrame {
         });
 
         JRadioButtonMenuItem reel = new JRadioButtonMenuItem("reel");
-        defaut.addActionListener(e -> {
+        reel.addActionListener(e -> {
             currentBackgroundImage = "images/reel.png";
             grillePanel.setBackgroundImage(currentBackgroundImage);
         });
 
         JRadioButtonMenuItem reelHiver = new JRadioButtonMenuItem("reelHiver");
-        defaut.addActionListener(e -> {
+        reelHiver.addActionListener(e -> {
             currentBackgroundImage = "images/reelHivert.png";
             grillePanel.setBackgroundImage(currentBackgroundImage);
         });
