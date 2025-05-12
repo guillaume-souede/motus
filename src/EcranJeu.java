@@ -1,19 +1,36 @@
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import javax.swing.*;
+import java.util.Random;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 public class EcranJeu extends JFrame {
     private int essaisMax;
     private String motSecret;
     private String currentBackgroundImage = "images/defaut.png";
     private final ArrayList<String> propositions = new ArrayList<>();
-    private final GrilleMotusPanel grillePanel;
+    private GrilleMotusPanel grillePanel;
     private final JTextField inputField = new JTextField(10);
     private final JButton validerBtn = new JButton("Valider");
     private final JLabel progressionLabel = new JLabel("/"); // Par défaut, 0/6
     private boolean jeuTermine = false;
+    private Random random = new Random();
 
     public EcranJeu(String bgPath) {
         super("Motus");
@@ -32,9 +49,9 @@ public class EcranJeu extends JFrame {
         });
 
         // Grille et fond
-        int lignes = 6; // Par défaut
-        int colonnes = 6; // Par défaut
-        grillePanel = new GrilleMotusPanel(lignes, colonnes, bgPath);
+        int lignes = random.nextInt(3)+6; // Par défaut
+        int colonnes = random.nextInt(3)+6; // Par défaut
+        this.grillePanel = new GrilleMotusPanel(lignes, colonnes, bgPath);
         essaisMax = lignes; // Le nombre d'essais max est égal au nombre de lignes
 
         JScrollPane scrollPane = new JScrollPane(grillePanel,
@@ -187,7 +204,7 @@ public class EcranJeu extends JFrame {
         });
         themeGroup.add(hiverOption);
         themeMenu.add(hiverOption);
-    
+        
         // Thème "Défaut"
         JRadioButtonMenuItem defautOption = new JRadioButtonMenuItem("Défaut");
         defautOption.addActionListener(e -> {
@@ -251,20 +268,21 @@ public class EcranJeu extends JFrame {
         // SOUS-MENU (ORDRE INVERSé !!)
         popupMenu.add(themeMenu);
         popupMenu.add(essaisMenu);
-        popupMenu.add(tailleMenu);
-        popupMenu.add(modeMenu);
+//        popupMenu.add(tailleMenu);
+//        popupMenu.add(modeMenu);
         popupMenu.add(tutorielItem);
-        popupMenu.add(resetItem);
+//        popupMenu.add(resetItem);
         popupMenu.add(quitterItem);
 
         // survol bouton (écouter l' ampoule)
-        // 💡🙏 💡🙏 💡🙏
+        // 💡🙏
         optionsBtn.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 popupMenu.show(optionsBtn, optionsBtn.getWidth() / 2, -popupMenu.getPreferredSize().height);
             }
         });
+        this.grillePanel = new GrilleMotusPanel(lignes,colonnes,bgPath);
 
         rightPanel.add(optionsBtn);
 
@@ -317,6 +335,7 @@ public class EcranJeu extends JFrame {
         validerBtn.setEnabled(false); // Désactiver le bouton "Valider" au démarrage
     }
 
+    // partie traitenment du jeu
     private void traiterProposition() {
         String prop = inputField.getText().trim().toUpperCase();
 
@@ -324,9 +343,13 @@ public class EcranJeu extends JFrame {
             return;
         }
 
-        if (propositions.size() >= essaisMax) return;
+        if (propositions.size() >= essaisMax){ 
+            return;
+        }
 
         propositions.add(prop);
+
+        // met a jour l'IG
         grillePanel.majGrille(propositions, motSecret);
 
         if (prop.equals(motSecret)) {
@@ -335,12 +358,14 @@ public class EcranJeu extends JFrame {
             inputField.setEnabled(false);
             validerBtn.setEnabled(false);
             jeuTermine = true; // Jeu terminé après une victoire
+
         } else if (propositions.size() == essaisMax) {
             JOptionPane.showMessageDialog(this, "Perdu ! Le mot était : " + motSecret);
             grillePanel.setBackgroundImage("images/defaite.png");
             inputField.setEnabled(false);
             validerBtn.setEnabled(false);
             jeuTermine = true; // Jeu terminé après une défaite
+
         } else {
             validerBtn.setEnabled(false);
         }
@@ -358,142 +383,14 @@ public class EcranJeu extends JFrame {
                 }
         } else if ("🤖".equals(mode)) {
             // Mode 🤖
-            motSecret = "CHIENNE"; // JAN : IMPLEMENTER LE ROBOT
+            String propostion = "";
+            JoueurProposeMot frameHumainPropose = new JoueurProposeMot();
+            motSecret = frameHumainPropose.getMot();
         }
     }
 
     public static void main(String[] args) {
         String bgPath = "images/defaut.png";
         SwingUtilities.invokeLater(() -> new EcranJeu(bgPath));
-    }
-}
-
-class GrilleMotusPanel extends JPanel {
-    // REMPLIR PROPOSITIONS
-    private int lignes;
-    private int colonnes;
-    private String bgPath;
-    private Image bgImage;
-    private final Font font = new Font("Arial", Font.BOLD, 32);
-
-    private ArrayList<String> propositions = new ArrayList<>();
-    private String motSecret = "";
-
-    private final Color rouge = Color.decode("#de4649");
-    private final Color jaune = Color.decode("#deb138");
-    private final Color bleu = Color.decode("#329ddc");
-
-    private int caseLargeur, caseHauteur, grilleX, grilleY;
-
-    public GrilleMotusPanel(int lignes, int colonnes, String bgPath) {
-        this.lignes = lignes;
-        this.colonnes = colonnes;
-        this.bgPath = bgPath;
-        try {
-            bgImage = new ImageIcon(bgPath).getImage();
-        } catch (Exception e) {
-            bgImage = null;
-        }
-        setPreferredSize(new Dimension(600, 600));
-        setOpaque(false);
-    }
-
-    public void majGrille(ArrayList<String> props, String motSecret) {
-        this.propositions = new ArrayList<>(props);
-        this.motSecret = motSecret;
-        repaint();
-    }
-
-    public void setColonnes(int colonnes) {
-        this.colonnes = colonnes;
-        repaint(); // Redessine la grille
-    }
-
-    public void setLignes(int lignes) {
-        this.lignes = lignes;
-        repaint(); // Redessine la grille
-    }
-
-    public int getColonnes() {
-        return colonnes;
-    }
-
-    public void setBackgroundImage(String imagePath) {
-        try {
-            bgImage = new ImageIcon(imagePath).getImage();
-        } catch (Exception e) {
-            bgImage = null;
-        }
-        repaint(); // Redessiner la grille
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        // Arrière-plan (AP)
-        if (bgImage != null) {
-            g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
-        }
-
-        // Scaling de l'AP
-        double echelleX = getWidth() / 1536.0;
-        double echelleY = getHeight() / 1024.0;
-
-        caseLargeur = (int) (84 * echelleX);
-        caseHauteur = (int) (90 * echelleY);
-        int espacementX = (int) (3 * echelleX);
-        int espacementY = (int) (3 * echelleY);
-
-        // Centrage Grille sur l'AP
-        int largeurGrille = colonnes * caseLargeur + (colonnes - 1) * espacementX;
-        int intervalleMin = (int) (341 * echelleX);
-        int intervalleMax = (int) (1137 * echelleX);
-        grilleX = intervalleMin + (intervalleMax - intervalleMin - largeurGrille) / 2;
-
-        grilleY = (int) (450 * echelleY); // ok
-
-        int fontSize = caseHauteur * 2 / 3;
-        g.setFont(new Font("Arial", Font.BOLD, fontSize));
-        g.setColor(Color.WHITE);
-
-        for (int i = 0; i < lignes; i++) {
-            String prop = (i < propositions.size()) ? propositions.get(i) : "";
-            String etat = (i < propositions.size()) ? EtatMot.checkEtatMot(prop, motSecret) : "";
-            String malPlaces = (i < propositions.size()) ? EtatMot.checkWrongPlacement(prop, motSecret) : "";
-
-            for (int j = 0; j < colonnes; j++) {
-                int x = grilleX + j * (caseLargeur + espacementX);
-                int y = grilleY + i * (caseHauteur + espacementY);
-
-                if (i < propositions.size() && !prop.isEmpty()) {
-                    char c = prop.charAt(j);
-                    if (etat.charAt(j) == c) {
-                        g.setColor(rouge);
-                        g.fillRect(x, y, caseLargeur, caseHauteur);
-                    } else if (malPlaces.indexOf(c) != -1) {
-                        g.setColor(jaune);
-                        g.fillOval(x, y, caseLargeur, caseHauteur);
-                    } else {
-                        g.setColor(bleu);
-                        g.fillRect(x, y, caseLargeur, caseHauteur);
-                    }
-
-                    g.setColor(Color.WHITE);
-                    drawCenteredString(g, "" + c, x, y, caseLargeur, caseHauteur);
-                } else {
-                    // Cases vides == bleu transparent
-                    g.setColor(bleu);
-                    g.fillRect(x, y, caseLargeur, caseHauteur);
-                }
-            }
-        }
-    }
-
-    private void drawCenteredString(Graphics g, String text, int x, int y, int w, int h) {
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-        int tx = x + (w - metrics.stringWidth(text)) / 2;
-        int ty = y + ((h - metrics.getHeight()) / 2) + metrics.getAscent();
-        g.drawString(text, tx, ty);
     }
 }

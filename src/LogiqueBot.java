@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class LogiqueBot {
 
@@ -68,7 +69,6 @@ public class LogiqueBot {
                 }
             }
         }
-        
         foodict = new ArrayList<>(outDict);
 
         // étape 5 : filtrer les mots ayant les lettres mal placées
@@ -79,9 +79,8 @@ public class LogiqueBot {
                     outDict.remove(mot);
                 }
             }
-            
         }
-            return outDict;
+        return outDict;
         }
 
     // Test de la présence de caractères mal placés
@@ -96,10 +95,15 @@ public class LogiqueBot {
         return true;
     }
 
+    public static String proposeMot(ArrayList<String> dicoMots){
+        Random randWord = new Random(69420);
+        String propositon = (dicoMots.get(randWord.nextInt(dicoMots.size())));
+        return propositon;
+    }
 
 
     public static void main(String[] args) {
-        OuvrirDB db = new OuvrirDB();
+        OuvrirDB db = new OuvrirDB("data/rules.txt");
         ArrayList<String> dico = new ArrayList<>(db.getOnePhrase(6));
         HashMap<Integer,Character> charsMalPlace = new HashMap<>();
         charsMalPlace = EtatMot.checkWrongPlacement2("partir", "patate");

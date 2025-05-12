@@ -1,8 +1,22 @@
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
-import javax.swing.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
 
 public class EcranRegle extends JFrame {
 
@@ -10,7 +24,7 @@ public class EcranRegle extends JFrame {
         super("Règles du Motus");
 
         // layout
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         JTextArea paneRegles = new JTextArea();
@@ -36,7 +50,7 @@ public class EcranRegle extends JFrame {
         });
 
         add(scrollPane, BorderLayout.CENTER);
-        add(quiterButton, BorderLayout.PAGE_END);
+        add(quiterButton, BorderLayout.LINE_END);
 
         // ajout jaquettes jeux
         JPanel jaquettesPanel = new JPanel();
@@ -117,6 +131,7 @@ public class EcranRegle extends JFrame {
 
         // Paramétrage fenêtre
         setSize(600, 600);
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
