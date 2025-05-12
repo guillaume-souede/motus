@@ -41,7 +41,7 @@ public class EtatMot {
         // b. sortir les 2 chars des fausses positions
         String propositionTrimmed = "", motSecretTrimmed = "";
         for (int positions : positionFausses) {
-            propositionTrimmed += proposition.charAt(positions)+""; // techniquement le +"" n'est pas nécécaire pour la concaténation
+            propositionTrimmed += proposition.charAt(positions)+""; // techniquement le +"" n'est pas nécéssaire pour la concaténation
             motSecretTrimmed += motSecret.charAt(positions)+"";
         }
 
@@ -113,4 +113,25 @@ public class EtatMot {
         System.out.println(emojiRepresentation(propostion, motSecret));
     }
 
+    public static String getImpossibleChars(String motSecret, String proposition) {
+        StringBuilder impossibleChars = new StringBuilder();
+        for (char c : proposition.toCharArray()) {
+            if (!motSecret.contains(String.valueOf(c))) {
+                impossibleChars.append(c);
+            }
+        }
+        return impossibleChars.toString();
+    }
+
+    public static String updateProgVraie(String motSecret, String proposition) {
+        char[] progArray = new char[motSecret.length()];
+        for (int i = 0; i < motSecret.length(); i++) {
+            if (proposition.charAt(i) == motSecret.charAt(i)) {
+                progArray[i] = motSecret.charAt(i);
+            } else {
+                progArray[i] = '*'; // Placeholder for unknown characters
+            }
+        }
+        return new String(progArray);
+    }
 }
