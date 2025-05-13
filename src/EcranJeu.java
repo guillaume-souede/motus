@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -37,7 +38,7 @@ public class EcranJeu extends JFrame {
     protected String mode;
 
     // variables pour le mode IA
-    protected String progVraie;
+    protected String progVraie = "";
     HashMap<Integer,Character> charsMalPlace = new HashMap<>();
     String charImpossible;
     ArrayList<String> dicoMots = new ArrayList<>();
@@ -171,7 +172,13 @@ public class EcranJeu extends JFrame {
                     return;
                 }
 
-                motSecret = motMystere; // définir le mot mystère pour le bot
+            motSecret = motMystere; // définir le mot mystère pour le bot
+            
+            // initialiser les variables pour le bot
+            progVraie += motSecret.charAt(0); // Initialise la première lettre
+            progVraie += "*".repeat(motSecret.length()-1); // Initialiser la progression avec des étoiles
+            charsMalPlace = new HashMap<>(); // Réinitialiser les caractères mal placés
+            charImpossible = "";
 
                 // vérifier si motSecret est bien initialisé
                 if (motSecret == null || motSecret.isEmpty()) {
@@ -180,11 +187,13 @@ public class EcranJeu extends JFrame {
                 }
 
                 // initialiser les variables pour le bot d'après LogiqueBot.java
-                progVraie = "*".repeat(motSecret.length()); // initialiser la progression avec des étoiles
+                progVraie = motSecret.charAt(0) + ""; // initialiser la première lettre
+                progVraie += "*".repeat(motSecret.length()-1); // initialiser la progression avec des étoiles
                 charsMalPlace.clear(); // réinitialiser les caractères mal placés
                 charImpossible = ""; // réinitialiser les caractères impossibles
                 OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
-                dicoMots = new ArrayList<>(db.getOnePhrase(motSecret.length()));
+                dicoMots = new ArrayList<>();
+                dicoMots = db.getOnePhrase(motSecret.length()); // charger le dictionnaire pour le bot
                 
                 // faire jouer le bot d'après LogiqueBot.java
                 int essais = 0;
@@ -199,8 +208,8 @@ public class EcranJeu extends JFrame {
                     }
 
                     // choisir un mot aléatoire parmi les mots possibles
-                    String proposition = LogiqueBot.randomWord(dicoMots);
-                    propositions.add(proposition);
+                    String proposition = LogiqueBot.randomWord(dicoMots).toLowerCase();
+                    propositions.add(proposition.toUpperCase());
                     grillePanel.majGrille(propositions, motSecret); // mettre à jour la grille
 
                     // vérifier si le mot proposé est correct
@@ -266,12 +275,6 @@ public class EcranJeu extends JFrame {
             inputField.setEnabled(false); // Désactiver le champ de saisie
             validerBtn.setEnabled(false); // Désactiver le bouton valider
 
-            // Initialiser les variables pour le Bot
-            progVraie = "*".repeat(motSecret.length());
-            charsMalPlace.clear();
-            charImpossible = "";
-            OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
-            dicoMots = new ArrayList<>(db.getOnePhrase(motSecret.length()));
 
             // Faire jouer le Bot
             int essais = 0;
@@ -355,6 +358,10 @@ public class EcranJeu extends JFrame {
             validerBtn.setEnabled(false);
             progressionLabel.setText("0/6-9");
             progressionLabel.setForeground(Color.RED);
+
+            // Initialiser les variables pour le bot
+            OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
+            dicoMots = db.getOnePhrase(taille); // Charger le dictionnaire pour le bot
         }
     }
 

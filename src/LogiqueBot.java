@@ -7,20 +7,20 @@ public class LogiqueBot {
     // méthode pour filtrer les mots du dictionnaire en fonction des contraintes
     static public ArrayList<String> choix(String progVraie, HashMap<Integer, Character> charsMalPlace, String charImpossible, ArrayList<String> dicoMots) {
 
-        ArrayList<String> outDict = new ArrayList<>(); // liste des mots filtrés
+        ArrayList<String> outDict = new ArrayList<>(dicoMots); // liste des mots filtrés
         ArrayList<String> foodict = new ArrayList<>(); // liste tampon pour la construction dynamique
 
         int propositionTaille = progVraie.length();
 
         // étape 1 : filtrer les mots qui n'ont pas le bon caractère à la bonne position
         for (int i = 0; i < propositionTaille; i++) {
-            char charAt = progVraie.charAt(i); // caractère à la position actuelle
-            if (charAt != '*') { // ignorer les positions marquées par un astérisque
+            String charAt = progVraie.charAt(i)+""; // caractère à la position actuelle
+            if (!charAt.equals("*")) { // ignorer les positions marquées par un astérisque
                 for (String mot : dicoMots) {
-                    if (mot.charAt(i) == charAt) {
+                    if (String.valueOf(mot.charAt(i)).equals(charAt)) {
                         outDict.add(mot); // ajouter les mots qui respectent la contrainte
                     } else {
-                        if (outDict.contains(mot) && mot.charAt(i) != charAt) {
+                        if (outDict.contains(mot) && !String.valueOf(mot.charAt(i)).equals(charAt)) {
                             outDict.remove(mot); // retirer les mots qui ne respectent pas la contrainte
                         }
                     }
