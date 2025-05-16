@@ -17,16 +17,17 @@ public class LogiqueBot {
             String charAt = progVraie.charAt(i)+""; // caractère à la position actuelle
             if (!charAt.equals("*")) { // ignorer les positions marquées par un astérisque
                 for (String mot : dicoMots) {
-                    if (String.valueOf(mot.charAt(i)).equals(charAt)) {
+                    if (String.valueOf(mot.toUpperCase().charAt(i)).equals(charAt)) {
                         outDict.add(mot); // ajouter les mots qui respectent la contrainte
                     } else {
                         if (outDict.contains(mot) && !String.valueOf(mot.charAt(i)).equals(charAt)) {
                             outDict.remove(mot); // retirer les mots qui ne respectent pas la contrainte
                         }
                     }
-                }
-            }
+                }}
         }
+
+        foodict = new ArrayList<>(outDict); // mise à jour de la liste tampon
 
         // étape 2 : filtrer les mots qui n'ont pas les bons caractères à la mauvaise position
         if (outDict != null) {

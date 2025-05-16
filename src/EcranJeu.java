@@ -213,23 +213,23 @@ public class EcranJeu extends JFrame {
                     grillePanel.majGrille(propositions, motSecret); // mettre à jour la grille
 
                     // vérifier si le mot proposé est correct
-                    if (proposition.equals(motSecret)) {
+                    if (proposition.equals(motSecret.toLowerCase())) {
                         JOptionPane.showMessageDialog(this, "Le bot a trouvé le mot : " + motSecret + " en " + (essais + 1) + " essais !");
                         grillePanel.setBackgroundImage("images/victoire.png");
                         motTrouve = true;
                     } else {
                         // mettre à jour les indices pour le bot
-                        charsMalPlace = EtatMot.checkWrongPlacement2(motSecret, proposition);
-                        charImpossible += EtatMot.getImpossibleChars(motSecret, proposition);
-                        progVraie = EtatMot.updateProgVraie(motSecret, proposition);
+                        charsMalPlace = EtatMot.checkWrongPlacement2(motSecret.toLowerCase(), proposition);
+                        charImpossible += EtatMot.getImpossibleChars(motSecret.toLowerCase(), proposition);
+                        progVraie = EtatMot.updateProgVraie(motSecret.toLowerCase(), proposition);
                     }
 
                     essais++;
-                    try {
-                        Thread.sleep(1000); // pause pour simuler le temps de réflexion du bot
-                    } catch (InterruptedException e1) {
-                        e1.printStackTrace();
-                    }
+                    // try {
+                    //     Thread.sleep(1000); // pause pour simuler le temps de réflexion du bot
+                    // } catch (InterruptedException e1) {
+                    //     e1.printStackTrace();
+                    // }
                 }
 
                 if (!motTrouve) {
@@ -303,11 +303,11 @@ public class EcranJeu extends JFrame {
                 }
 
                 essais++;
-                try {
-                    Thread.sleep(1000); // Pause pour simuler le temps de réflexion du Bot
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                // try {
+                //     Thread.sleep(1000); // Pause pour simuler le temps de réflexion du Bot
+                // } catch (InterruptedException e) {
+                //     e.printStackTrace();
+                // }
             }
 
             if (!motTrouve) {

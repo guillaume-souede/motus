@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-public final class OuvrirDB {
+public class OuvrirDB {
 
     private final HashMap<Integer, Mots> phrase; // int = taille du mot
 
