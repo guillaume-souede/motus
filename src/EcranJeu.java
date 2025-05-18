@@ -419,12 +419,24 @@ public class EcranJeu extends JFrame {
 
         JCheckBoxMenuItem tutorielItem = new JCheckBoxMenuItem("Tutoriel");
         tutorielMenuItem = tutorielItem; // Stocker la référence
+
+        // fond coché/décoché
+        tutorielItem.addItemListener(e -> {
+            if (tutorielItem.isSelected()) {
+                tutorielItem.setBackground(new Color(0, 120, 255)); // Bleu
+                tutorielItem.setForeground(Color.WHITE); // Texte blanc pour contraste
+            } else {
+                tutorielItem.setBackground(null); // Fond par défaut
+                tutorielItem.setForeground(null); // Texte par défaut
+            }
+        });
+
         tutorielItem.addActionListener(e -> {
             if (!tutorielActif) {
-                // Activer le mode tutoriel
+                // mode tutoriel
                 grillePanel.setLignes(1);
                 essaisMax = 1;
-                grillePanel.setColonnes(8); // "TUTORIEL" fait 8 lettres
+                grillePanel.setColonnes(8); // "TUTORIEL" = 8 lettres
                 currentBackgroundImage = "images/tutoriel.png";
                 tutorielActif = true;
                 motSecret = "TUTORIEL";
