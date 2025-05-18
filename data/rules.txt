@@ -1,14 +1,23 @@
-Le but du jeu est de deviner un mot composé d’un nombre de lettres fixé à l’avance.
+Le jeu propose deux modes : Joueur et Ordinateur. 
+Dans les deux cas, il s'agit de deviner un mot dont le nombre de lettres est fixé à l’avance (entre 6 et 9 lettres).
 
-À chaque essai, le joueur propose un mot qu’il doit épeler.
-Le mot est accepté uniquement s’il contient le bon nombre de lettres et s’il est correctement orthographié.
+À chaque tour, le joueur écrit un mot. Celui-ci est accepté uniquement s’il contient le bon nombre de lettres et s’il est correctement orthographié (mot reconnu).
 
-Une fois validé, le mot s’affiche selon le code couleur :
+Une fois le mot validé, chaque lettre est affichée avec un code couleur :
 
 🟥 Carré rouge = Lettre bien placée : présente dans le mot et à la bonne position, 
 🟡 Cercle jaune = Lettre mal placée : présente dans le mot mais ailleurs,
 🟦 Carré bleu = Lettre absente du mot.
 
-Remarque : pour chaque lettre, seules les occurrences réellement présentes dans le mot secret peuvent être colorées.
+Remarque : Seules les lettres réellement présentes dans le mot secret seront colorées. Les répétitions non justifiées restent en bleu.
+
+
+Modes disponibles :
+
+- En mode Joueur, le mot à deviner est choisi aléatoirement, et le joueur doit le retrouver.
+
+- En mode Ordinateur, le joueur saisit un mot, et l’intelligence artificielle tente de le deviner.
+
+La partie est gagnée lorsque le mot est trouvé, quel que soit le mode choisi.
 
 Découvrez aussi nos autres jeux !
