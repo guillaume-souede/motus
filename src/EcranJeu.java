@@ -59,8 +59,8 @@ public class EcranJeu extends JFrame {
         essaisMax = 6;
 
         JScrollPane scrollPane = new JScrollPane(grillePanel,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
         scrollPane.setBorder(null);
@@ -175,8 +175,7 @@ public class EcranJeu extends JFrame {
             motSecret = motMystere; // définir le mot mystère pour le bot
             
             // initialiser les variables pour le bot
-            progVraie += motSecret.charAt(0); // Initialise la première lettre
-            progVraie += "*".repeat(motSecret.length()-1); // Initialiser la progression avec des étoiles
+            progVraie = ""; // initialiser prog vraie
             charsMalPlace = new HashMap<>(); // Réinitialiser les caractères mal placés
             charImpossible = "";
 
@@ -188,7 +187,9 @@ public class EcranJeu extends JFrame {
 
                 // initialiser les variables pour le bot d'après LogiqueBot.java
                 progVraie = motSecret.charAt(0) + ""; // initialiser la première lettre
-                progVraie += "*".repeat(motSecret.length()-1); // initialiser la progression avec des étoiles
+                for (int i = 1; i < motSecret.length()-1; i++) {
+                    progVraie += "*"; // initialiser la progression avec des étoiles
+                }
                 charsMalPlace.clear(); // réinitialiser les caractères mal placés
                 charImpossible = ""; // réinitialiser les caractères impossibles
                 OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
@@ -219,8 +220,8 @@ public class EcranJeu extends JFrame {
                         motTrouve = true;
                     } else {
                         // mettre à jour les indices pour le bot
-                        charsMalPlace = EtatMot.checkWrongPlacement2(motSecret.toLowerCase(), proposition);
-                        charImpossible += EtatMot.getImpossibleChars(motSecret.toLowerCase(), proposition);
+                        charsMalPlace = EtatMot.checkWrongPlacement2(motSecret.toLowerCase(),proposition);
+                        charImpossible += EtatMot.getImpossibleChars(motSecret.toLowerCase(),proposition);
                         progVraie = EtatMot.updateProgVraie(motSecret.toLowerCase(), proposition);
                     }
 

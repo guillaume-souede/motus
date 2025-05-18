@@ -32,11 +32,12 @@ public class LogiqueBot {
         // étape 2 : filtrer les mots qui n'ont pas les bons caractères à la mauvaise position
         if (outDict != null) {
             for (String mot : outDict) {
-                String charMalPlaceeString = charsMalPlace.values().toString(); // récupérer les caractères mal placés
-                if (testCharMalPlace(mot, charMalPlaceeString)) {
-                    foodict.add(mot); // ajouter les mots qui contiennent les caractères mal placés
-                } else {
-                    foodict.remove(mot); // retirer les mots qui ne respectent pas cette contrainte
+                for (Character charmalplace : charsMalPlace.values()) {
+                    if (testCharMalPlace(mot, charmalplace+"")) { // vérifier si le mot contient les caractères mal placés
+                        foodict.add(mot); // ajouter les mots qui contiennent les caractères mal placés
+                    } else {
+                        foodict.remove(mot); // retirer les mots qui ne respectent pas cette contrainte
+                    }
                 }
             }
         }

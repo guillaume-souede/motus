@@ -87,10 +87,10 @@ public class EtatMot {
         return outString;
     }
 
-    static HashMap<Integer,Character> checkWrongPlacement2(String proposition, String motSecret){
+    static HashMap<Integer,Character> checkWrongPlacement2(String motSecret,String proposition ){
         HashMap<Integer,Character> mauvaisePosBonChar = new HashMap<>();
         for (int i = 0; i < proposition.length(); i++) {
-            if (motSecret.contains(proposition.charAt(i)+"") == false) {
+            if (motSecret.contains(proposition.charAt(i)+"") == true && proposition.charAt(i) != motSecret.charAt(i)) { // si le char est dans le mot secret mais pas à la bonne position
             mauvaisePosBonChar.put(i, proposition.charAt(i)) ; // on ajoute la position en clef et le char mal plaé en valeur
             }
         }
@@ -104,14 +104,7 @@ public class EtatMot {
     }
 
 
-    public static void main(String[] args) {
-        // bloc de test
-        String propostion= "partir";
-        String motSecret = "patate";
-        System.out.println(checkEtatMot(propostion, motSecret));
-        System.out.println(checkWrongPlacement(propostion, motSecret));
-        System.out.println(emojiRepresentation(propostion, motSecret));
-    }
+
 
     public static String getImpossibleChars(String motSecret, String proposition) {
         StringBuilder impossibleChars = new StringBuilder();
@@ -133,5 +126,13 @@ public class EtatMot {
             }
         }
         return new String(progArray);
+    }
+        public static void main(String[] args) {
+        // bloc de test
+        String propostion= "partir";
+        String motSecret = "patate";
+        System.out.println(checkEtatMot(propostion, motSecret));
+        System.out.println(checkWrongPlacement(propostion, motSecret));
+        System.out.println(emojiRepresentation(propostion, motSecret));
     }
 }
