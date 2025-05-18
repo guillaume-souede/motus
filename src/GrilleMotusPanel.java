@@ -16,7 +16,11 @@ public class GrilleMotusPanel extends JPanel {
     public GrilleMotusPanel(int lignes, int colonnes, String bgPath) {
         this.lignes = lignes;
         this.colonnes = colonnes;
-        setBackgroundImage(bgPath);
+        try {
+            this.bgImage = new ImageIcon(bgPath).getImage();
+        } catch (Exception e) {
+            this.bgImage = null;
+        }
         setOpaque(false);
         setPreferredSize(new Dimension(600, 600));
     }

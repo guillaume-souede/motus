@@ -437,7 +437,8 @@ public class EcranJeu extends JFrame {
                 tutorielItem.setSelected(true);
                 resetChamp();
                 try {
-                    EcranRegle regleWindow = new EcranRegle(jeuTermine);
+                    // Remplacer l'ancien appel incorrect par le bon constructeur
+                    new EcranRegle(this);
                 } catch (FileNotFoundException e1) {}
             } else {
                 // Désactiver le mode tutoriel (remettre les valeurs par défaut)

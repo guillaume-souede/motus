@@ -18,11 +18,11 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 
 public class EcranRegle extends JFrame {
-    private boolean jeuOuvert;
+    private JFrame ecranJeu; // Peut être null
 
-    public EcranRegle(boolean jeuOuvert) throws FileNotFoundException {
+    public EcranRegle(JFrame ecranJeu) throws FileNotFoundException {
         super("Règles du Motus");
-        this.jeuOuvert = jeuOuvert;
+        this.ecranJeu = ecranJeu;
 
         // layout
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -45,12 +45,11 @@ public class EcranRegle extends JFrame {
         quiterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
-                if (jeuOuvert) {
-                    dispose();
-                } else {
+                dispose();
+                if (EcranRegle.this.ecranJeu == null) {
                     new Main();
-                    dispose();
                 }
+                // Sinon, rien à faire : EcranJeu reste affiché
             }
         });
 
@@ -140,6 +139,6 @@ public class EcranRegle extends JFrame {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        new EcranRegle(false);
+        new EcranRegle(null);
     }
 }

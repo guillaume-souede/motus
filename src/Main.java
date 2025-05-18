@@ -7,8 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-
+import java.io.FileNotFoundException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -60,23 +59,18 @@ public class Main extends JFrame{
         bouttonFrame.setOpaque(false); // pour ne pas cacher l’image de fond
 
         // paramétrage des boutons
-        bouttonJouer.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent clic) {
-                // ouvrir la fenêtre de paramètre de jeu
-                new EcranChargement();
-                dispose();
-            }
+        bouttonJouer.addActionListener(clic -> {
+            new EcranChargement();
+            dispose();
         });
 
         bouttonRegles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
                 try {
-                    // ouvrir la fenêtre de règle
-                    new EcranRegle();
-                    dispose();
-                } catch (IOException e) {
+                    // On passe null car on vient du menu principal (pas d'EcranJeu ouvert)
+                    new EcranRegle(null);
+                } catch (Exception e) {
                     dispose();
                     e.printStackTrace();
                 }
