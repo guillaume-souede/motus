@@ -7,7 +7,6 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,31 +15,29 @@ import javax.swing.JPanel;
 
 public class Main extends JFrame{
 
-    /**
-     * Menu principal qui est affiché au boot
-     */
+    // MENU PRINCIPAL AFFICHé AU BOOT.
 
     public Main(){
         // paramétrage de base du layout
         super("Motus et bouche cousue");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // chargement de l'image de fond
+        // Image de fond
         ImageIcon icon = new ImageIcon("images/bienvenue.png");
-        Image backgroundImage = icon.getImage();
+        Image arrPlan = icon.getImage();
 
-        // panneau principal avec image de fond
-        JPanel backgroundPanel = new JPanel() {
+        // Panneau principal
+        JPanel arrPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+                g.drawImage(arrPlan, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        backgroundPanel.setLayout(new GridLayout(3,1,15,10)); // même layout que l'ancien
-        setContentPane(backgroundPanel);
+        arrPanel.setLayout(new GridLayout(3,1,15,10)); // même layout que l'ancien
+        setContentPane(arrPanel);
 
-        // création des éléments du menu
+        // Menu : création
         JLabel titre = new JLabel("<html><center>Bienvenue dans Motus, une production √4 !</center></html>", JLabel.CENTER);
         titre.setFont(new Font("SansSerif", Font.BOLD, 14));
         titre.setForeground(Color.WHITE); // texte blanc pour la lisibilité
@@ -49,7 +46,7 @@ public class Main extends JFrame{
         JButton bouttonRegles = new JButton("Règles");
         JButton buttonFermer = new JButton("Fermer");
 
-        // uniformisation des tailles de boutons
+        // Boutons : taille
         Dimension buttonSize = new Dimension(100, 30);
         bouttonJouer.setPreferredSize(buttonSize);
         bouttonRegles.setPreferredSize(buttonSize);
@@ -58,7 +55,7 @@ public class Main extends JFrame{
         JPanel bouttonFrame = new JPanel(new FlowLayout(FlowLayout.CENTER,15,0));
         bouttonFrame.setOpaque(false); // pour ne pas cacher l’image de fond
 
-        // paramétrage des boutons
+        // Boutons : paramétrage
         bouttonJouer.addActionListener(clic -> {
             new EcranChargement();
             dispose();
@@ -68,8 +65,8 @@ public class Main extends JFrame{
             @Override
             public void actionPerformed(ActionEvent clic) {
                 try {
-                    // On passe null car on vient du menu principal (pas d'EcranJeu ouvert)
-                    new EcranRegle(null);
+                    // passer la référence à la fenêtre Main
+                    new EcranRegle(Main.this);
                 } catch (Exception e) {
                     dispose();
                     e.printStackTrace();
@@ -79,16 +76,16 @@ public class Main extends JFrame{
 
         buttonFermer.addActionListener(e -> dispose());
 
-        // positionnement des bouttons
+        // Bouttons : position
         bouttonFrame.add(bouttonJouer);
         bouttonFrame.add(bouttonRegles);
         bouttonFrame.add(buttonFermer);
 
-        backgroundPanel.add(titre); 
-        backgroundPanel.add(new JLabel()); // ligne vide pour espacement
-        backgroundPanel.add(bouttonFrame);
+        arrPanel.add(titre); 
+        arrPanel.add(new JLabel()); // permet espacement Titre / Boutons
+        arrPanel.add(bouttonFrame);
 
-        // paramétrage taille et position de la fenêtre
+        // Fenêtre : position et paramétrage
         setSize(400, 300);
         setLocationRelativeTo(null);
         setVisible(true);

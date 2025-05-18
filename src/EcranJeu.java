@@ -44,6 +44,7 @@ public class EcranJeu extends JFrame {
     ArrayList<String> dicoMots = new ArrayList<>();
 
     private boolean tutorielActif = false;
+    private JCheckBoxMenuItem tutorielMenuItem; // Référence à l'item Tutoriel
 
     @SuppressWarnings("unused")
     public EcranJeu(String bgPath) {
@@ -259,6 +260,13 @@ public class EcranJeu extends JFrame {
         modeComboBox.setSelectedIndex(0);
         validerBtn.setEnabled(false);
         progressionLabel.setText("0/6-9"); //ok
+
+        // Forcer le mode tutoriel au premier lancement
+        SwingUtilities.invokeLater(() -> {
+            if (tutorielMenuItem != null && !tutorielMenuItem.isSelected()) {
+                tutorielMenuItem.doClick();
+            }
+        });
     }
 
     private void resetChamp() {
@@ -410,11 +418,12 @@ public class EcranJeu extends JFrame {
         themeMenu.add(reel); themeMenu.add(reelHiver);
 
         JCheckBoxMenuItem tutorielItem = new JCheckBoxMenuItem("Tutoriel");
+        tutorielMenuItem = tutorielItem; // Stocker la référence
         tutorielItem.addActionListener(e -> {
             if (!tutorielActif) {
                 // Activer le mode tutoriel
-                grillePanel.setLignes(2);
-                essaisMax = 2;
+                grillePanel.setLignes(1);
+                essaisMax = 1;
                 grillePanel.setColonnes(8); // "TUTORIEL" fait 8 lettres
                 currentBackgroundImage = "images/tutoriel.png";
                 tutorielActif = true;
