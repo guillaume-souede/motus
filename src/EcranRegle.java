@@ -5,7 +5,6 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -19,9 +18,11 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 
 public class EcranRegle extends JFrame {
+    private boolean jeuOuvert;
 
-    public EcranRegle() throws FileNotFoundException {
+    public EcranRegle(boolean jeuOuvert) throws FileNotFoundException {
         super("Règles du Motus");
+        this.jeuOuvert = jeuOuvert;
 
         // layout
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -44,8 +45,12 @@ public class EcranRegle extends JFrame {
         quiterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent clic) {
-                new Main();
-                dispose();
+                if (jeuOuvert) {
+                    dispose();
+                } else {
+                    new Main();
+                    dispose();
+                }
             }
         });
 
@@ -135,6 +140,6 @@ public class EcranRegle extends JFrame {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        new EcranRegle();
+        new EcranRegle(false);
     }
 }

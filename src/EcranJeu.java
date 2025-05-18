@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,12 +43,16 @@ public class EcranJeu extends JFrame {
     String charImpossible;
     ArrayList<String> dicoMots = new ArrayList<>();
 
+    private boolean tutorielActif = false;
+
+    @SuppressWarnings("unused")
     public EcranJeu(String bgPath) {
         super("Motus");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         addComponentListener(new ComponentAdapter() {
+            @Override
             public void componentResized(ComponentEvent e) {
                 int width = getWidth(), height = getHeight();
                 setTitle("Motus (" + width + "x" + height + ")");
@@ -74,13 +79,13 @@ public class EcranJeu extends JFrame {
         mode = modeComboBox.getSelectedItem()+"";
         JButton resetBtn = new JButton("⟳");
 
-        leftPanel.add(new JLabel("Mode:"));
+        leftPanel.add(new JLabel("Mode"));
         leftPanel.add(modeComboBox);
         leftPanel.add(resetBtn);
 
         // Centre
         JPanel centerPanel = new JPanel();
-        centerPanel.add(new JLabel("Proposition :"));
+        centerPanel.add(new JLabel("Proposition"));
         centerPanel.add(inputField);
         centerPanel.add(progressionLabel);
         centerPanel.add(validerBtn);
@@ -90,6 +95,7 @@ public class EcranJeu extends JFrame {
         JButton optionsBtn = new JButton("⚙");
         JPopupMenu popupMenu = createPopupMenu();
         optionsBtn.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseEntered(MouseEvent e) {
                 popupMenu.show(optionsBtn, optionsBtn.getWidth() / 2, -popupMenu.getPreferredSize().height);
             }
@@ -127,10 +133,11 @@ public class EcranJeu extends JFrame {
         resetBtn.addActionListener(e -> {
             int taille = grillePanel.getColonnes(); // Récupérer la taille actuelle
             mettreAJourMotSecret((String) modeComboBox.getSelectedItem(), taille); // Mettre à jour le mot secret
-            resetChamp(taille); // Réinitialiser l'état du jeu
+            resetChamp(); // Réinitialiser l'état du jeu
         });
 
         inputField.addKeyListener(new KeyAdapter() {
+            @Override
             public void keyReleased(KeyEvent e) {
                 String text = inputField.getText().trim();
                 int currentLength = text.length();
@@ -254,7 +261,7 @@ public class EcranJeu extends JFrame {
         progressionLabel.setText("0/6-9"); //ok
     }
 
-    private void resetChamp(int taille) {
+    private void resetChamp() {
         propositions.clear();
         grillePanel.majGrille(propositions, motSecret);
         grillePanel.setBackgroundImage(currentBackgroundImage);
@@ -326,7 +333,6 @@ public class EcranJeu extends JFrame {
                     progressionLabel.setText(prop.length() + "/6-9");
                     progressionLabel.setForeground(Color.GREEN);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     JOptionPane.showMessageDialog(this, "Erreur lors du chargement du mot secret !");
                     return;
                 }
@@ -367,6 +373,7 @@ public class EcranJeu extends JFrame {
         }
     }
 
+    @SuppressWarnings("unused")
     private JPopupMenu createPopupMenu() {
         JPopupMenu menu = new JPopupMenu();
 
@@ -408,7 +415,7 @@ public class EcranJeu extends JFrame {
 
         JRadioButtonMenuItem reelHiver = new JRadioButtonMenuItem("Réaliste hivernal");
         reelHiver.addActionListener(e -> {
-            currentBackgroundImage = "images/reelHivert.png";
+            currentBackgroundImage = "images/reelHiver.png";
             grillePanel.setBackgroundImage(currentBackgroundImage);
         });
 
@@ -417,17 +424,31 @@ public class EcranJeu extends JFrame {
         themeGroup.add(reel); themeGroup.add(reelHiver);
         themeMenu.add(reel); themeMenu.add(reelHiver);
 
-        JMenuItem tutorielItem = new JMenuItem("Tutoriel");
+        JCheckBoxMenuItem tutorielItem = new JCheckBoxMenuItem("Tutoriel");
         tutorielItem.addActionListener(e -> {
-            grillePanel.setLignes(2);
-            essaisMax = 2;
-            grillePanel.setColonnes(6);
-            grillePanel.setBackgroundImage("images/tutoriel.png");
-            resetChamp(6);
-            try {
-                new EcranRegle();
-            } catch (FileNotFoundException e1) {
-                e1.printStackTrace();
+            if (!tutorielActif) {
+                // Activer le mode tutoriel
+                grillePanel.setLignes(2);
+                essaisMax = 2;
+                grillePanel.setColonnes(8); // "TUTORIEL" fait 8 lettres
+                currentBackgroundImage = "images/tutoriel.png";
+                tutorielActif = true;
+                motSecret = "TUTORIEL";
+                tutorielItem.setSelected(true);
+                resetChamp();
+                try {
+                    EcranRegle regleWindow = new EcranRegle(jeuTermine);
+                } catch (FileNotFoundException e1) {}
+            } else {
+                // Désactiver le mode tutoriel (remettre les valeurs par défaut)
+                grillePanel.setLignes(6);
+                essaisMax = 6;
+                grillePanel.setColonnes(6);
+                currentBackgroundImage = "images/defaut.png";
+                tutorielActif = false;
+                motSecret = null;
+                tutorielItem.setSelected(false);
+                resetChamp();
             }
         });
 
@@ -436,7 +457,7 @@ public class EcranJeu extends JFrame {
 
         menu.add(essaisMenu);
         menu.add(themeMenu);
-        menu.add(tutorielItem);
+        menu.add(tutorielItem); // <-- coche automatique
         menu.add(quitter);
         return menu;
     }
