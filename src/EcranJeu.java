@@ -168,14 +168,10 @@ public class EcranJeu extends JFrame {
         validerBtn.addActionListener(e -> {
             if ("🤖".equals(mode)) {
                 String motMystere = inputField.getText().trim().toUpperCase();
-                if (motMystere.length() < 6 || motMystere.length() > 9) {
-                    JOptionPane.showMessageDialog(this, "Veuillez entrer un mot entre 6 et 9 caractères.");
-                    return;
-                }
 
                 motSecret = motMystere; // définir le mot mystère pour le bot
 
-                // --- AJOUTER CETTE LIGNE POUR ADAPTER LA GRILLE ---
+                // AJOUTER CETTE LIGNE POUR ADAPTER LA GRILLE
                 grillePanel.setColonnes(motSecret.length());
                 grillePanel.majGrille(new ArrayList<>(), motSecret);
 
@@ -220,8 +216,7 @@ public class EcranJeu extends JFrame {
 
                     // vérifier si le mot proposé est correct
                     if (proposition.equals(motSecret.toLowerCase())) {
-                        // OptionPane.showMessageDialog(this, "Le bot a trouvé le mot : " + motSecret + " en " + (essais + 1) + " essais !");
-                        grillePanel.setBackgroundImage("images/victoire.png");
+                        terminerJeu(true, "Le bot a trouvé le mot en " + (essais + 1) + " essais !");
                         motTrouve = true;
                     } else {
                         // mettre à jour les indices pour le bot
@@ -239,12 +234,12 @@ public class EcranJeu extends JFrame {
                 }
 
                 if (!motTrouve) {
-                    JOptionPane.showMessageDialog(this, "Le bot n'a pas trouvé le mot. Le mot était : " + motSecret);
-                    grillePanel.setBackgroundImage("images/defaite.png");
+                    if (!dicoMots.contains(motSecret.toLowerCase())) {
+                        terminerJeu(false, "Mot impossible.");
+                    } else {
+                        terminerJeu(false, "Défaite. Le mot était : " + motSecret);
+                    }
                 }
-
-                inputField.setEnabled(false);
-                validerBtn.setEnabled(false);
             } else {
                 traiterProposition(mode); // Mode joueur
             }
@@ -317,16 +312,6 @@ public class EcranJeu extends JFrame {
                 // }
             }
 
-            if (!motTrouve) { // PB!!!
-                grillePanel.setBackgroundImage("images/defaite.png");
-                if (!dicoMots.contains(motSecret.toLowerCase())) {
-                    progressionLabel.setText("Perdu : " + motSecret + " (mot non trouvé dans le dico)");
-                } else {
-                    progressionLabel.setText("Perdu ! Le mot était : " + motSecret);
-                }
-                progressionLabel.setForeground(Color.RED);
-            }
-
             inputField.setEnabled(false);
             validerBtn.setEnabled(false);
         } else {
@@ -334,11 +319,6 @@ public class EcranJeu extends JFrame {
             String prop = inputField.getText().trim().toUpperCase();
             if (motSecret == null) {
                 // Première proposition : définir la taille et tirer le mot secret
-                if (prop.length() < 6 || prop.length() > 9) {
-                    progressionLabel.setText("Mot de 6 à 9 lettres !");
-                    progressionLabel.setForeground(Color.RED);
-                    return;
-                }
                 try {
                     OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
                     motSecret = db.getRandomWord(prop.length());
@@ -355,17 +335,16 @@ public class EcranJeu extends JFrame {
             // Ensuite, vérifier la taille
             if (prop.length() != motSecret.length() || propositions.size() >= essaisMax) return;
 
-            propositions.add(prop);
-            grillePanel.majGrille(propositions, motSecret);
-
             if (prop.equals(motSecret)) {
-                grillePanel.setBackgroundImage("images/victoire.png");
-                progressionLabel.setText("Bravo ! Trouvé en " + propositions.size() + " essais.");
-                progressionLabel.setForeground(Color.GREEN);
-            } else if (propositions.size() == essaisMax) {
-                grillePanel.setBackgroundImage("images/defaite.png");
-                progressionLabel.setText("Perdu ! Le mot était : " + motSecret);
-                progressionLabel.setForeground(Color.RED);
+                propositions.add(prop);
+                grillePanel.majGrille(propositions, motSecret);
+                terminerJeu(true, "Bravo ! Trouvé en " + propositions.size() + " essais.");
+            } else {
+                propositions.add(prop);
+                grillePanel.majGrille(propositions, motSecret);
+                if (propositions.size() == essaisMax) {
+                    terminerJeu(false, "Perdu ! Le mot était : " + motSecret);
+                }
             }
 
             inputField.setEnabled(!prop.equals(motSecret));
@@ -460,6 +439,25 @@ public class EcranJeu extends JFrame {
         menu.add(tutorielItem);
         menu.add(quitter);
         return menu;
+    }
+
+    private void terminerJeu(boolean gagne, String message) {
+        jeuTermine = true;
+        inputField.setEnabled(false);
+        validerBtn.setEnabled(false);
+
+        if ("👨".equals(mode) && !gagne && motSecret != null) {
+            progressionLabel.setText("Mot : " + motSecret);
+            progressionLabel.setForeground(Color.RED);
+        } else if (gagne) {
+            progressionLabel.setText(message);
+            progressionLabel.setForeground(Color.GREEN);
+        } else {
+            progressionLabel.setText(message);
+            progressionLabel.setForeground(Color.RED);
+        }
+
+        // JOptionPane.showMessageDialog(this, message);
     }
 
     public static void main(String[] args) {
