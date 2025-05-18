@@ -9,7 +9,6 @@ import java.awt.event.MouseEvent;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -71,13 +70,10 @@ public class EcranJeu extends JFrame {
 
         // Gauche
         JPanel leftPanel = new JPanel();
-        JComboBox<Integer> tailleComboBox = new JComboBox<>(new Integer[]{6, 7, 8, 9});
         JComboBox<String> modeComboBox = new JComboBox<>(new String[]{"👨", "🤖"});
         mode = modeComboBox.getSelectedItem()+"";
         JButton resetBtn = new JButton("⟳");
 
-        leftPanel.add(new JLabel("Taille:"));
-        leftPanel.add(tailleComboBox);
         leftPanel.add(new JLabel("Mode:"));
         leftPanel.add(modeComboBox);
         leftPanel.add(resetBtn);
@@ -107,30 +103,25 @@ public class EcranJeu extends JFrame {
         add(inputPanel, BorderLayout.SOUTH);
 
         // Listeners ComboBox
-        tailleComboBox.addActionListener(e -> {
-            int taille = (int) tailleComboBox.getSelectedItem();
-            grillePanel.setColonnes(taille);
-            mettreAJourMotSecret((String) modeComboBox.getSelectedItem(), taille);
-            resetChamp(taille);
-        });
-
         modeComboBox.addActionListener(e -> {
-            int taille = grillePanel.getColonnes();
+            int taille = 6; // Toujours reset à 6 colonnes par défaut
             String selectedMode = (String) modeComboBox.getSelectedItem();
-            mode = selectedMode; // à ajouter
+            mode = selectedMode;
             mettreAJourMotSecret(selectedMode, taille);
 
-            if ("🤖".equals(selectedMode)) {
-                inputField.setEnabled(true); // Activer le champ pour saisir le mot mystère
-                validerBtn.setEnabled(false); // Désactiver le bouton jusqu'à ce qu'un mot valide soit saisi
-                progressionLabel.setText("0/6-9"); // Indiquer la plage de longueur valide
-                progressionLabel.setForeground(Color.RED); // Rouge par défaut
-            } else {
-                inputField.setEnabled(true); // Activer le champ pour le joueur
-                validerBtn.setEnabled(false);
-                progressionLabel.setText("0/" + taille); // Réinitialiser l'affichage de progression
-                progressionLabel.setForeground(Color.RED); // Rouge par défaut
-            }
+            // Reset complet de la grille et du jeu
+            grillePanel.setColonnes(taille);
+            grillePanel.majGrille(new ArrayList<>(), null);
+            propositions.clear();
+            inputField.setText("");
+            inputField.setEnabled(true);
+            validerBtn.setEnabled(false);
+            progressionLabel.setText("0/6-9");
+            progressionLabel.setForeground(Color.RED);
+
+            // Remettre le thème par défaut
+            currentBackgroundImage = "images/defaut.png";
+            grillePanel.setBackgroundImage(currentBackgroundImage);
         });
 
         resetBtn.addActionListener(e -> {
@@ -153,16 +144,26 @@ public class EcranJeu extends JFrame {
                     progressionLabel.setText(currentLength + "/6-9");
                     progressionLabel.setForeground(isValid ? Color.GREEN : Color.RED);
                 } else {
-                    // Mode joueur : Activer le bouton "Valider" uniquement si la longueur correspond au mot secret
-                    boolean isValid = motSecret != null && currentLength == motSecret.length();
-                    validerBtn.setEnabled(isValid);
+                    if (motSecret == null) {
+                        // Première saisie : taille libre entre 6 et 9
+                        boolean isValid = currentLength >= 6 && currentLength <= 9;
+                        validerBtn.setEnabled(isValid);
+                        progressionLabel.setText(currentLength + "/6-9");
+                        progressionLabel.setForeground(isValid ? Color.GREEN : Color.RED);
+                    } else {
+                        // Mode joueur : Activer le bouton "Valider" uniquement si la longueur correspond au mot secret
+                        boolean isValid = currentLength == motSecret.length();
+                        validerBtn.setEnabled(isValid);
 
-                    // Mettre à jour l'affichage de progression
-                    progressionLabel.setText(currentLength + "/" + (motSecret != null ? motSecret.length() : ""));
-                    progressionLabel.setForeground(isValid ? Color.GREEN : Color.RED);
+                        // Mettre à jour l'affichage de progression
+                        progressionLabel.setText(currentLength + "/" + motSecret.length());
+                        progressionLabel.setForeground(isValid ? Color.GREEN : Color.RED);
+                    }
                 }
             }
         });
+
+        inputField.addActionListener(e -> validerBtn.doClick());
 
         validerBtn.addActionListener(e -> {
             if ("🤖".equals(mode)) {
@@ -172,12 +173,16 @@ public class EcranJeu extends JFrame {
                     return;
                 }
 
-            motSecret = motMystere; // définir le mot mystère pour le bot
-            
-            // initialiser les variables pour le bot
-            progVraie = ""; // initialiser prog vraie
-            charsMalPlace = new HashMap<>(); // Réinitialiser les caractères mal placés
-            charImpossible = "";
+                motSecret = motMystere; // définir le mot mystère pour le bot
+
+                // --- AJOUTER CETTE LIGNE POUR ADAPTER LA GRILLE ---
+                grillePanel.setColonnes(motSecret.length());
+                grillePanel.majGrille(new ArrayList<>(), motSecret);
+
+                // initialiser les variables pour le bot
+                progVraie = "";
+                charsMalPlace = new HashMap<>();
+                charImpossible = "";
 
                 // vérifier si motSecret est bien initialisé
                 if (motSecret == null || motSecret.isEmpty()) {
@@ -204,7 +209,7 @@ public class EcranJeu extends JFrame {
                     // filtrer les mots possibles avec la méthode choix
                     dicoMots = LogiqueBot.choix(progVraie, charsMalPlace, charImpossible, dicoMots);
                     if (dicoMots.isEmpty()) {
-                        JOptionPane.showMessageDialog(this, "Le bot n'a plus de mots possibles !");
+                        // JOptionPane.showMessageDialog(this, "Le bot n'a plus de mots possibles !");
                         break;
                     }
 
@@ -215,7 +220,7 @@ public class EcranJeu extends JFrame {
 
                     // vérifier si le mot proposé est correct
                     if (proposition.equals(motSecret.toLowerCase())) {
-                        JOptionPane.showMessageDialog(this, "Le bot a trouvé le mot : " + motSecret + " en " + (essais + 1) + " essais !");
+                        // OptionPane.showMessageDialog(this, "Le bot a trouvé le mot : " + motSecret + " en " + (essais + 1) + " essais !");
                         grillePanel.setBackgroundImage("images/victoire.png");
                         motTrouve = true;
                     } else {
@@ -251,17 +256,18 @@ public class EcranJeu extends JFrame {
 
         modeComboBox.setSelectedIndex(0);
         validerBtn.setEnabled(false);
+        progressionLabel.setText("0/6-9"); //ok
     }
 
     private void resetChamp(int taille) {
-        propositions.clear(); // Réinitialiser les propositions
-        grillePanel.majGrille(propositions, motSecret); // Réinitialiser la grille
-        grillePanel.setBackgroundImage(currentBackgroundImage); // Réinitialiser l'image de fond
-        inputField.setEnabled(true); // Réactiver le champ de saisie
-        validerBtn.setEnabled(false); // Désactiver le bouton valider
-        inputField.setText(""); // Vider le champ de saisie
-        progressionLabel.setText("0/" + taille); // Réinitialiser l'affichage de progression
-        jeuTermine = false; // Réinitialiser l'état du jeu
+        propositions.clear();
+        grillePanel.majGrille(propositions, motSecret);
+        grillePanel.setBackgroundImage(currentBackgroundImage);
+        inputField.setEnabled(true);
+        validerBtn.setEnabled(false);
+        inputField.setText("");
+        progressionLabel.setText("0/6-9"); // <-- Toujours afficher 0/6-9 au reset
+        jeuTermine = false;
     }
 
     private void traiterProposition(String mode) {
@@ -293,7 +299,7 @@ public class EcranJeu extends JFrame {
 
                 if (proposition.equals(motSecret)) {
                     grillePanel.setBackgroundImage("images/victoire.png");
-                    progressionLabel.setText("Mot trouvé en " + (essais + 1) + " essais !");
+                    progressionLabel.setText("Motus en " + (essais + 1) + " essais.");
                     progressionLabel.setForeground(Color.GREEN);
                     motTrouve = true;
                 } else {
@@ -311,17 +317,42 @@ public class EcranJeu extends JFrame {
                 // }
             }
 
-            if (!motTrouve) {
+            if (!motTrouve) { // PB!!!
                 grillePanel.setBackgroundImage("images/defaite.png");
-                progressionLabel.setText("Mot non trouvé : " + motSecret);
+                if (!dicoMots.contains(motSecret.toLowerCase())) {
+                    progressionLabel.setText("Perdu : " + motSecret + " (mot non trouvé dans le dico)");
+                } else {
+                    progressionLabel.setText("Perdu ! Le mot était : " + motSecret);
+                }
                 progressionLabel.setForeground(Color.RED);
             }
 
             inputField.setEnabled(false);
             validerBtn.setEnabled(false);
         } else {
-            // Mode joueur (inchangé)
+            // Mode joueur
             String prop = inputField.getText().trim().toUpperCase();
+            if (motSecret == null) {
+                // Première proposition : définir la taille et tirer le mot secret
+                if (prop.length() < 6 || prop.length() > 9) {
+                    progressionLabel.setText("Mot de 6 à 9 lettres !");
+                    progressionLabel.setForeground(Color.RED);
+                    return;
+                }
+                try {
+                    OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
+                    motSecret = db.getRandomWord(prop.length());
+                    grillePanel.setColonnes(prop.length());
+                    progressionLabel.setText(prop.length() + "/6-9");
+                    progressionLabel.setForeground(Color.GREEN);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Erreur lors du chargement du mot secret !");
+                    return;
+                }
+            }
+
+            // Ensuite, vérifier la taille
             if (prop.length() != motSecret.length() || propositions.size() >= essaisMax) return;
 
             propositions.add(prop);
@@ -345,24 +376,15 @@ public class EcranJeu extends JFrame {
     }
 
     private void mettreAJourMotSecret(String mode, int taille) {
-        if ("👨".equals(mode)) {
-            try {
-                OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
-                motSecret = db.getRandomWord(taille);
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Erreur lors du chargement du mot secret !");
-            }
-        } else {
-            motSecret = null; // Il sera défini après saisie de l'utilisateur
-            inputField.setText("");
-            validerBtn.setEnabled(false);
-            progressionLabel.setText("0/6-9");
-            progressionLabel.setForeground(Color.RED);
+        motSecret = null;
+        inputField.setText("");
+        validerBtn.setEnabled(false);
+        progressionLabel.setText("0/6-9"); // !!! Toujours afficher 0/6-9
+        progressionLabel.setForeground(Color.RED);
 
-            // Initialiser les variables pour le bot
+        if ("🤖".equals(mode)) {
             OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
-            dicoMots = db.getOnePhrase(taille); // Charger le dictionnaire pour le bot
+            dicoMots = db.getOnePhrase(taille);
         }
     }
 
@@ -399,13 +421,13 @@ public class EcranJeu extends JFrame {
             grillePanel.setBackgroundImage(currentBackgroundImage);
         });
 
-        JRadioButtonMenuItem reel = new JRadioButtonMenuItem("reel");
+        JRadioButtonMenuItem reel = new JRadioButtonMenuItem("Réaliste");
         reel.addActionListener(e -> {
             currentBackgroundImage = "images/reel.png";
             grillePanel.setBackgroundImage(currentBackgroundImage);
         });
 
-        JRadioButtonMenuItem reelHiver = new JRadioButtonMenuItem("reelHiver");
+        JRadioButtonMenuItem reelHiver = new JRadioButtonMenuItem("Réaliste hivernal");
         reelHiver.addActionListener(e -> {
             currentBackgroundImage = "images/reelHivert.png";
             grillePanel.setBackgroundImage(currentBackgroundImage);

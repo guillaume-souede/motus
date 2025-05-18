@@ -73,7 +73,7 @@ public class GrilleMotusPanel extends JPanel {
         int intervalleMin = (int) (341 * echelleX);
         int intervalleMax = (int) (1137 * echelleX);
         int grilleX = intervalleMin + (intervalleMax - intervalleMin - largeurGrille) / 2;
-        int grilleY = (int) (450 * echelleY); // Position verticale ajustée
+        int grilleY = (int) (450 * echelleY) + 10 ; // Position verticale ajustée
 
         // Définir la taille de la police
         int fontSize = caseHauteur * 2 / 3;
