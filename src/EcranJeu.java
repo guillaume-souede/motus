@@ -223,7 +223,7 @@ public class EcranJeu extends JFrame {
 
                     // vérifier si le mot proposé est correct
                     if (proposition.equals(motSecret.toLowerCase())) {
-                        terminerJeu(true, "Le bot a trouvé le mot en " + (essais + 1) + " essais !");
+                        terminerJeu(true, "Motus en " + (essais + 1) + " essais !");
                         motTrouve = true;
                     } else {
                         // mettre à jour les indices pour le bot
@@ -244,7 +244,7 @@ public class EcranJeu extends JFrame {
                     if (!dicoMots.contains(motSecret.toLowerCase())) {
                         terminerJeu(false, "Mot impossible.");
                     } else {
-                        terminerJeu(false, "Défaite. Le mot était : " + motSecret);
+                        terminerJeu(false, "Perdu ! Le mot était : " + motSecret);
                     }
                 }
             } else {
@@ -290,18 +290,13 @@ public class EcranJeu extends JFrame {
             boolean motTrouve = false;
             while (essais < essaisMax && !motTrouve) {
                 dicoMots = LogiqueBot.choix(progVraie, charsMalPlace, charImpossible, dicoMots);
-                if (dicoMots.isEmpty()) {
-                    progressionLabel.setText("Aucune solution trouvée !");
-                    progressionLabel.setForeground(Color.RED);
-                    break;
-                }
                 String proposition = LogiqueBot.randomWord(dicoMots);
                 propositions.add(proposition);
                 grillePanel.majGrille(propositions, motSecret); // Mettre à jour la grille
 
                 if (proposition.equals(motSecret)) {
                     grillePanel.setBackgroundImage("images/victoire.png");
-                    progressionLabel.setText("Motus en " + (essais + 1) + " essais.");
+                    progressionLabel.setText("Motus en " + (essais + 1) + " essais !");
                     progressionLabel.setForeground(Color.GREEN);
                     motTrouve = true;
                 } else {
@@ -312,11 +307,6 @@ public class EcranJeu extends JFrame {
                 }
 
                 essais++;
-                // try {
-                //     Thread.sleep(1000); // Pause pour simuler le temps de réflexion du Bot
-                // } catch (InterruptedException e) {
-                //     e.printStackTrace();
-                // }
             }
 
             inputField.setEnabled(false);
@@ -326,16 +316,11 @@ public class EcranJeu extends JFrame {
             String prop = inputField.getText().trim().toUpperCase();
             if (motSecret == null) {
                 // Première proposition : définir la taille et tirer le mot secret
-                try {
-                    OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
-                    motSecret = db.getRandomWord(prop.length());
-                    grillePanel.setColonnes(prop.length());
-                    progressionLabel.setText(prop.length() + "/6-9");
-                    progressionLabel.setForeground(Color.GREEN);
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Erreur lors du chargement du mot secret !");
-                    return;
-                }
+                OuvrirDB db = new OuvrirDB("data/motsMotus.txt");
+                motSecret = db.getRandomWord(prop.length());
+                grillePanel.setColonnes(prop.length());
+                progressionLabel.setText(prop.length() + "/6-9");
+                progressionLabel.setForeground(Color.GREEN);
             }
 
             // Ensuite, vérifier la taille
@@ -344,7 +329,7 @@ public class EcranJeu extends JFrame {
             if (prop.equals(motSecret)) {
                 propositions.add(prop);
                 grillePanel.majGrille(propositions, motSecret);
-                terminerJeu(true, "Bravo ! Trouvé en " + propositions.size() + " essais.");
+                terminerJeu(true, "Motus en " + propositions.size() + " essais !");
             } else {
                 propositions.add(prop);
                 grillePanel.majGrille(propositions, motSecret);

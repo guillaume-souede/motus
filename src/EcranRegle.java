@@ -18,7 +18,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 
 public class EcranRegle extends JFrame {
-    private JFrame ecranJeu; // Peut être null
+    private final JFrame ecranJeu;
 
     public EcranRegle(JFrame ecranJeu) throws FileNotFoundException {
         super("Règles du Motus");

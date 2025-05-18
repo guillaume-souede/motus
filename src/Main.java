@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 public class Main extends JFrame{
 
     /**
-     * Menu principal qui est afficher au boot
+     * Menu principal qui est affiché au boot
      */
 
     public Main(){
