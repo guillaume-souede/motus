@@ -96,11 +96,11 @@ public class LogiqueBot {
         return new ArrayList<>(db.getOnePhrase(longueurMot));
     }
 
-    public static void main(String[] args) {
-        OuvrirDB db = new OuvrirDB("data/rules.txt"); // ouvrir la base de données
-        ArrayList<String> dico = new ArrayList<>(db.getOnePhrase(6)); // récupérer une liste de mots
-        HashMap<Integer, Character> charsMalPlace = new HashMap<>();
-        charsMalPlace = EtatMot.checkWrongPlacement2("partir", "patate"); // vérifier les caractères mal placés
-        choix("pa****", charsMalPlace, "zrq", dico); // appeler la méthode choix
-    }
+//     public static void main(String[] args) {
+//         OuvrirDB db = new OuvrirDB("data/rules.txt"); // ouvrir la base de données
+//         ArrayList<String> dico = new ArrayList<>(db.getOnePhrase(6)); // récupérer une liste de mots
+//         HashMap<Integer, Character> charsMalPlace = new HashMap<>();
+//         charsMalPlace = EtatMot.checkWrongPlacement2("partir", "patate"); // vérifier les caractères mal placés
+//         choix("pa****", charsMalPlace, "zrq", dico); // appeler la méthode choix
+//     }
 }

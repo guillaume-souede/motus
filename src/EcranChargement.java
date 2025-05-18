@@ -109,7 +109,7 @@ public class EcranChargement extends JFrame {
     public void afficher() {
         SwingUtilities.invokeLater(() -> setVisible(true));
     }
-    public static void main(String[] args) {
-        new EcranChargement();
-    }
+//     public static void main(String[] args) {
+//         new EcranChargement();
+//     }
 }

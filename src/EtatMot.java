@@ -127,12 +127,12 @@ public class EtatMot {
         }
         return new String(progArray);
     }
-        public static void main(String[] args) {
-        // bloc de test
-        String propostion= "partir";
-        String motSecret = "patate";
-        System.out.println(checkEtatMot(propostion, motSecret));
-        System.out.println(checkWrongPlacement(propostion, motSecret));
-        System.out.println(emojiRepresentation(propostion, motSecret));
-    }
+    //     public static void main(String[] args) {
+    //     // bloc de test
+    //     String propostion= "partir";
+    //     String motSecret = "patate";
+    //     System.out.println(checkEtatMot(propostion, motSecret));
+    //     System.out.println(checkWrongPlacement(propostion, motSecret));
+    //     System.out.println(emojiRepresentation(propostion, motSecret));
+    // }
 }

@@ -82,7 +82,9 @@ public class EcranRegle extends JFrame {
         searchPanel.setLayout(new FlowLayout());
 
         // Créer un JComboBox avec les lettres de l'alphabet
-        String[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        String[] alphabet = "ABCDEFGHIJKLMNOPQRSTUV".split("");
+        // String[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
         JComboBox<String> letterSelector = new JComboBox<>(alphabet);
 
         // Ajouter un ActionListener au JComboBox
@@ -138,7 +140,7 @@ public class EcranRegle extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        new EcranRegle(null);
-    }
+//     public static void main(String[] args) throws FileNotFoundException {
+//         new EcranRegle(null);
+//     }
 }

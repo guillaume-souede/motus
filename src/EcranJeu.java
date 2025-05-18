@@ -488,7 +488,7 @@ public class EcranJeu extends JFrame {
         // JOptionPane.showMessageDialog(this, message);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new EcranJeu("images/defaut.png"));
-    }
+//     public static void main(String[] args) {
+//         SwingUtilities.invokeLater(() -> new EcranJeu("images/defaut.png"));
+//     }
 }
