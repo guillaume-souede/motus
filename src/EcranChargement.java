@@ -2,7 +2,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,8 +34,16 @@ public class EcranChargement extends JFrame {
         barreChargement.setStringPainted(true);
         barreChargement.setForeground(Color.GREEN);
         barreChargement.setBackground(Color.DARK_GRAY);
-        barreChargement.setFont(new Font("Arial", Font.BOLD, 14));
+        barreChargement.setFont(new Font("Arial", Font.BOLD, 22)); // police plus grande
+        barreChargement.setPreferredSize(new java.awt.Dimension(600, 40)); // barre plus haute
         barreChargement.setValue(0);
+        barreChargement.setOpaque(true);
+        barreChargement.setBorderPainted(false);
+        barreChargement.setUI(new javax.swing.plaf.basic.BasicProgressBarUI() {
+            protected java.awt.Dimension getPreferredInnerHorizontal() {
+                return new java.awt.Dimension(600, 40);
+            }
+        });
 
         background.add(barreChargement, BorderLayout.SOUTH);
         add(background);
@@ -66,8 +73,16 @@ public class EcranChargement extends JFrame {
         barreChargement.setStringPainted(true);
         barreChargement.setForeground(Color.GREEN);
         barreChargement.setBackground(Color.DARK_GRAY);
-        barreChargement.setFont(new Font("Arial", Font.BOLD, 14));
+        barreChargement.setFont(new Font("Arial", Font.BOLD, 22)); // police plus grande
+        barreChargement.setPreferredSize(new java.awt.Dimension(600, 40)); // barre plus haute
         barreChargement.setValue(0);
+        barreChargement.setOpaque(true);
+        barreChargement.setBorderPainted(false);
+        barreChargement.setUI(new javax.swing.plaf.basic.BasicProgressBarUI() {
+            protected java.awt.Dimension getPreferredInnerHorizontal() {
+                return new java.awt.Dimension(600, 40);
+            }
+        });
 
         background.add(barreChargement, BorderLayout.SOUTH);
         add(background);
