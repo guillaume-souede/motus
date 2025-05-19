@@ -82,7 +82,7 @@ public class EcranRegle extends JFrame {
         searchPanel.setLayout(new FlowLayout());
 
         // Créer un JComboBox avec les lettres de l'alphabet
-        String[] alphabet = "ABCDEFGHIJKLMNOPQRSTUV".split("");
+        String[] alphabet = "ABCDEFGHIJKLMNOPQRSTV".split("");
         // String[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
         JComboBox<String> letterSelector = new JComboBox<>(alphabet);
