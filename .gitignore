@@ -1,1 +1,5 @@
 .DS_Store
+pysrc/__pycache__/configs.cpython-39.pyc
+pysrc/__pycache__/gui_tools.cpython-39.pyc
+pysrc/__pycache__/handledico.cpython-39.pyc
+.vscode/launch.json
