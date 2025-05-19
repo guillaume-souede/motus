@@ -61,6 +61,7 @@ class Application(tk.Tk):
         self.app_size = min(MAX_WIDTH-100,self.backImage.width()), min(MAX_HEIGHT-100,self.backImage.height())
         self.minsize(self.backImage.width()//2, self.backImage.height()//2)
         self.title("MOTUS v1.0 (c)AMOUROUX Bernard  Mai 2025")
+        self.configure(bg='wheat')
         self.resizable(False, False)
         
         
@@ -73,18 +74,18 @@ class Application(tk.Tk):
     def cree_widgets(self):
         tk.Label(self, bd=0, bg='wheat',font=self.labelFont,
                               text=" Longueur du mot : ").grid(column=0,row=0,columnspan=2,sticky="w")
-        self.spnbjbox = tk.Spinbox(self,bd=3,relief='sunken',textvariable=self.vnblettres, 
+        self.spboxletters = tk.Spinbox(self,bd=3,relief='sunken',textvariable=self.vnblettres, 
                                            wrap=True,from_=wordlengthlist[0],to=wordlengthlist[-1],
                                                 width=3,state='readonly',font=('Arial 10 italic bold'))
-        self.spnbjbox.grid(column=2, row=0, sticky='w')    
+        self.spboxletters.grid(column=2, row=0, sticky='w')    
         tk.Label(self, bd=0, bg='wheat',font=self.labelFont,
                               text=" Nombre d'essais : ").grid(column=3,row=0,columnspan=2,sticky="w")
-        self.spnbebox = tk.Spinbox(self,bd=3,relief='sunken',textvariable=self.vnbessais,wrap=True,
+        self.spboxtries = tk.Spinbox(self,bd=3,relief='sunken',textvariable=self.vnbessais,wrap=True,
                                      from_=6,to=10,width=3,state='readonly',font=('Arial 10 italic bold'))
-        self.spnbebox.grid(column=5, row=0, sticky='w')
+        self.spboxtries.grid(column=5, row=0, sticky='w')
         # --------------- Création du tk.Canvas() pour affichage de l'image de fond ---------------
-        frame0 = My_LabelFrame(self,row=1,cspan=20,rspan=20,pad=(0,0,0,0),bg="ivory",bd=2,relief='ridge')
-        self.background = tk.Canvas(frame0, bd=3, relief='groove', bg='ivory', 
+        frame0 = My_LabelFrame(self,row=1,cspan=20,rspan=20,pad=(0,0,0,0),bd=2,relief='ridge')
+        self.background = tk.Canvas(frame0, bd=3, relief='groove', 
                                         width=self.app_size[0],height=self.app_size[1], name="!backImage")
         self.background.grid(column=0, row=0, columnspan=20, rowspan=20, sticky='nsew')
         self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
