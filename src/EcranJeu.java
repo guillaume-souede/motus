@@ -338,17 +338,24 @@ public class EcranJeu extends JFrame {
                 propositions.add(prop);
                 grillePanel.majGrille(propositions, motSecret);
                 terminerJeu(true, "Motus en " + propositions.size() + " essais !");
+                // Ne pas réactiver inputField après victoire
             } else {
                 propositions.add(prop);
                 grillePanel.majGrille(propositions, motSecret);
                 if (propositions.size() == essaisMax) {
+                    // Harmonisation avec le mode robot
                     terminerJeu(false, "Perdu ! Le mot était : " + motSecret);
+                    // Ne pas réactiver inputField après défaite
+                    return;
                 }
             }
 
-            inputField.setEnabled(!prop.equals(motSecret));
-            validerBtn.setEnabled(false);
-            inputField.setText("");
+            // Ne réactiver inputField que si le jeu n'est pas terminé
+            if (!jeuTermine) {
+                inputField.setEnabled(true);
+                validerBtn.setEnabled(false);
+                inputField.setText("");
+            }
         }
         System.out.println("motSecret : " + motSecret);
     }
@@ -406,7 +413,7 @@ public class EcranJeu extends JFrame {
             grillePanel.setBackgroundImage(currentBackgroundImage);
         });
 
-        JRadioButtonMenuItem reelHiver = new JRadioButtonMenuItem("Réaliste hivernal");
+        JRadioButtonMenuItem reelHiver = new JRadioButtonMenuItem("Réaliste 2");
         reelHiver.addActionListener(e -> {
             currentBackgroundImage = "images/reelHiver.png";
             grillePanel.setBackgroundImage(currentBackgroundImage);
@@ -474,21 +481,12 @@ public class EcranJeu extends JFrame {
         inputField.setEnabled(false);
         validerBtn.setEnabled(false);
 
-        if ("👨".equals(mode) && !gagne && motSecret != null) {
-            progressionLabel.setText("Mot : " + motSecret);
-            progressionLabel.setForeground(Color.RED);
-        } else if (gagne) {
+        if (gagne && message != null && !message.isEmpty()) {
             progressionLabel.setText(message);
             progressionLabel.setForeground(Color.GREEN);
-        } else {
+        } else if (!gagne && message != null && !message.isEmpty()) {
             progressionLabel.setText(message);
             progressionLabel.setForeground(Color.RED);
         }
-
-        // JOptionPane.showMessageDialog(this, message);
     }
-
-//     public static void main(String[] args) {
-//         SwingUtilities.invokeLater(() -> new EcranJeu("images/defaut.png"));
-//     }
 }

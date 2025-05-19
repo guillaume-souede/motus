@@ -20,7 +20,6 @@ Modes disponibles :
 
 La partie est gagnée lorsque le mot est trouvé, quel que soit le mode choisi.
 
-Découvrez Bernard : https://github.com/AMXBernard
-(Encart publicitaire offert à titre gracieux)
-
-Découvrez aussi nos autres jeux !
+💡 Découvrez Bernard : [Découvrez Bernard](https://github.com/AMXBernard)
+ 
+💡 Découvrez aussi nos autres jeux !
