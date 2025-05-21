@@ -52,20 +52,26 @@ class GameBoard(My_LabelFrame):
         self.update()
 
     @property
-    def dico_Buttons(self):
+    def dico_Buttons(self) -> dict:
         return self.__dico_buttons 
 
-    def create_GameBoard(self, dimensions:tuple) -> dict:
-        print(f"GameBoard dimensions: {dimensions}")
-        ltr_size = [46,38,32,24,18]
-        self.ltr_font = (f'Courier\ New {ltr_size[self.__nb_letters-6]} bold italic')
-        for i in range(self.__nb_letters):
-            for j in range(self.__nb_tries):
-                btn_ID = i * self.__nb_tries + j if i != 0 else i * (self.__nb_tries - 1) + j
-                btn = tk.Button(self,bd=1,relief="raised",text="A",font=self.ltr_font)  #f"btn {btn_ID}"
-                btn.grid(column=j, row=i, padx=1, ipadx=(10-self.__nb_letters)*7, 
-                                            pady=2, ipady=0, sticky="new")
+    def __delete_DicoButtons(self):
+        [value[0].destroy() for value in self.__dico_buttons.values()]
+        self.__dico_buttons.clear()
+
+    def create_GameBoard(self, dimensions:tuple, nb_letters:int=6, nb_tries:int=6) -> dict:
+        #print(f"GameBoard dimensions: {dimensions}")
+        ltr_size = [46,44,42,40]
+        ipadx = [28,20,14,0]
+        if self.__dico_buttons: self.__delete_DicoButtons()
+        ltr_font = (f'Courier\ New {ltr_size[nb_letters-6]} bold italic')
+        for i in range(nb_tries):
+            for j in range(nb_letters):
+                btn_ID = i * nb_letters + j if i != 0 else i * (nb_letters - 1) + j
+                btn = tk.Button(self,bd=1,relief="raised",text="A",font=ltr_font)  #f"btn {btn_ID}"
+                btn.grid(column=j, row=i, padx=1, ipadx=ipadx[nb_letters-6], pady=2, ipady=0, sticky="new")
                 self.__dico_buttons[(i,j)] = (btn, f"mot {i}")
+        return self.__dico_buttons
 
 if __name__ == "__main__":
     

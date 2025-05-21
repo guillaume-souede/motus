@@ -53,8 +53,10 @@ class Application(tk.Tk):
         self.labelFont = tkFont.Font(self, family='Courier New', size=10, weight='bold', slant='roman')
         self.menuFont = tkFont.Font(self, family='Serif', size=11, weight='normal', slant='italic')
         
+        self.__MOTUS_word:str=""
         self.__dico_Letters:dict = ({})
         self.vnblettres = tk.IntVar(value=wordlengthlist[0])
+        self.vrequest = tk.StringVar(value=" Votre mot de 6 à 9 lettres ...")
         self.vnbessais = tk.IntVar(value=6)
 
         self.protocol('WM_DELETE_WINDOW',self.Quit)
@@ -80,6 +82,7 @@ class Application(tk.Tk):
         self.spboxletters = tk.Spinbox(self,bd=3,relief='sunken',textvariable=self.vnblettres, 
                                            wrap=True,from_=wordlengthlist[0],to=wordlengthlist[-1],
                                                 width=3,state='readonly',font=('Arial 10 italic bold'))
+        self.spboxletters.configure(command=lambda :self.create_GameBoard(False))
         self.spboxletters.grid(column=3, row=0, sticky='w')    
         # -----------------------------------------------------------------------------------------
         tk.Label(self, bd=0, bg='wheat',font=self.labelFont,
@@ -88,12 +91,22 @@ class Application(tk.Tk):
                                      from_=6,to=10,width=3,state='readonly',font=('Arial 10 italic bold'))
         self.spboxtries.grid(column=8, row=0, sticky='w')
         # -----------------------------------------------------------------------------------------
-        tk.Button(self,text='  Jouer  ',bg='wheat',activebackground='orange',state='active',
-                    command=self.create_GameBoard).grid(column=12,row=0,padx=5,columnspan=5,sticky="nsew")
-        tk.Button(self,text='Abandonner',bg='wheat',activebackground='red',state='disabled',
-                    command=self.create_GameBoard).grid(column=34,row=0,padx=5,columnspan=5,sticky="nsew")
+        self.playButton = tk.Button(self,text='  Jouer  ',bg='wheat',activebackground='orange',
+                                                      state='active',command=self.create_GameBoard)
+        self.playButton.grid(column=10,row=0,padx=5,columnspan=5,sticky="nsew")
         # -----------------------------------------------------------------------------------------
-    
+        frameEntry = My_LabelFrame(self,col=17,row=0,cspan=10,bg=self.cget('bg'),bd=1,relief="groove")
+        self.entryLabel = tk.Label(frameEntry,text=" Votre proposition : ",bg=self.cget('bg'),
+                                                        state="disabled",disabledforeground="grey50")
+        self.entryLabel.grid(column=0,row=0,columnspan=4,sticky='w')
+        self.entryRequest = tk.Entry(frameEntry,bg='ivory',readonlybackground='grey90',fg="grey50",
+                      width=26,disabledforeground="grey50",state='readonly',textvariable=self.vrequest)
+        self.entryRequest.grid(column=4,row=0,columnspan=6,sticky='w')
+        # -----------------------------------------------------------------------------------------
+        self.abortButton = tk.Button(self,text='Abandonner',bg='wheat',activebackground='red',
+                                                        state='disabled', command=self.__abort_GameBoard)
+        self.abortButton.grid(column=34,row=0,padx=5,columnspan=5,sticky="nsew")
+        # -----------------------------------------------------------------------------------------
         # --------------- Création du tk.Canvas() pour affichage de l'image de fond ---------------
         frame0 = My_LabelFrame(self,row=1,cspan=40,rspan=40,pad=(0,0,0,0),bd=2,relief='ridge')
         self.background = tk.Canvas(frame0, bd=3, relief='groove',name="!backImage",
@@ -104,17 +117,40 @@ class Application(tk.Tk):
         # -----------------------------------------------------------------------------------------
         self.gameBoard = GameBoard(frame0,self.__dico_Letters,self.vnblettres.get(),
                                       self.vnbessais.get(),col=9,row=30,cspan=20,rspan=10)
-        self.gameBoard.create_GameBoard(self.gameBoard.bbox())
-        self.__dico_Letters.update(self.gameBoard.dico_Buttons)
+        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox()))
         # -----------------------------------------------------------------------------------------
         message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum {self.vnbessais.get()} essais"
         self.barre_Etat = Window_StateBar(self,"",1,col=0,row=41,cspan=40,pady=5)
         self.barre_Etat.update_vltexte(message, 1)
         self.fenetre_a_propos(self.messageBox)    
     
-    def create_GameBoard(self):
-        dimensions = self.nametowidget(".!my_labelframe.gameBoard").bbox(); print(f"dimensions: {dimensions}")
-            
+    def create_GameBoard(self, playgame:bool=True):
+        letters, tries = self.vnblettres.get(), self.vnbessais.get()
+        self.__MOTUS_word = self.dico_MOTUS.dico_MOTUS_one_world(f"{letters}")
+        message = f" Info : Découvrir un mot MOTUS de {letters} lettres avec au maximum {tries} essais"
+        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(), letters, tries))
+        if playgame: self.__init_GameBoard(nb_letters=letters, nb_tries=tries)   
+        self.barre_Etat.update_vltexte(message, 1)
+    
+    def __init_GameBoard(self, nb_letters:int, nb_tries:int):
+        self.entryLabel.configure(state="normal",fg="black")
+        self.entryRequest.configure(state="normal",fg="black")
+        self.entryRequest.select_range(0, tk.END)
+        self.spboxletters.configure(state="disabled")
+        self.spboxtries.configure(state="disabled")
+        self.playButton.configure(state="disabled")
+        self.abortButton.configure(state="normal")
+        self.entryRequest.focus_force()
+    
+    def __abort_GameBoard(self):
+        self.entryLabel.configure(state="disabled",fg="grey50")
+        self.entryRequest.configure(state="readonly",fg="grey50")
+        self.vrequest.set(f" mot MOTUS : {self.__MOTUS_word.upper()}")
+        self.spboxletters.configure(state="readonly")
+        self.spboxtries.configure(state="readonly")
+        self.abortButton.configure(state="disabled")
+        self.playButton.configure(state="active")
+        
     def fenetre_a_propos(self, msgbox:Win_MessageBox):
         """ Fenêtre-message à propos.
             Indique le nom de l'auteurs ainsi que la licence.
