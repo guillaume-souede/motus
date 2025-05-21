@@ -60,21 +60,21 @@ class Handle_DicoMotus():
             raise FileNotFoundError(f" Fichier dictionnaire '{fname}' non trouvé !")
                     
     @property
-    def dico_MOTUS(self) -> dict:
+    def dico_MOTUS(self)->dict:
         return self.__dico_MOTUS                    # return full dictionary
     
-    def __dico_MOTUS_length(self, wordlength:WordLength) -> list:
+    def __dico_MOTUS_length(self, wordlength:WordLength)->list:
         """ Propriété qui renvoi la liste des mots du dictionnaire MOTUS 
             de longueur 'wordlength'.
         """
         return self.__dico_MOTUS.get(wordlength, [f"{wordlength}",])   # return value of dictionary[worldlength]
     
-    def __shuffle_worlds(self, wordlength:WordLength) -> list:
+    def __shuffle_worlds(self, wordlength:WordLength)->list:
         """ Mélange la liste """
         shuffle(self.__dico_MOTUS_length(wordlength))
         return self.dico_MOTUS.get(wordlength, [f"{wordlength}",])
     
-    def dico_MOTUS_one_world(self, wordlength:WordLength) -> str:
+    def dico_MOTUS_one_world(self, wordlength:WordLength)->str:
         return choice(self.__shuffle_worlds(wordlength=wordlength))
     
     

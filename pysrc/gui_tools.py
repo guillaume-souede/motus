@@ -130,7 +130,7 @@ class Win_MessageBox(tk.Toplevel):
         self.withdraw()    
    
 # ----------------------------- Méthodes diverses -----------------------------    
-def get_widget(parent, pathname:str) -> object:
+def get_widget(parent, pathname:str)->object:
     """ Retourne l'objet dont le nom est 'pathname' et qui appartient à 'parent' """
     try:
         widget = parent.nametowidget(pathname)

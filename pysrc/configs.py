@@ -1,13 +1,17 @@
 from typing import Literal
 
 WordLength = Literal["6", "7", "8", "9"]
-wordlengthlist:list[int] = [c for c in range(6,10)]
+wordlengthlist:list[int]=[c for c in range(6,10)]
 
 dico_path:str = "data"
 images_path:str  = "images"
 
 default_dico_filename = "motsMotus.txt"
 default_MOTUS_background = "defaut.png"
+
+COLOR_OK = "lightgreen"
+COLOR_IS = "tan"
+COLOR_NO = "red"
 
 if __name__ == "__main__":
     
