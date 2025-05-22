@@ -343,9 +343,7 @@ public class EcranJeu extends JFrame {
                 propositions.add(prop);
                 grillePanel.majGrille(propositions, motSecret);
                 if (propositions.size() == essaisMax) {
-                    // Harmonisation avec le mode robot
                     terminerJeu(false, "Perdu ! Le mot était : " + motSecret);
-                    // Ne pas réactiver inputField après défaite
                     return;
                 }
             }
@@ -431,10 +429,10 @@ public class EcranJeu extends JFrame {
         tutorielItem.addItemListener(e -> {
             if (tutorielItem.isSelected()) {
                 tutorielItem.setBackground(new Color(0, 120, 255)); // Bleu
-                tutorielItem.setForeground(Color.WHITE); // Texte blanc pour contraste
+                tutorielItem.setForeground(Color.WHITE); // Texte blanc
             } else {
-                tutorielItem.setBackground(null); // Fond par défaut
-                tutorielItem.setForeground(null); // Texte par défaut
+                tutorielItem.setBackground(null); // Fond défaut
+                tutorielItem.setForeground(null); // Texte défaut
             }
         });
 
