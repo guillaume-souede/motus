@@ -3,7 +3,7 @@ from typing import Literal
 WordLength = Literal["6", "7", "8", "9"]
 wordlengthlist:list=[c for c in range(6,10)]
 
-PlayerStatus = Literal["tries","winner","looser"]
+PlayerStatus = Literal["tries","winner","loser"]
 
 dico_path:str = "data"
 images_path:str  = "images"

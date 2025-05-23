@@ -98,7 +98,7 @@ class Win_MessageBox(tk.Toplevel):
     def __init__(self, master:tk.Tk, message:str=None, *args, **kwargs):
         
         self.__master = master
-        self.__name__ = 'win_messagebox'
+        self.__name__ = '!win_messagebox'
         self.__vmessage = tk.StringVar(value=message)
         
         tab_options:dict = {'bd':3, 'bg':'wheat', 'relief':'ridge', 'pady':5}        
@@ -118,7 +118,6 @@ class Win_MessageBox(tk.Toplevel):
     @property
     def message(self)->str:
         return self.__vmessage.get()
-    
     @message.setter
     def message(self, message):
         self.__vmessage.set(message)
@@ -133,6 +132,69 @@ class Win_MessageBox(tk.Toplevel):
         self.boxtitle(" Message ")
         self.withdraw()    
    
+
+class My_MessageBox(tk.Toplevel):
+    
+    def __init__(self, master:tk.Tk, title:str, message:str=None, *args, **kwargs):
+        
+        self.__master = master
+        self.__vtitle = tk.StringVar(value=title)
+        self.__vmessage = tk.StringVar(value=message)
+        
+        tab_options:dict = {'bd':3,'bg':'wheat','relief':'ridge','name':"!my_MessageBox"}        
+        for key in list(tab_options.keys()):
+            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
+        super().__init__(master, *args, **kwargs)
+        
+        self.protocol("WM_DELETE_WINDOW", self.choose_cancel)
+        msg_font = ('Courier\ New 18 bold italic')
+        btn_font = ('Courier\ New 14 bold italic')
+        self.title(self.__vtitle.get())
+        self.resizable(False, False)
+
+        tk.Message(self,bg='wheat',width=600,aspect=100,justify=tk.CENTER,font=msg_font,
+                                               textvariable=self.__vmessage).grid(padx=10,pady=10,
+                                                      column=0,row=0,columnspan=6,rowspan=4,sticky="nsew")
+        tk.Button(self,text=" Rejouer ",width=12,font=btn_font,activebackground="lightgreen",
+                                command=self.ok_command,padx=10).grid(column=1,row=4,sticky="nw")
+        tk.Button(self,text=" Quitter ",width=12,font=btn_font,activebackground="tan",
+                                command=self.no_command,padx=10).grid(column=3,row=4,sticky="ne")
+
+    def go(self):
+        """ Methode qui permet de garder le focus sur la fenetre de choix
+            de l'huile qui lors du choix renvoi le nom de l'huile choisie
+            et ferme la fenetre Toplevel.
+        """
+        self.lift(self.__master)        # mise au premier plan de la Toplevel    
+        self.how = None                 # Nom de la procédure exécutée en sortie
+        self.mainloop()                 # Sortie de la Boucle principale par "self.quit(how)"
+        self.destroy()                  # Fermeture de la fenetre Toplevel
+        return self.how
+
+    def choose_ok(self) -> str:
+        return "yes"
+
+    def choose_nok(self) -> str:
+        return "no"
+    
+    def choose_cancel(self):
+        self.Quit(None)
+        
+    def ok_command(self):
+        self.Quit(self.choose_ok())
+        
+    def no_command(self):
+        self.Quit(self.choose_nok())
+        
+    def Quit(self, how=None):
+        """ Sortie de la boucle principale et non fermeture de la fenetre
+            Exécution de la methode "how" qui permet de récupérer la
+            donnée voulue en sotie en fin de méthode "go()"
+        """
+        self.how = how
+        self.quit()                     # Exit mainloop()
+        
+
 # ----------------------------- Méthodes diverses -----------------------------    
 def get_widget(parent, pathname:str)->object:
     """ Retourne l'objet dont le nom est 'pathname' et qui appartient à 'parent' """
@@ -148,8 +210,10 @@ if __name__ == "__main__":
         
     root = tk.Tk()
     msgbox = Win_MessageBox(root)
-    msgbox.message = "Win Message Box"
-    print(f"msgbox name  : {msgbox}")
-    print("msgbox object:", get_widget(root,'.!win_messagebox').__repr__())
-    msgbox.lift(root)
+    #msgbox.message = "Win Message Box"
+    #print(f"msgbox name  : {msgbox}")
+    #print("msgbox object:", get_widget(root,'.!win_messagebox').__repr__())
+    #msgbox.lift(root)
+    message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
+    print(My_MessageBox(root,"Faites votre choix de partie",message).go())
     root.mainloop()
