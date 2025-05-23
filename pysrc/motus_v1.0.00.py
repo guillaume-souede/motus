@@ -135,15 +135,27 @@ class Application(tk.Tk):
         proposition = self.vrequest.get()
         if proposition != " Votre mot de 6 à 9 lettres ..." and len(proposition) == self.vnblettres.get():
             # ---- Recherche et écriture du mot dans les cases du premier mot libre ----
-            buttons = self.__find_free_word(proposition)
+            word_nbr, buttons = self.__find_free_word(proposition)
             buttons = self.__draw_OK_letters(word=proposition, buttons=buttons)
             buttons = self.__draw_IS_letters(word=proposition, buttons=buttons)
             buttons = self.__draw_NO_letters(word=proposition, buttons=buttons)
-                    
+            if word_nbr == self.vnbessais.get()-1 or self.OK == self.vnbessais.get():
+                resultat = self.__win_loose_game()
+                print(f"resultat: {resultat}")
+                if resultat == "winner":
+                    self.create_GameBoard()
+                else:
+                    self.Quit()
+                 
         else:
             message = self.barre_Etat.get_message
             self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{proposition}' est invalide")
             self.barre_Etat.get_message = message
+    
+    
+    
+    def __win_loose_game(self) -> PlayerStatus:
+        return "looser"if self.NO > 0 or self.IS > 0 else "winner"
     
     def __draw_NO_letters(self, word:str, buttons:list) -> PlayerStatus:
         """ Changement de la couleur de fond, le relief des lettres
@@ -152,7 +164,7 @@ class Application(tk.Tk):
         for idx,button in buttons:
             button.configure(bg='red',relief='flat',activebackground='red')
             button.flash()
-            self.NO += 1
+        self.NO = len(buttons)
         return buttons
         
     def __draw_IS_letters(self, word:str, buttons:list):
@@ -165,7 +177,7 @@ class Application(tk.Tk):
                 button.configure(bg='orange',relief='flat',activebackground='orange')
                 found.append((idx,button))
                 button.flash()
-                self.IS += 1
+        self.IS = len(found)
         [buttons.remove(b) for b in found[::-1]]
         return buttons
     
@@ -179,14 +191,8 @@ class Application(tk.Tk):
                 button.configure(bg='lightgreen',relief='flat',activebackground='lightgreen')
                 found.append((idx,button))
                 button.flash()
-                self.OK += 1
+        self.OK = len(found)
         [buttons.remove(b) for b in found[::-1]]        
-        
-        #found = list(filter(lambda l:l[0]==l[1], list(zip(word, self.__MOTUS_word, range(len(word))))))
-        #if found:
-        #    [buttons[i][1].configure(bg='lightgreen',relief='flat',activebackground='lightgreen') \
-        #                                                            for i in map(lambda b:b[2], found)]
-        #    [buttons.remove(buttons[i]) for i in sorted(map(lambda b:b[2], found),reverse=True)]
         return buttons
     
     def __find_free_word(self, word:str) -> list:
@@ -203,7 +209,7 @@ class Application(tk.Tk):
             word_nbr = records[0][0][1]
             self.vrequest.set("")
         self.TR += 1
-        return dummy
+        return word_nbr, dummy
         
     def create_GameBoard(self, playgame:bool=True):
         # --------------- Fonction de validation du tk.Entry() ----------------
