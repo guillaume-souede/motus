@@ -29,7 +29,7 @@ __date__ = "$Date: 2025/05/18 07:00 $"
 __copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
-import sys,os
+import sys,os,re
 import os.path as op
 import tkinter as tk
 import tkinter.font as tkFont
@@ -89,22 +89,27 @@ class Application(tk.Tk):
                               text=" Nombre d'essais :").grid(column=4,row=0,columnspan=4,sticky="w")
         self.spboxtries = tk.Spinbox(self,bd=3,relief='sunken',textvariable=self.vnbessais,wrap=True,
                                      from_=6,to=10,width=3,state='readonly',font=('Arial 10 italic bold'))
+        self.spboxtries.configure(command=lambda :self.create_GameBoard(False))
         self.spboxtries.grid(column=8, row=0, sticky='w')
         # -----------------------------------------------------------------------------------------
         self.playButton = tk.Button(self,text='  Jouer  ',bg='wheat',activebackground='orange',
                                                       state='active',command=self.create_GameBoard)
         self.playButton.grid(column=10,row=0,padx=5,columnspan=5,sticky="nsew")
         # -----------------------------------------------------------------------------------------
-        frameEntry = My_LabelFrame(self,col=17,row=0,cspan=10,bg=self.cget('bg'),bd=1,relief="groove")
+        frameEntry = My_LabelFrame(self,col=17,row=0,cspan=13,bg=self.cget('bg'),bd=2,relief="groove")
         self.entryLabel = tk.Label(frameEntry,text=" Votre proposition : ",bg=self.cget('bg'),
                                                         state="disabled",disabledforeground="grey50")
         self.entryLabel.grid(column=0,row=0,columnspan=4,sticky='w')
-        self.entryRequest = tk.Entry(frameEntry,bg='ivory',readonlybackground='grey90',fg="grey50",
-                      width=26,disabledforeground="grey50",state='readonly',textvariable=self.vrequest)
+        self.entryRequest = tk.Entry(frameEntry,bg='ivory',readonlybackground='grey90',width=26,
+                state='readonly',fg="grey50",disabledforeground="grey50",textvariable=self.vrequest)
         self.entryRequest.grid(column=4,row=0,columnspan=6,sticky='w')
+        self.validButton = tk.Button(frameEntry,bg='ivory',text=" Valider ",state="disabled")
+        self.validButton.configure(activebackground="lightgreen",command=self.__valide_Mot)
+        self.validButton.grid(column=12,row=0,columnspan=2,padx=10,sticky='nsew')
+        self.validButton.__funcID = self.bind("<Return>", self.__valide_Mot)
         # -----------------------------------------------------------------------------------------
         self.abortButton = tk.Button(self,text='Abandonner',bg='wheat',activebackground='red',
-                                                        state='disabled', command=self.__abort_GameBoard)
+                                                    state='disabled', command=self.__abort_GameBoard)
         self.abortButton.grid(column=34,row=0,padx=5,columnspan=5,sticky="nsew")
         # -----------------------------------------------------------------------------------------
         # --------------- Création du tk.Canvas() pour affichage de l'image de fond ---------------
@@ -113,23 +118,76 @@ class Application(tk.Tk):
                                                       width=self.app_size[0],height=self.app_size[1])
         self.background.grid(column=0, row=0, columnspan=40, rowspan=40, sticky='nsew')
         self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
-                                            image=self.backImage, anchor="center", tags='img_background')
+                                        image=self.backImage, anchor="center", tags='img_background')
         # -----------------------------------------------------------------------------------------
-        self.gameBoard = GameBoard(frame0,self.__dico_Letters,self.vnblettres.get(),
-                                      self.vnbessais.get(),col=9,row=30,cspan=20,rspan=10)
-        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox()))
+        letters = self.vnblettres.get(); tries = self.vnbessais.get()
+        self.gameBoard = GameBoard(frame0,self.__dico_Letters,letters,tries,col=9,row=30,cspan=20,rspan=10)
+        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),letters,tries))
         # -----------------------------------------------------------------------------------------
         message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum {self.vnbessais.get()} essais"
         self.barre_Etat = Window_StateBar(self,"",1,col=0,row=41,cspan=40,pady=5)
         self.barre_Etat.update_vltexte(message, 1)
         self.fenetre_a_propos(self.messageBox)    
     
+    
+    
+    def __valide_Mot(self, event=None):
+        proposition = self.vrequest.get()
+        if proposition != " Votre mot de 6 à 9 lettres ..." and len(proposition) == self.vnblettres.get():
+            # ---- Recherche et écriture du mot dans les cases du premier mot libre ----
+            buttons:list[tk.Button] = self.__find_free_word(proposition)
+            buttons = self.__draw_OK_letters(word=proposition, buttons=buttons)
+            buttons = self.__draw_IS_letters(word=proposition, buttons=buttons)
+            
+        else:
+            message = self.barre_Etat.get_message
+            self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{proposition}' est invalide")
+            self.barre_Etat.get_message = message
+    
+    
+    def __draw_IS_letters(self, word:str, buttons:list):
+        found = list(set(word) & set(self.__MOTUS_word))
+        print(f"found: {found}")
+        return buttons
+    
+    def __draw_OK_letters(self, word:str, buttons:list):
+        """ Recherche de la/des lettres/position dans le mot qui est/sont bien placée(s)
+            et change la couleur de fond, le relief de ces lettres.
+        """
+        found = list(filter(lambda l:l[0]==l[1], list(zip(word, self.__MOTUS_word, range(len(word))))))
+        if found:
+            [buttons[i].configure(bg='red',relief='flat',activebackground='red') \
+                                                                    for i in map(lambda b:b[2], found)]
+            #[buttons.remove(buttons[i]) for i in sorted(map(lambda b:b[2], found),reverse=True)]
+        return buttons
+    
+    def __find_free_word(self, word:str) -> int:
+        """ Recherche de la position du premier mot libre de 0 à 6...9 """
+        dummy:list = ([])
+        records = list(filter(lambda record:record[1]==False, self.__dico_Letters.values()))
+        if records:
+            for l in range(self.gameBoard.nb_Letters):
+                btn_ID, tries, letter = records[l][0]
+                self.__dico_Letters[tries,l] = ((btn_ID,tries,word[l]), True, records[l][2])
+                self.__dico_Letters[tries,l][2].configure(text=word[l].upper())
+                dummy.append(records[l][2])
+            self.vrequest.set("")
+        return dummy
+        
     def create_GameBoard(self, playgame:bool=True):
+        # --------------- Fonction de validation du tk.Entry() ----------------
+        def _validateCmd(value:str, max:int):
+            return bool(len(value) <= int(max))
+        # ---------------------------------------------------------------------
         letters, tries = self.vnblettres.get(), self.vnbessais.get()
+        # ------ Mise en place de la fonction de validation du tk.Entry() -----
+        _Cmd = self.entryRequest.register(_validateCmd)
+        self.entryRequest.configure(validatecommand=(_Cmd,"%P",letters),validate="key")
+        # ---------------------------------------------------------------------
         self.__MOTUS_word = self.dico_MOTUS.dico_MOTUS_one_world(f"{letters}")
         message = f" Info : Découvrir un mot MOTUS de {letters} lettres avec au maximum {tries} essais"
-        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(), letters, tries))
-        if playgame: self.__init_GameBoard(nb_letters=letters, nb_tries=tries)   
+        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),letters,tries))
+        if playgame: self.__init_GameBoard(nb_letters=letters,nb_tries=tries)   
         self.barre_Etat.update_vltexte(message, 1)
     
     def __init_GameBoard(self, nb_letters:int, nb_tries:int):
@@ -140,15 +198,19 @@ class Application(tk.Tk):
         self.spboxtries.configure(state="disabled")
         self.playButton.configure(state="disabled")
         self.abortButton.configure(state="normal")
+        self.validButton.__funcID = self.bind("<Return>", self.__valide_Mot)
+        self.validButton.configure(state="normal")
         self.entryRequest.focus_force()
     
     def __abort_GameBoard(self):
+        self.unbind("<Return>",self.validButton.__funcID)
         self.entryLabel.configure(state="disabled",fg="grey50")
         self.entryRequest.configure(state="readonly",fg="grey50")
         self.vrequest.set(f" mot MOTUS : {self.__MOTUS_word.upper()}")
         self.spboxletters.configure(state="readonly")
         self.spboxtries.configure(state="readonly")
         self.abortButton.configure(state="disabled")
+        self.validButton.configure(state="disabled")
         self.playButton.configure(state="active")
         
     def fenetre_a_propos(self, msgbox:Win_MessageBox):
@@ -164,8 +226,6 @@ class Application(tk.Tk):
         msgbox.message = message
         msgbox.lift(self)
         
-        
-    
     def Quit(self):
         self.destroy()
     

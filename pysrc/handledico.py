@@ -33,7 +33,7 @@ import os.path as op
 import tkinter as tk
 
 from os import getcwd
-from random import shuffle,choice
+from random import shuffle,choice,seed
 from configs import *
 
 
@@ -45,6 +45,8 @@ class Handle_DicoMotus():
         self.__filename = filename if filename != None else default_dico_filename
         self.__dico_MOTUS:dict[str:[list]] = ({})
         self.__load_dicofile()
+        # ---- for test only ----
+        seed(1)
     
     def __load_dicofile(self):
         bad_chars = """ \n\r\t"""

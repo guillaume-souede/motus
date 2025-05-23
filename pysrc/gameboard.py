@@ -37,13 +37,12 @@ from configs import *
 
 class GameBoard(My_LabelFrame):
     
-    def __init__(self, master, dico_buttons:dict, nb_letters:int, nb_tries:int, *args, **kwargs):
+    def __init__(self, master, dico_buttons:dict, nb_letters:int=6, nb_tries:int=6, *args, **kwargs):
         
         self.__master = master
         self.__nb_tries = nb_tries
         self.__nb_letters = nb_letters
         self.__dico_buttons = dico_buttons
-        
         
         tab_options:dict = {'bg':'orange','bd':5,'relief':'groove','labelanchor':'n'}
         for key in list(tab_options.keys()):
@@ -52,25 +51,42 @@ class GameBoard(My_LabelFrame):
         self.update()
 
     @property
+    def nb_Letters(self) -> int:
+        return self.__nb_letters
+    @nb_Letters.setter
+    def nb_Letters(self, nb_letters):
+        self.__nb_letters = nb_letters
+        
+    @property
+    def nb_Tries(self) -> int:
+        return self.__nb_tries
+    @nb_Tries.setter
+    def nb_Tries(self, nb_tries):
+        self.__nb_tries = nb_tries
+
+    @property
     def dico_Buttons(self) -> dict:
         return self.__dico_buttons 
 
     def __delete_DicoButtons(self):
-        [value[0].destroy() for value in self.__dico_buttons.values()]
+        [value[2].destroy() for value in self.__dico_buttons.values()]
         self.__dico_buttons.clear()
 
-    def create_GameBoard(self, dimensions:tuple, nb_letters:int=6, nb_tries:int=6) -> dict:
-        #print(f"GameBoard dimensions: {dimensions}")
-        ltr_size = [46,44,42,40]
-        ipadx = [28,20,14,0]
-        if self.__dico_buttons: self.__delete_DicoButtons()
+    def create_GameBoard(self, dimensions:tuple, nb_letters:int, nb_tries:int) -> dict:
+        ltr_size = [42,44,42,40]
+        self.__delete_DicoButtons()
+        padXY = [(28,0),(20,1),(10,4),(4,6)]
+        self.nb_Letters = nb_letters if nb_letters != self.nb_Letters else self.nb_Letters
+        self.nb_Tries = nb_tries if nb_tries != self.nb_Tries else self.nb_Tries
         ltr_font = (f'Courier\ New {ltr_size[nb_letters-6]} bold italic')
         for i in range(nb_tries):
             for j in range(nb_letters):
                 btn_ID = i * nb_letters + j if i != 0 else i * (nb_letters - 1) + j
                 btn = tk.Button(self,bd=1,relief="raised",text="A",font=ltr_font)  #f"btn {btn_ID}"
-                btn.grid(column=j, row=i, padx=1, ipadx=ipadx[nb_letters-6], pady=2, ipady=0, sticky="new")
-                self.__dico_buttons[(i,j)] = (btn, f"mot {i}")
+                btn.grid(column=j, row=i, padx=1, ipadx=padXY[nb_letters-6][0], 
+                                              pady=2, ipady=padXY[nb_letters-6][1], sticky="new")
+                # ----- dico_buttons :   (n°Lettre, n°mot), état, objet) ------
+                self.__dico_buttons[(i,j)] = ((btn_ID,i," "), False, btn)
         return self.__dico_buttons
 
 if __name__ == "__main__":
@@ -78,7 +94,8 @@ if __name__ == "__main__":
     dico:dict = ({})
     
     root = tk.Tk()
-    gameboard = GameBoard(root, dico, nb_letters=6, nb_tries=6, cspan=12, rspan=10)
-    gameboard.create_GameBoard((4,7,15,19))
-    print(f"self._dico_buttons: {gameboard.dico_Buttons[list(gameboard.dico_Buttons.keys())[0]]}")
-    
+    gameboard = GameBoard(root, dico, nb_letters=6, nb_tries=6, cspan=18, rspan=10)
+    gameboard.create_GameBoard(gameboard.bbox(),gameboard.nb_Letters,gameboard.nb_Tries)
+    print("self._dico_buttons:",[print(gameboard.dico_Buttons[i]) \
+                for i in list(filter(lambda w:w[0]==0, gameboard.dico_Buttons.keys()))])
+    root.mainloop()

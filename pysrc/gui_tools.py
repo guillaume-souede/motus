@@ -72,6 +72,13 @@ class Window_StateBar(tk.Frame):
         tk.Label(self,bd=0,bg=self.cget('bg'),anchor="sw",height=1,textvariable=self.__vl_texte).grid()
         self.update_vltexte(defMessage if not message else message, waitime)
 
+    @property
+    def get_message(self) -> str:
+        return self.__vl_texte.get()
+    @get_message.setter
+    def get_message(self, default_msg:str):
+        self.__defaultMsg = default_msg
+        
     def __raz_vltexte__(self):
         self.__vl_texte.set(self.__defaultMsg)
         self.__waitnbr = None
@@ -84,9 +91,6 @@ class Window_StateBar(tk.Frame):
         elif wait > 1:
             self.__waitnbr = self.after(self.__defaultTime if wait==None else (wait*1000) , self.__raz_vltexte__)
         self.__vl_texte.set(msg)
-
-    def get_message(self) -> str:
-        return self.__vl_texte
 
 
 class Win_MessageBox(tk.Toplevel):
