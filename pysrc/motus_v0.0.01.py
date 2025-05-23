@@ -251,7 +251,7 @@ class Application(tk.Tk):
         """
         message = "MOTUS v0.0.10"+"\n\nCopyright (C) 2025\nBernard Amouroux\n" \
         "\nDonnées :\nDictionnaire des mots MOTUS\nhttps://www.motus.france2.fr\n\n" \
-        "Sur une idée du projet 'MOTUS' de \nl'Université de Toulouse - Master BBS\nBio-informatique et Biologie des Systèmes\n-\n"\
+        "Sur une idée du projet 'MOTUS' de \nl'Université de Toulouse - Master BBS\nBio-informatique et Biologie des Systèmes ET SURTOUT AMOUROUX Jan et SOUEDE Guillaume\n-\n"\
         "https://www.univ-tlse3.fr/decouvrir-nos-diplomes/master-mention-bio-informatique\n" \
         "\nLicense : GPL Version 3, 29 June 2007"
         msgbox.boxtitle('À propos')
