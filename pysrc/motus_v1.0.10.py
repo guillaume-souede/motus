@@ -134,6 +134,7 @@ class Application(tk.Tk):
         self.gameBoard = GameBoard(self.frame0,self.__dico_Letters,col=9,row=20,cspan=20,rspan=20)
         self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),
                                                 self.gameBoard.nb_Letters,self.gameBoard.nb_Tries))
+        self.gameBoard.presentation_motus()
         # -----------------------------------------------------------------------------------------
         message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum {self.vnbessais.get()} essais"
         self.barre_Etat = Window_StateBar(self,"",1,col=0,row=41,cspan=38,pady=5)
@@ -234,7 +235,6 @@ class Application(tk.Tk):
                 dummy.append((records[l][0],records[l][2]))
             word_nbr = records[0][0][1]
             self.vrequest.set("")
-        self.TR += 1
         return word_nbr, dummy
         
     def create_GameBoard(self, playgame:bool=True):
@@ -242,7 +242,7 @@ class Application(tk.Tk):
         def _validateCmd(value:str, max:int):
             return bool(len(value) <= int(max))
         # ---------------------------------------------------------------------
-        self.OK,self.IS,self.NO,self.TR = 0, 0, 0, 0 
+        self.OK, self.IS, self.NO = 0, 0, 0
         letters, tries = self.vnblettres.get(), self.vnbessais.get()
         # ------ Mise en place de la fonction de validation du tk.Entry() -----
         _Cmd = self.entryRequest.register(_validateCmd)

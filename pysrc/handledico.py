@@ -79,8 +79,6 @@ class Handle_DicoMotus():
     def dico_MOTUS_one_world(self, wordlength:WordLength)->str:
         return choice(self.__shuffle_worlds(wordlength=wordlength))
     
-    
-    
 
 if __name__ == "__main__":
     

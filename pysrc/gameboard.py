@@ -103,14 +103,23 @@ class GameBoard(My_LabelFrame):
                 # ----- dico_buttons :   (n°Lettre, n°mot), état, objet) ------
                 self.__dico_buttons[(i,j)] = ((btn_ID,i," "), False, btn)
         return self.__dico_buttons
+    
+    def presentation_motus(self):
+        init_text = "mot    mot    mot       MOTUS!      "
+        [letter[2].configure(bg='lightgreen',text=init_text[idx]) \
+                for idx,letter in enumerate(self.__dico_buttons.values()) if init_text[idx] != " "]
+        
+    def phrase_initiale(self)-> str:
+        return "mot    mot    mot       MOTUS!      "
 
 if __name__ == "__main__":
     
     dico:dict = ({})
     
     root = tk.Tk()
-    gameboard = GameBoard(root, dico, nb_letters=7, nb_tries=8)
+    gameboard = GameBoard(root, dico, nb_letters=6, nb_tries=6)
     gameboard.create_GameBoard(gameboard.bbox(),gameboard.nb_Letters,gameboard.nb_Tries)
-    print("self._dico_buttons:",[print(gameboard.dico_Buttons[i]) \
-                for i in list(filter(lambda w:w[0]==0, gameboard.dico_Buttons.keys()))])
+    #print("self._dico_buttons:",[print(gameboard.dico_Buttons[i]) \
+    #            for i in list(filter(lambda w:w[0]==0, gameboard.dico_Buttons.keys()))])
+    gameboard.presentation_motus()
     root.mainloop()
