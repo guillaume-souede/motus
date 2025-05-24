@@ -2,8 +2,8 @@
 # -- encode utf-8 --
 """
 Bibliotheque 'GameBoard'. Surcharges de la classes tKinter Frame
-pour afficher le tableau de lettres du jeu MOTUS inspiré du jeu 
-télévisé diffusé sur France2.
+pour afficher le tableau de lettres composé de Tkinter Buttons()
+du jeu MOTUS inspiré du jeu télévisé diffusé sur France2.
 Copyright (C) 2025  Bernard AMOUROUX
 
 This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,14 @@ from gui_tools import *
 from configs import *
 
 class GameBoard(My_LabelFrame):
-    
+    """ Librairie qui crée et gère un tableau de X*Y tk.Button() pour
+        afficher un tableau de jeu, ici pour le jeu MOTUS. 
+        Les paramètres d'initialisation de la classe 'GameBoard' sont:
+        'master': fenètre qui va contenir le tableau de jeu
+        'dico_buttons': le dictionnaire qui contient les références des cases du jeu
+        'nb_letters': nombre de lettres du mot à trouver
+        'nb_tries': nombre de tentatives max pour trouver 
+    """
     def __init__(self, master, dico_buttons:dict, nb_letters:int=6, nb_tries:int=6, *args, **kwargs):
         
         self.__master = master
@@ -69,20 +76,28 @@ class GameBoard(My_LabelFrame):
         return self.__dico_buttons 
 
     def __delete_DicoButtons(self):
+        """ Methode d'effacement des widgets tk.Buttons et 
+            du dictionnaires principal associé 'self.__dico_buttons'
+        """
         [value[2].destroy() for value in self.__dico_buttons.values()]
         self.__dico_buttons.clear()
 
     def create_GameBoard(self, dimensions:tuple, nb_letters:int, nb_tries:int) -> dict:
-        ltr_size = [42,44,42,40]
-        self.__delete_DicoButtons()
-        padXY = [(28,0),(20,1),(10,4),(4,6)]
+        """ Création de la zone des tk.Buttons() fonction du nombre de lettres
+            'nb_letters' et du nombre d'essais 'nb_tries'.
+            Renvoi un dictionnaire dont les cles sont un tuple (essais,lettres)
+            et les données un tuple ((btn_ID,essai,lettre du mot), mot utilisé Vrai/faux, tk.Button)
+        """
+        self.__delete_DicoButtons()             # - Effacement données et dictionnaire des tk.Buttons
+        padXY = [(30,0),(21,1),(15,2),(11,3)]   # - Gestion des options padx et pady des tk.Buttons
+        ltr_size = [42,42,40,38]                # - Taille des polices de caractères fonction du nombre de lettres 
         self.nb_Letters = nb_letters if nb_letters != self.nb_Letters else self.nb_Letters
         self.nb_Tries = nb_tries if nb_tries != self.nb_Tries else self.nb_Tries
         ltr_font = (f'Courier\ New {ltr_size[nb_letters-6]} bold italic')
         for i in range(nb_tries):
             for j in range(nb_letters):
                 btn_ID = i * nb_letters + j if i != 0 else i * (nb_letters - 1) + j
-                btn = tk.Button(self,bd=1,relief="raised",text="A",font=ltr_font)  #f"btn {btn_ID}"
+                btn = tk.Button(self,bd=1,relief="raised",text=" ",font=ltr_font)  #f"btn {btn_ID}"
                 btn.grid(column=j, row=i, padx=1, ipadx=padXY[nb_letters-6][0], 
                                               pady=2, ipady=padXY[nb_letters-6][1], sticky="new")
                 # ----- dico_buttons :   (n°Lettre, n°mot), état, objet) ------
@@ -94,7 +109,7 @@ if __name__ == "__main__":
     dico:dict = ({})
     
     root = tk.Tk()
-    gameboard = GameBoard(root, dico, nb_letters=6, nb_tries=6, cspan=18, rspan=10)
+    gameboard = GameBoard(root, dico, nb_letters=7, nb_tries=8)
     gameboard.create_GameBoard(gameboard.bbox(),gameboard.nb_Letters,gameboard.nb_Tries)
     print("self._dico_buttons:",[print(gameboard.dico_Buttons[i]) \
                 for i in list(filter(lambda w:w[0]==0, gameboard.dico_Buttons.keys()))])

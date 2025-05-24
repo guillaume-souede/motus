@@ -41,7 +41,7 @@ class Handle_DicoMotus():
     
     def __init__(self, master:tk.Tk, filename:str=None):
         
-        self.__master = master
+        self.__master = master      # pour développement futur, sera déjà déclaré !
         self.__filename = filename if filename != None else default_dico_filename
         self.__dico_MOTUS:dict[str:[list]] = ({})
         self.__load_dicofile()

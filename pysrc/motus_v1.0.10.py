@@ -42,40 +42,48 @@ from configs import *
 
 
 class Application(tk.Tk):
-    
+    """ Classe qui gère l'affichage et la gestion du jeu en lui-même
+        Paramètre:
+            'filename': nom du fichier des mots à charger servant de dictionnaire de référence
+                        peut-être passé en paramètre de ligne de commande (nom complet)
+    """
     def __init__(self, filename:str):
         
         tk.Tk.__init__(self)
-        
+        # -------------- Initialisation des images de fond du jeu -------------
         self.backImage = tk.PhotoImage(master=self,
                                 file=op.join(os.getcwd(),images_path,default_MOTUS_background))
-        
+        self.winnerImage = tk.PhotoImage(master=self,
+                                file=op.join(os.getcwd(),images_path,"victoire.png"))
+        self.loserImage = tk.PhotoImage(master=self,
+                                file=op.join(os.getcwd(),images_path,"defaite.png"))
+        # ---------- Initialisation des polices de caractères du jeu ----------
         self.labelFont = tkFont.Font(self, family='Courier New', size=10, weight='bold', slant='roman')
         self.menuFont = tkFont.Font(self, family='Serif', size=11, weight='normal', slant='italic')
-        
+        # ---------------------------------------------------------------------
         self.__MOTUS_word:str=""
         self.__dico_Letters:dict = ({})
         self.player_status:PlayerStatus = "tries"
-        self.OK,self.IS,self.NO,self.TR = 0, 0, 0, 0
+        self.OK, self.IS, self.NO = 0, 0, 0
         self.vnblettres = tk.IntVar(value=wordlengthlist[0])
         self.vrequest = tk.StringVar(value=" Votre mot de 6 à 9 lettres ...")
         self.vnbessais = tk.IntVar(value=6)
-
+        # ---------- Interception de la croix rouge en haut à droite ----------
         self.protocol('WM_DELETE_WINDOW',self.Quit)
-
-        MAX_WIDTH, MAX_HEIGHT = self.maxsize()
+        # ---- Taille de la fenètre du jeu fonction de la résolution écran ----
+        MAX_WIDTH, MAX_HEIGHT = self.maxsize()  # --- renvoi la taille écran --
         self.app_size = min(MAX_WIDTH-100,self.backImage.width()), min(MAX_HEIGHT-150,self.backImage.height())
         self.minsize(self.backImage.width()//2, self.backImage.height()//2)
+        # ---------------------------------------------------------------------
         self.title("MOTUS v1.0 (c)AMOUROUX Bernard  Mai 2025")
-        [self.columnconfigure(i, weight=1) for i in range(41)]
-        [self.rowconfigure(i, weight=1) for i in range(41)]
+        [self.columnconfigure(i, weight=0) for i in range(41)]
+        [self.rowconfigure(i, weight=0) for i in range(41)]
         self.resizable(False, False)
         self.configure(bg='wheat')
-        
+        # ---------------------------------------------------------------------        
         self.dico_MOTUS = Handle_DicoMotus(self, filename=filename)
         self.messageBox = Win_MessageBox(self)
         self.cree_widgets()
-        
         
     def cree_widgets(self):
         # -----------------------------------------------------------------------------------------
@@ -88,7 +96,7 @@ class Application(tk.Tk):
         self.spboxletters.grid(column=3, row=0, sticky='w')    
         # -----------------------------------------------------------------------------------------
         tk.Label(self, bd=0, bg='wheat',font=self.labelFont,
-                              text=" Nombre d'essais :").grid(column=4,row=0,columnspan=4,sticky="w")
+                              text="Nombre d'essais :").grid(column=4,row=0,columnspan=4,sticky="w")
         self.spboxtries = tk.Spinbox(self,bd=3,relief='sunken',textvariable=self.vnbessais,wrap=True,
                                      from_=6,to=10,width=3,state='readonly',font=('Arial 10 italic bold'))
         self.spboxtries.configure(command=lambda :self.create_GameBoard(False))
@@ -115,35 +123,65 @@ class Application(tk.Tk):
         self.abortButton.grid(column=34,row=0,padx=5,columnspan=5,sticky="nsew")
         # -----------------------------------------------------------------------------------------
         # --------------- Création du tk.Canvas() pour affichage de l'image de fond ---------------
-        frame0 = My_LabelFrame(self,row=1,cspan=40,rspan=40,pad=(0,0,0,0),bd=2,relief='ridge')
-        self.background = tk.Canvas(frame0, bd=3, relief='groove',name="!backImage",
+        # -----------------------------------------------------------------------------------------
+        self.frame0 = My_LabelFrame(self,row=1,cspan=40,rspan=40,pad=(0,0,0,0),bd=2,relief='ridge')
+        self.background = tk.Canvas(self.frame0, bd=3, relief='groove',name="!backImage",
                                                       width=self.app_size[0],height=self.app_size[1])
         self.background.grid(column=0, row=0, columnspan=40, rowspan=40, sticky='nsew')
         self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
                                         image=self.backImage, anchor="center", tags='img_background')
         # -----------------------------------------------------------------------------------------
-        letters = self.vnblettres.get(); tries = self.vnbessais.get()
-        self.gameBoard = GameBoard(frame0,self.__dico_Letters,letters,tries,col=9,row=30,cspan=20,rspan=10)
-        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),letters,tries))
+        self.gameBoard = GameBoard(self.frame0,self.__dico_Letters,col=9,row=20,cspan=20,rspan=20)
+        self.__dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),
+                                                self.gameBoard.nb_Letters,self.gameBoard.nb_Tries))
         # -----------------------------------------------------------------------------------------
         message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum {self.vnbessais.get()} essais"
-        self.barre_Etat = Window_StateBar(self,"",1,col=0,row=41,cspan=40,pady=5)
+        self.barre_Etat = Window_StateBar(self,"",1,col=0,row=41,cspan=38,pady=5)
         self.barre_Etat.update_vltexte(message, 1)
+        # -----------------------------------------------------------------------------------------
+        tk.Button(self,bg='orange',border=1,command=lambda :show_rules(self),text="Règles du jeu",
+                    activebackground='wheat').grid(column=38,row=41,columnspan=2,padx=2,pady=2,sticky="n")
+        # -----------------------------------------------------------------------------------------        
         self.fenetre_a_propos(self.messageBox)    
     
     def __valide_Mot(self, event=None):
         proposition = self.vrequest.get()
         if proposition != " Votre mot de 6 à 9 lettres ..." and len(proposition) == self.vnblettres.get():
             # ---- Recherche et écriture du mot dans les cases du premier mot libre ----
-            buttons = self.__find_free_word(proposition)
+            word_nbr, buttons = self.__find_free_word(proposition)
             buttons = self.__draw_OK_letters(word=proposition, buttons=buttons)
             buttons = self.__draw_IS_letters(word=proposition, buttons=buttons)
             buttons = self.__draw_NO_letters(word=proposition, buttons=buttons)
-                    
+            if word_nbr == self.vnbessais.get()-1 or self.OK == self.vnbessais.get():
+                resultat = self.__win_loose_game()
+                self.gameBoard.grid_remove()
+                if resultat == "winner":
+                    message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{self.__MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"    
+                    winner_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
+                                                image=self.winnerImage, anchor="center", tags='img_winner')
+                    self.__choose_new_game(message, winner_img)    
+                if resultat == "loser":
+                    message = f"\n{'Vous avez perdu le mot MOTUS est :':100}\n{self.__MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"    
+                    loser_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
+                                                image=self.loserImage, anchor="center", tags='img_winner')
+                    self.__choose_new_game(message, loser_img)
+                self.gameBoard.grid()
         else:
             message = self.barre_Etat.get_message
             self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{proposition}' est invalide")
             self.barre_Etat.get_message = message
+    
+    def __choose_new_game(self, message:str, image_ID:int):
+        choix = My_MessageBox(self,"Choix de la partie MOTUS",message=message).go()
+        if choix == "yes":
+            self.background.delete(image_ID)
+            self.create_GameBoard()
+        else:
+            self.Quit()
+            
+    def __win_loose_game(self) -> PlayerStatus:
+        """ Methode qui renvoi le status du joueur : 'winner' ou 'looser' """
+        return "loser"if self.NO > 0 or self.IS > 0 else "winner"
     
     def __draw_NO_letters(self, word:str, buttons:list) -> PlayerStatus:
         """ Changement de la couleur de fond, le relief des lettres
@@ -152,7 +190,7 @@ class Application(tk.Tk):
         for idx,button in buttons:
             button.configure(bg='red',relief='flat',activebackground='red')
             button.flash()
-            self.NO += 1
+        self.NO = len(buttons)
         return buttons
         
     def __draw_IS_letters(self, word:str, buttons:list):
@@ -165,7 +203,7 @@ class Application(tk.Tk):
                 button.configure(bg='orange',relief='flat',activebackground='orange')
                 found.append((idx,button))
                 button.flash()
-                self.IS += 1
+        self.IS = len(found)
         [buttons.remove(b) for b in found[::-1]]
         return buttons
     
@@ -179,14 +217,8 @@ class Application(tk.Tk):
                 button.configure(bg='lightgreen',relief='flat',activebackground='lightgreen')
                 found.append((idx,button))
                 button.flash()
-                self.OK += 1
+        self.OK = len(found)
         [buttons.remove(b) for b in found[::-1]]        
-        
-        #found = list(filter(lambda l:l[0]==l[1], list(zip(word, self.__MOTUS_word, range(len(word))))))
-        #if found:
-        #    [buttons[i][1].configure(bg='lightgreen',relief='flat',activebackground='lightgreen') \
-        #                                                            for i in map(lambda b:b[2], found)]
-        #    [buttons.remove(buttons[i]) for i in sorted(map(lambda b:b[2], found),reverse=True)]
         return buttons
     
     def __find_free_word(self, word:str) -> list:
@@ -203,7 +235,7 @@ class Application(tk.Tk):
             word_nbr = records[0][0][1]
             self.vrequest.set("")
         self.TR += 1
-        return dummy
+        return word_nbr, dummy
         
     def create_GameBoard(self, playgame:bool=True):
         # --------------- Fonction de validation du tk.Entry() ----------------
@@ -249,9 +281,10 @@ class Application(tk.Tk):
         """ Fenêtre-message à propos.
             Indique le nom de l'auteurs ainsi que la licence.
         """
-        message = "MOTUS v0.0.10"+"\n\nCopyright (C) 2025\nBernard Amouroux\n" \
+        message = "MOTUS v1.0.10"+"\n\nCopyright (C) 2025\nBernard Amouroux\n" \
         "\nDonnées :\nDictionnaire des mots MOTUS\nhttps://www.motus.france2.fr\n\n" \
-        "Sur une idée du projet 'MOTUS' de \nl'Université de Toulouse - Master BBS\nBio-informatique et Biologie des Systèmes ET SURTOUT AMOUROUX Jan et SOUEDE Guillaume\n-\n"\
+        "Sur une idée du projet JAVA 'MOTUS' de\nJan AMOUROUX \nGuillaume SOUÈDE\n\nétudiants à l'Université de Toulouse\n" \
+        "Master BBS - Bio-informatique et Biologie des Systèmes\n\n" \
         "https://www.univ-tlse3.fr/decouvrir-nos-diplomes/master-mention-bio-informatique\n" \
         "\nLicense : GPL Version 3, 29 June 2007"
         msgbox.boxtitle('À propos')

@@ -140,25 +140,32 @@ class My_MessageBox(tk.Toplevel):
         self.__master = master
         self.__vtitle = tk.StringVar(value=title)
         self.__vmessage = tk.StringVar(value=message)
-        
+        # ---------------------------------------------------------------------
         tab_options:dict = {'bd':3,'bg':'wheat','relief':'ridge','name':"!my_MessageBox"}        
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
         super().__init__(master, *args, **kwargs)
-        
+        # ---------------------------------------------------------------------        
         self.protocol("WM_DELETE_WINDOW", self.choose_cancel)
         msg_font = ('Courier\ New 18 bold italic')
         btn_font = ('Courier\ New 14 bold italic')
+        self.bind_all("<Escape>", self.no_command)
+        self.bind_all("<Return>", self.ok_command)
         self.title(self.__vtitle.get())
         self.resizable(False, False)
-
+        # ---------------------------------------------------------------------
         tk.Message(self,bg='wheat',width=600,aspect=100,justify=tk.CENTER,font=msg_font,
                                                textvariable=self.__vmessage).grid(padx=10,pady=10,
                                                       column=0,row=0,columnspan=6,rowspan=4,sticky="nsew")
-        tk.Button(self,text=" Rejouer ",width=12,font=btn_font,activebackground="lightgreen",
-                                command=self.ok_command,padx=10).grid(column=1,row=4,sticky="nw")
-        tk.Button(self,text=" Quitter ",width=12,font=btn_font,activebackground="tan",
-                                command=self.no_command,padx=10).grid(column=3,row=4,sticky="ne")
+        self.playButton = tk.Button(self,text=" Rejouer ",width=12,font=btn_font,state="active",
+                                            activebackground="lightgreen",command=self.ok_command,padx=10)
+        self.playButton.grid(column=1,row=4,pady=10,sticky="nw")
+        self.quitButton = tk.Button(self,text=" Quitter ",width=12,font=btn_font,
+                                            activebackground="tan",command=self.no_command,padx=10)
+        self.quitButton.grid(column=3,row=4,pady=10,sticky="ne")
+
+    def valide_ok_command(self, event):
+        print(f"event: {event}")
 
     def go(self):
         """ Methode qui permet de garder le focus sur la fenetre de choix
@@ -180,10 +187,10 @@ class My_MessageBox(tk.Toplevel):
     def choose_cancel(self):
         self.Quit(None)
         
-    def ok_command(self):
+    def ok_command(self, event=None):
         self.Quit(self.choose_ok())
         
-    def no_command(self):
+    def no_command(self, event=None):
         self.Quit(self.choose_nok())
         
     def Quit(self, how=None):
@@ -196,6 +203,9 @@ class My_MessageBox(tk.Toplevel):
         
 
 # ----------------------------- Méthodes diverses -----------------------------    
+def show_rules(master)->tk.Toplevel:
+    print(" ---> show Rules ...")
+
 def get_widget(parent, pathname:str)->object:
     """ Retourne l'objet dont le nom est 'pathname' et qui appartient à 'parent' """
     try:
