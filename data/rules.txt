@@ -1,15 +1,17 @@
-Le jeu propose deux modes : Joueur et Ordinateur. 
-Dans les deux cas, il s'agit de deviner un mot dont le nombre de lettres est fixé à l’avance (entre 6 et 9 lettres).
+        
+    Actuellement le jeu propose le mode 'Joueur' uniquement. La version 2 de ce MOTUS proposera l'IA comme adversaire !. On pourra alors sélectionner : Joueur et Ordinateur. 
 
-À chaque tour, le joueur écrit un mot. Celui-ci est accepté uniquement s’il contient le bon nombre de lettres et s’il est correctement orthographié (mot reconnu).
+    Dans les deux cas, il s'agit de deviner un mot dont le nombre de lettres (entre 6 et 9) et le nombre d'essais (entre 6 et 10) sont fixés à l’avance.
 
-Une fois le mot validé, chaque lettre est affichée avec un code couleur :
+    À chaque tour, le joueur écrit un mot. Celui-ci est accepté uniquement s’il contient le bon nombre de lettres et s’il est correctement orthographié (mot reconnu).
 
-🟥 Carré rouge = Lettre bien placée : présente dans le mot et à la bonne position, 
-🟡 Cercle jaune = Lettre mal placée : présente dans le mot mais ailleurs,
-🟦 Carré bleu = Lettre absente du mot.
+    Une fois le mot validé, chaque lettre est affichée avec un code couleur :
 
-Remarque : Seules les lettres réellement présentes dans le mot secret seront colorées. Les répétitions non justifiées restent en bleu.
+🟦 Carré Vert   = Lettre bien placée : présente dans le mot et à la bonne position, 
+🟥 Carré Orange = Lettre bien placée : présente dans le mot et à la bonne position, 
+🟥 Carré Rouge  = Lettre absente du mot.
+
+Remarque : Seules les lettres réellement présentes dans le mot secret seront colorées. Les répétitions non justifiées restent en orange.
 
 
 Modes disponibles :
@@ -18,6 +20,4 @@ Modes disponibles :
 
 - En mode Ordinateur, le joueur saisit un mot, et l’intelligence artificielle tente de le deviner.
 
-La partie est gagnée lorsque le mot est trouvé, quel que soit le mode choisi.
-
-Découvrez aussi nos autres jeux !
+    La partie est gagnée lorsque le mot est trouvé, quel que soit le mode choisi.

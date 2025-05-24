@@ -63,8 +63,8 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         self.__MOTUS_word:str=""
         self.__dico_Letters:dict = ({})
-        self.player_status:PlayerStatus = "tries"
-        self.OK, self.IS, self.NO = 0, 0, 0
+        self.player_status = "tries"
+        self.OK,self.IS,self.NO = 0,0,0
         self.vnblettres = tk.IntVar(value=wordlengthlist[0])
         self.vrequest = tk.StringVar(value=" Votre mot de 6 à 9 lettres ...")
         self.vnbessais = tk.IntVar(value=6)
@@ -81,7 +81,7 @@ class Application(tk.Tk):
         self.resizable(False, False)
         self.configure(bg='wheat')
         # ---------------------------------------------------------------------        
-        self.dico_MOTUS = Handle_DicoMotus(self, filename=filename)
+        self.dico_MOTUS = Handle_DicoMotus(self, filename)
         self.messageBox = Win_MessageBox(self)
         self.cree_widgets()
         
@@ -140,7 +140,7 @@ class Application(tk.Tk):
         self.barre_Etat = Window_StateBar(self,"",1,col=0,row=41,cspan=38,pady=5)
         self.barre_Etat.update_vltexte(message, 1)
         # -----------------------------------------------------------------------------------------
-        tk.Button(self,bg='orange',border=1,command=lambda :show_rules(self),text="Règles du jeu",
+        tk.Button(self,bg='orange',border=1,command=self.__show_rules,text="Règles du jeu",
                     activebackground='wheat').grid(column=38,row=41,columnspan=2,padx=2,pady=2,sticky="n")
         # -----------------------------------------------------------------------------------------        
         self.fenetre_a_propos(self.messageBox)    
@@ -276,6 +276,9 @@ class Application(tk.Tk):
         self.abortButton.configure(state="disabled")
         self.validButton.configure(state="disabled")
         self.playButton.configure(state="active")
+    
+    def __show_rules(self):
+        Game_Rules(self).show_helpfile()
         
     def fenetre_a_propos(self, msgbox:Win_MessageBox):
         """ Fenêtre-message à propos.

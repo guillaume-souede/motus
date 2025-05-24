@@ -29,8 +29,12 @@ __date__ = "$Date: 2025/05/18 07:00 $"
 __copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
+import re
+import os.path as op
 import tkinter as tk
 
+from os import getcwd
+from configs import *
 
 class My_LabelFrame(tk.LabelFrame):
 
@@ -202,6 +206,70 @@ class My_MessageBox(tk.Toplevel):
         self.quit()                     # Exit mainloop()
         
 
+class Game_Rules(tk.Toplevel):
+        
+    def __init__(self, master, filename:str=None, *args, **kwargs):
+         
+        self.__master = master
+        self.__filename = filename if filename else op.join(getcwd(),dico_path,default_help_filename)
+        self.__vtitle = tk.StringVar(value="Aide de MOTUS v1.0.10 (c)AMOUROUX Bernard 05/2025")
+        self.__dico_lines:dict[int:str] = ({})
+        # ---------------------------------------------------------------------
+        tab_options:dict = {'bd':3,'bg':'wheat','relief':'ridge','name':"!my_gameRules"}        
+        for key in list(tab_options.keys()):
+            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
+        super().__init__(master, *args, **kwargs)
+        # ---------------------------------------------------------------------        
+        self.protocol("WM_DELETE_WINDOW", self.Quit)
+        # ---------------------------------------------------------------------        
+        self.txt_font = ('Courier\ New 18 bold italic')
+        self.bind_all("<Escape>", self.Quit)
+        self.minsize(master.app_size[0]//3, master.app_size[1]//3)
+        self.columnconfigure(index=0, weight=1)
+        self.rowconfigure(index=0, weight=1)
+        self.title(self.__vtitle.get())
+        # ---------------------------------------------------------------------             self.create_widgets()
+        self.__load_helpfile()
+    
+    def show_helpfile(self):
+        self.create_widgets()
+        
+    def __load_helpfile(self):
+        if not op.isfile(self.__filename):
+            raise FileNotFoundError(f"Bad file name: {self.__filename}")
+        with open(file=self.__filename, mode='rt', encoding="utf-8") as helpfile:
+            for idx,line in enumerate(helpfile.readlines()):
+                self.__dico_lines[idx] = line.rstrip()
+    
+    def create_widgets(self):
+        versb = tk.Scrollbar(self, orient=tk.VERTICAL)
+        versb.grid(column=1,row=0,sticky='nse')
+        self.__text_help = tk.Text(self, bg='ivory',font=self.txt_font,wrap="word",width=90)
+        self.__text_help.tag_configure("ok", background="lightgreen",border=2,relief='raised')
+        self.__text_help.tag_configure("is", background="orange",border=2,relief='raised')
+        self.__text_help.tag_configure("no", background="red",border=2,relief='raised')
+        self.__text_help.grid(column=0,row=0,sticky="nsew")
+        self.__text_help['yscrollcommand'] = versb.set   
+        versb['command'] = self.__text_help.yview
+        # ---------------------------------------------------------------------        
+        [self.__text_help.insert(tk.END, f"{line}\n") for line in self.__dico_lines.values()]
+        # ---------------------------------------------------------------------
+        tags_list = self.__look_for_tags(self.__text_help.get("1.0", tk.END))
+        for span,tagname in tags_list:
+            self.__text_help.tag_add(tagname,self.__text_help.index(f"1.0 + {span[0]-2}c"), self.__text_help.index(f"1.0 + {span[1]-1}c"))
+        self.__text_help.configure(state="disabled")
+    
+    def __look_for_tags(self, help_text:str)->list:
+        tags_list:list = ([])
+        text_to_tag = [("Carré Vert  ","ok"),("Carré Orange","is"),("Carré Rouge ","no")]
+        for color,tagname in text_to_tag:
+            found = re.search(color, help_text, flags=0).span()
+            tags_list.append((found,tagname))
+        return tags_list
+        
+    def Quit(self, event=None):
+        self.destroy()
+    
 # ----------------------------- Méthodes diverses -----------------------------    
 def show_rules(master)->tk.Toplevel:
     print(" ---> show Rules ...")
@@ -219,11 +287,13 @@ def get_widget(parent, pathname:str)->object:
 if __name__ == "__main__":
         
     root = tk.Tk()
+    root.app_size = root.maxsize()
     msgbox = Win_MessageBox(root)
-    #msgbox.message = "Win Message Box"
+    msgbox.message = "Win Message Box"
     #print(f"msgbox name  : {msgbox}")
     #print("msgbox object:", get_widget(root,'.!win_messagebox').__repr__())
-    #msgbox.lift(root)
+    msgbox.lift(root)
     message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
-    print(My_MessageBox(root,"Faites votre choix de partie",message).go())
+    #print(My_MessageBox(root,"Faites votre choix de partie",message).go())
+    Game_Rules(root).show_helpfile()
     root.mainloop()
