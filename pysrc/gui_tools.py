@@ -29,7 +29,6 @@ __date__ = "$Date: 2025/05/18 07:00 $"
 __copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
-import re
 import os.path as op
 import tkinter as tk
 
@@ -139,11 +138,12 @@ class Win_MessageBox(tk.Toplevel):
 
 class My_MessageBox(tk.Toplevel):
     
-    def __init__(self, master:tk.Tk, title:str, message:str=None, *args, **kwargs):
+    def __init__(self, master:tk.Tk, title:str, message:str=None, action:int=0, *args, **kwargs):
         
         self.__master = master
         self.__vtitle = tk.StringVar(value=title)
         self.__vmessage = tk.StringVar(value=message)
+        tab_action = [(" Rejouer "," Quitter "),("Oui","Non")]
         # ---------------------------------------------------------------------
         tab_options:dict = {'bd':3,'bg':'wheat','relief':'ridge','name':"!my_MessageBox"}        
         for key in list(tab_options.keys()):
@@ -153,18 +153,19 @@ class My_MessageBox(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.choose_cancel)
         msg_font = ('Courier\ New 18 bold italic')
         btn_font = ('Courier\ New 14 bold italic')
-        self.bind_all("<Escape>", self.no_command)
-        self.bind_all("<Return>", self.ok_command)
+        self.bind("<Escape>", self.no_command)
+        self.bind("<Return>", self.ok_command)
         self.title(self.__vtitle.get())
         self.resizable(False, False)
         # ---------------------------------------------------------------------
+        title1,title2 = tab_action[action][0], tab_action[action][1]
         tk.Message(self,bg='wheat',width=600,aspect=100,justify=tk.CENTER,font=msg_font,
                                                textvariable=self.__vmessage).grid(padx=10,pady=10,
                                                       column=0,row=0,columnspan=6,rowspan=4,sticky="nsew")
-        self.playButton = tk.Button(self,text=" Rejouer ",width=12,font=btn_font,state="active",
+        self.playButton = tk.Button(self,text=title1,width=12,font=btn_font,state="active",
                                             activebackground="lightgreen",command=self.ok_command,padx=10)
         self.playButton.grid(column=1,row=4,pady=10,sticky="nw")
-        self.quitButton = tk.Button(self,text=" Quitter ",width=12,font=btn_font,
+        self.quitButton = tk.Button(self,text=title2,width=12,font=btn_font,
                                             activebackground="tan",command=self.no_command,padx=10)
         self.quitButton.grid(column=3,row=4,pady=10,sticky="ne")
 
@@ -215,14 +216,14 @@ class Game_Rules(tk.Toplevel):
         self.__vtitle = tk.StringVar(value="Aide de MOTUS v1.0.10 (c)AMOUROUX Bernard 05/2025")
         self.__dico_lines:dict[int:str] = ({})
         # ---------------------------------------------------------------------
-        tab_options:dict = {'bd':3,'bg':'wheat','relief':'ridge','name':"!my_gameRules"}        
+        tab_options:dict = {'bd':3,'bg':'ivory','relief':'ridge','name':"!my_gameRules"}        
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
         super().__init__(master, *args, **kwargs)
         # ---------------------------------------------------------------------        
         self.protocol("WM_DELETE_WINDOW", self.Quit)
         # ---------------------------------------------------------------------        
-        self.txt_font = ('Courier\ New 18 bold italic')
+        self.txt_font = ('Courier\ New 16 bold italic')
         self.bind_all("<Escape>", self.Quit)
         self.minsize(master.app_size[0]//3, master.app_size[1]//3)
         self.columnconfigure(index=0, weight=1)
@@ -235,6 +236,10 @@ class Game_Rules(tk.Toplevel):
         self.create_widgets()
         
     def __load_helpfile(self):
+        """ Charge le fichier d'aide au format texte donné au constructeur de
+            la classe et à défaut le fichier de la librairie 'configs.py'
+            contenu dans la constante 'default_help_filename'.
+        """
         if not op.isfile(self.__filename):
             raise FileNotFoundError(f"Bad file name: {self.__filename}")
         with open(file=self.__filename, mode='rt', encoding="utf-8") as helpfile:
@@ -242,38 +247,42 @@ class Game_Rules(tk.Toplevel):
                 self.__dico_lines[idx] = line.rstrip()
     
     def create_widgets(self):
+        # ------------------ Tags à placer dans le tk.Text() ------------------
+        text_tags = [(" Carré Vert   ","ok","lightgreen"),
+                     (" Carré Orange ","is","orange"),
+                     (" Carré Rouge  ","no","red"),       ]
+        # ---------------------------------------------------------------------
         versb = tk.Scrollbar(self, orient=tk.VERTICAL)
         versb.grid(column=1,row=0,sticky='nse')
-        self.__text_help = tk.Text(self, bg='ivory',font=self.txt_font,wrap="word",width=90)
-        self.__text_help.tag_configure("ok", background="lightgreen",border=2,relief='raised')
-        self.__text_help.tag_configure("is", background="orange",border=2,relief='raised')
-        self.__text_help.tag_configure("no", background="red",border=2,relief='raised')
-        self.__text_help.grid(column=0,row=0,sticky="nsew")
+        self.__text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
+        self.__text_help.grid(column=0,row=0,padx=10,pady=10,sticky="nsew")
         self.__text_help['yscrollcommand'] = versb.set   
         versb['command'] = self.__text_help.yview
-        # ---------------------------------------------------------------------        
+        # ------------ Insertion du texte dans le widget tk.Text() ------------        
         [self.__text_help.insert(tk.END, f"{line}\n") for line in self.__dico_lines.values()]
         # ---------------------------------------------------------------------
-        tags_list = self.__look_for_tags(self.__text_help.get("1.0", tk.END))
-        for span,tagname in tags_list:
-            self.__text_help.tag_add(tagname,self.__text_help.index(f"1.0 + {span[0]-2}c"), self.__text_help.index(f"1.0 + {span[1]-1}c"))
+        self.__look_for_tags(self.__text_help.get("1.0", tk.END),text_tags)
         self.__text_help.configure(state="disabled")
     
-    def __look_for_tags(self, help_text:str)->list:
-        tags_list:list = ([])
-        text_to_tag = [("Carré Vert  ","ok"),("Carré Orange","is"),("Carré Rouge ","no")]
-        for color,tagname in text_to_tag:
-            found = re.search(color, help_text, flags=0).span()
-            tags_list.append((found,tagname))
-        return tags_list
+    def __look_for_tags(self, help_text:str,text_tags:list):
+        """ Methode qui ajoute des tags au texte. La recherche du pattern se fait
+            avec la méthode Text().search() intégrée à l'interpréteur Tcl(). 
+            parametres:
+                'help_text': texte que l'on veut tager
+                'text_tags': tuple de la forme -> (pattern, tagname) 
+        """
+        count = tk.IntVar()
+        for pattern,tagname,color in text_tags:
+            found = self.__text_help.search(pattern,"1.0",tk.END,count=count,regexp=True)
+            if found:
+                self.__text_help.tag_configure(tagname, background=color,
+                                        border=3,spacing1=5,spacing3=5,relief='raised')
+                self.__text_help.tag_add(tagname,f"{found}", f"{found}+{count.get()}c")
         
     def Quit(self, event=None):
         self.destroy()
     
 # ----------------------------- Méthodes diverses -----------------------------    
-def show_rules(master)->tk.Toplevel:
-    print(" ---> show Rules ...")
-
 def get_widget(parent, pathname:str)->object:
     """ Retourne l'objet dont le nom est 'pathname' et qui appartient à 'parent' """
     try:
@@ -283,17 +292,14 @@ def get_widget(parent, pathname:str)->object:
         return None
 
 
-
 if __name__ == "__main__":
         
     root = tk.Tk()
     root.app_size = root.maxsize()
     msgbox = Win_MessageBox(root)
     msgbox.message = "Win Message Box"
-    #print(f"msgbox name  : {msgbox}")
-    #print("msgbox object:", get_widget(root,'.!win_messagebox').__repr__())
     msgbox.lift(root)
     message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
-    #print(My_MessageBox(root,"Faites votre choix de partie",message).go())
+    print(My_MessageBox(root,"Faites votre choix de partie",message,0).go())
     Game_Rules(root).show_helpfile()
     root.mainloop()

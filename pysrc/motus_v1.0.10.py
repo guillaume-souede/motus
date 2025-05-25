@@ -145,9 +145,12 @@ class Application(tk.Tk):
         # -----------------------------------------------------------------------------------------        
         self.fenetre_a_propos(self.messageBox)    
     
+    def __valide_proposition(self, proposition:str)->bool:
+        return proposition in self.dico_MOTUS.dico_MOTUS[f"{self.gameBoard.nb_Letters}"]
+    
     def __valide_Mot(self, event=None):
-        proposition = self.vrequest.get()
-        if proposition != " Votre mot de 6 à 9 lettres ..." and len(proposition) == self.vnblettres.get():
+        proposition = self.vrequest.get().strip()
+        if self.__valide_proposition(proposition) or len(proposition) == self.vnblettres.get():
             # ---- Recherche et écriture du mot dans les cases du premier mot libre ----
             word_nbr, buttons = self.__find_free_word(proposition)
             buttons = self.__draw_OK_letters(word=proposition, buttons=buttons)
@@ -176,9 +179,9 @@ class Application(tk.Tk):
         choix = My_MessageBox(self,"Choix de la partie MOTUS",message=message).go()
         if choix == "yes":
             self.background.delete(image_ID)
-            self.create_GameBoard()
-        else:
+        elif My_MessageBox(self,"Quitter MOTUS","Voulez-vous quitter le jeu ?",1).go() == "yes":
             self.Quit()
+        self.create_GameBoard()
             
     def __win_loose_game(self) -> PlayerStatus:
         """ Methode qui renvoi le status du joueur : 'winner' ou 'looser' """
@@ -295,7 +298,7 @@ class Application(tk.Tk):
         msgbox.lift(self)
         
     def Quit(self):
-        self.destroy()
+        self.quit()
     
 
 if __name__ == "__main__":

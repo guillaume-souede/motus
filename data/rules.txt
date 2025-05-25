@@ -7,9 +7,9 @@
 
     Une fois le mot validé, chaque lettre est affichée avec un code couleur :
 
-🟦 Carré Vert   = Lettre bien placée : présente dans le mot et à la bonne position, 
-🟥 Carré Orange = Lettre bien placée : présente dans le mot et à la bonne position, 
-🟥 Carré Rouge  = Lettre absente du mot.
+ Carré Vert    = Lettre bien placée : présente dans le mot et à la bonne position, 
+ Carré Orange  = Lettre bien placée : présente dans le mot mais pas à la bonne place, 
+ Carré Rouge   = Lettre absente du mot.
 
 Remarque : Seules les lettres réellement présentes dans le mot secret seront colorées. Les répétitions non justifiées restent en orange.
 
