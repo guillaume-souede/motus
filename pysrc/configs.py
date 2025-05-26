@@ -3,6 +3,7 @@ from typing import Literal
 WordLength = Literal["6", "7", "8", "9"]
 wordlengthlist:list=[c for c in range(6,10)]
 
+PlayerMode = Literal["human","computer"]
 PlayerStatus = Literal["winner","loser","tries"]
 PlayerGenre = Literal["homme","femme"]
 
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     print(f"WordLength: {WordLength}")
     print(f"wordlengthlist: {wordlengthlist}")
     print(f"player_status: {PlayerStatus}")
+    print(f"player_mode: {PlayerMode}")
     print(f"dico_path: {dico_path}")
     print(f"images_path: {images_path}")
     print(f"default_help_filename: {default_help_filename}")

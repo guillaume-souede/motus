@@ -229,7 +229,8 @@ class Game_Rules(tk.Toplevel):
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=0, weight=1)
         self.title(self.__vtitle.get())
-        # ---------------------------------------------------------------------             self.create_widgets()
+        # ---------------------------------------------------------------------
+        self.__text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
         self.__load_helpfile()
     
     def show_helpfile(self):
@@ -254,7 +255,7 @@ class Game_Rules(tk.Toplevel):
         # ---------------------------------------------------------------------
         versb = tk.Scrollbar(self, orient=tk.VERTICAL)
         versb.grid(column=1,row=0,sticky='nse')
-        self.__text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
+        #self.text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
         self.__text_help.grid(column=0,row=0,padx=10,pady=10,sticky="nsew")
         self.__text_help['yscrollcommand'] = versb.set   
         versb['command'] = self.__text_help.yview
@@ -268,7 +269,7 @@ class Game_Rules(tk.Toplevel):
         """ Methode qui ajoute des tags au texte. La recherche du pattern se fait
             avec la méthode Text().search() intégrée à l'interpréteur Tcl(). 
             parametres:
-                'help_text': texte que l'on veut tager
+                'help_text': texte que l'on veut 'tager'
                 'text_tags': tuple de la forme -> (pattern, tagname) 
         """
         count = tk.IntVar()
@@ -278,9 +279,87 @@ class Game_Rules(tk.Toplevel):
                 self.__text_help.tag_configure(tagname, background=color,
                                         border=3,spacing1=5,spacing3=5,relief='raised')
                 self.__text_help.tag_add(tagname,f"{found}", f"{found}+{count.get()}c")
-        
+    
+    def get_Parent(self)->tk.Tk:
+        return self.__master
+    
+    def get_TextWidget(self)->tk.Text:
+        return self.__text_help
+    
     def Quit(self, event=None):
         self.destroy()
+
+
+class OneClick_CopyPaste():
+    """ Classe Menu popup copier/coller couper.
+        Les parametres du contructeur sont:
+            'master': widget appelant dont le parent est un tk.Toplevel()
+            'widget': le widget tk.Text() de l'appelant.
+        Les 2 paramètres suivants sont optionnels et non nécessaire pour 'Copier/Coller Couper' !
+            'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
+            'nosel' : list[int] liste des indices des rubrique dont l'état sera 'disabled'
+    """
+    def __init__(self, master:object, widget:tk.Text, commandsList:tuple=None, nosel:list=None):
+        
+        self.__master = master
+        self.__widget = widget
+        self.__commandList = commandsList
+        self.__NoSel = [2, 3]
+        if nosel : self.__NoSel.extend(nosel)
+        # ----- Pour pouvoir Couper/Coller dans le widget Text() pour test ----
+        self.master = master.get_Parent()
+            
+    def show_Menu_Popup(self, event:tk.Event):
+        
+        menu_Font = ('Arial 12 bold italic')
+        # ---------------------------------------------------------------------
+        def nomenupopup(nosel:list):                
+            [popup_menu.entryconfigure(i, state = 'disabled') for i in nosel \
+                                                      if not self.__widget.tag_ranges('sel')]
+        # ---------------------------------------------------------------------
+        #def add_commandsList(commandlist:list):
+        #    [popup_menu.add_command(label=cmd[0],accelerator=cmd[1],command=cmd[2]) for cmd in commandlist]
+        # ---------------------------------------------------------------------
+        popup_menu = tk.Menu(self.master,tearoff=0,font=menu_Font,postcommand=lambda :nomenupopup(self.__NoSel))
+        popup_menu.add_command(label="  OneClick Copy/Paste",accelerator ="and Cut ",
+                                                        background='orange',activebackground='orange')
+        popup_menu.add_separator()
+        popup_menu.add_command(label="Copier",accelerator="Ctrl-C",command=self.__menucopier,activebackground='tan')
+        popup_menu.add_command(label="Couper",accelerator="Ctrl-X",command=self.__menucouper,activebackground='tan')
+        popup_menu.add_command(label="Coller",accelerator="Ctrl-V",command=self.__menucoller,activebackground='tan')
+        popup_menu.add_separator()
+        if self.__commandList: 
+            #add_commandsList(self.__commandList) 
+            [popup_menu.add_command(label=cmd[0],accelerator=cmd[1],command=cmd[2]) for cmd in self.__commandList]
+        # ---------------------------------------------------------------------
+        try:
+            popup_menu.tk_popup(event.x_root, event.y_root)
+            self.__widget.configure(state='normal')
+        except Exception as e:
+            print(f"Erreur interne : {e}")
+            popup_menu.grab_release()
+                
+    def __menucoller(self, event=None):
+        try:
+            texttopaste = self.master.clipboard_get()
+            [self.__widget.insert(tk.INSERT, w) for w in texttopaste]
+        except:
+            print("Rien à coller/Texte en lecture seule")
+            return
+
+    def __menucopier(self, event=None)-> bool:        
+        self.master.clipboard_clear()
+        idx = self.__widget.tag_ranges('sel')
+        if (idx):
+            self.master.clipboard_append(self.__widget.selection_get())
+            return True
+        return False
+
+    def __menucouper(self, event=None):
+        if self.__menucopier() and self.__widget.cget('state') != 'disabled':
+            self.__widget.delete('sel.first', 'sel.last')
+        else:
+            print("Rien à couper/Texte en lecture seule")
     
 # ----------------------------- Méthodes diverses -----------------------------    
 def get_widget(parent, pathname:str)->object:
@@ -293,13 +372,24 @@ def get_widget(parent, pathname:str)->object:
 
 
 if __name__ == "__main__":
+    
+    def do_Nothing():
+        return None
         
     root = tk.Tk()
     root.app_size = root.maxsize()
-    msgbox = Win_MessageBox(root)
-    msgbox.message = "Win Message Box"
-    msgbox.lift(root)
-    message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
-    print(My_MessageBox(root,"Faites votre choix de partie",message,0).go())
-    Game_Rules(root).show_helpfile()
+    rules = Game_Rules(root)
+    # -------------------------------------------------------------------------
+    #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
+    #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
+    new_menu = [("copy","Ctrl-C",do_Nothing),("Paste","Ctrl-V",do_Nothing),("Cut","Ctrl-X",do_Nothing)]
+    # -------------------------------------------------------------------------
+    menu = OneClick_CopyPaste(rules,rules.get_TextWidget(),new_menu, [6,7])
+    rules.bind("<Button-3>", menu.show_Menu_Popup)
+    rules.show_helpfile()
+    #msgbox = Win_MessageBox(root)
+    #msgbox.message = "Win Message Box"
+    #msgbox.lift(root)
+    #message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
+    #print(My_MessageBox(root,"Faites votre choix de partie",message,0).go())
     root.mainloop()

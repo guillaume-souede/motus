@@ -88,7 +88,7 @@ class GameBoard(My_LabelFrame):
             Renvoi un dictionnaire dont les cles sont un tuple (essais,lettres)
             et les données un tuple ((btn_ID,essai,lettre du mot), mot utilisé Vrai/faux, tk.Button)
         """
-        self.__delete_DicoButtons()             # - Effacement données et dictionnaire des tk.Buttons
+        self.__delete_DicoButtons()             # - Effacement données du dictionnaire et widgets tk.Buttons
         padXY = [(30,0),(21,1),(15,2),(11,3)]   # - Gestion des options padx et pady des tk.Buttons
         ltr_size = [42,42,40,38]                # - Taille des polices de caractères fonction du nombre de lettres 
         self.nb_Letters = nb_letters if nb_letters != self.nb_Letters else self.nb_Letters

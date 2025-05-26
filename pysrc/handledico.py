@@ -39,6 +39,10 @@ from configs import *
 
 class Handle_DicoMotus():
     
+    @classmethod
+    def valid_player_MOTUS(cls, proposition:str, dico:dict, word_length:WordLength) -> bool:
+        return proposition in dico[word_length]
+    
     def __init__(self, master:tk.Tk, filename:str=None):
         
         self.__master = master      # pour développement futur, sera déjà déclaré !
@@ -71,16 +75,19 @@ class Handle_DicoMotus():
         """
         return self.__dico_MOTUS.get(wordlength, [f"{wordlength}",])   # return value of dictionary[worldlength]
     
-    def __shuffle_worlds(self, wordlength:WordLength)->list:
+    def __shuffle_words(self, wordlength:WordLength)->list:
         """ Mélange la liste """
         shuffle(self.__dico_MOTUS_length(wordlength))
         return self.dico_MOTUS.get(wordlength, [f"{wordlength}",])
     
-    def dico_MOTUS_one_world(self, wordlength:WordLength)->str:
-        return choice(self.__shuffle_worlds(wordlength=wordlength))
+    def dico_MOTUS_one_word(self, wordlength:WordLength)->str:
+        return choice(self.__shuffle_words(wordlength=wordlength))
     
-
+    
 if __name__ == "__main__":
     
     dico = Handle_DicoMotus(None, "motsMotus.txt")
-    randomwords = [print(dico.dico_MOTUS_one_world(f"{l}")) for l in range(6,10)] 
+    randomwords = [print(dico.dico_MOTUS_one_word(f"{l}")) for l in range(6,10)] 
+    print(f"'alexis' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('alexis',dico.dico_MOTUS,'6')}")
+    print(f"'elixir' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('elixir',dico.dico_MOTUS,'6')}")
+    
