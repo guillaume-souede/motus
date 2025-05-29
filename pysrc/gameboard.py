@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-# -- encode utf-8 --
 """
 Bibliotheque 'GameBoard'. Surcharges de la classes tKinter Frame
 pour afficher le tableau de lettres composé de Tkinter Buttons()
@@ -100,7 +98,7 @@ class GameBoard(My_LabelFrame):
                 btn = tk.Button(self,bd=1,relief="raised",text=" ",font=ltr_font)  #f"btn {btn_ID}"
                 btn.grid(column=j, row=i, padx=1, ipadx=padXY[nb_letters-6][0], 
                                               pady=2, ipady=padXY[nb_letters-6][1], sticky="new")
-                # ----- dico_buttons :   (n°Lettre, n°mot), état, objet) ------
+                # ----- dico_buttons :   (n°Lettre, n°mot,lettre mot), état, objet) ------
                 self.__dico_buttons[(i,j)] = ((btn_ID,i," "), False, btn)
         return self.__dico_buttons
     

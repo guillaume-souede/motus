@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-# -- encode utf-8 --
 """
 Bibliotheque 'GUI_Tools'. Quelques surcharges de classes tKinter 
 pour le jeu MOTUS inspiré du jeu télévisé diffusé sur France2
@@ -249,9 +247,9 @@ class Game_Rules(tk.Toplevel):
     
     def create_widgets(self):
         # ------------------ Tags à placer dans le tk.Text() ------------------
-        text_tags = [(" Carré Vert   ","ok","lightgreen"),
-                     (" Carré Orange ","is","orange"),
-                     (" Carré Rouge  ","no","red"),       ]
+        text_tags = [(" Carré Rouge  ","ok",COLOR_OK),
+                     (" Carré Bleu   ","is",COLOR_IS),
+                     (" Carré Jaune  ","no",COLOR_NO),       ]
         # ---------------------------------------------------------------------
         versb = tk.Scrollbar(self, orient=tk.VERTICAL)
         versb.grid(column=1,row=0,sticky='nse')

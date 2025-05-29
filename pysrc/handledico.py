@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-# -- encode utf-8 --
 """
 Bibliotheque 'Handle_Dico'. Lecture et chargement du dictionnaire
 des mots pour le jeu MOTUS inspiré du jeu télévisé diffusé sur France2.
@@ -66,21 +64,25 @@ class Handle_DicoMotus():
             raise FileNotFoundError(f" Fichier dictionnaire '{fname}' non trouvé !")
                     
     @property
-    def dico_MOTUS(self)->dict:
-        return self.__dico_MOTUS                    # return full dictionary
+    def dico_MOTUS(self)->dict:                                     # - return full dictionary
+        """ Renvoi le dictionnaire complet des mots MOTUS """
+        return self.__dico_MOTUS             
     
-    def __dico_MOTUS_length(self, wordlength:WordLength)->list:
+    def __dico_MOTUS_length(self, wordlength:WordLength)->list:     # - return value of dictionary[worldlength]
         """ Propriété qui renvoi la liste des mots du dictionnaire MOTUS 
             de longueur 'wordlength'.
         """
-        return self.__dico_MOTUS.get(wordlength, [f"{wordlength}",])   # return value of dictionary[worldlength]
+        return self.__dico_MOTUS.get(wordlength, [f"{wordlength}",])   
     
     def __shuffle_words(self, wordlength:WordLength)->list:
-        """ Mélange la liste """
+        """ Mélange la liste des mots MOTUS de longueur désirée 'wordlength'. 
+            Si 'wordlength' est incorrect, renvoi 'str(wordlength)' comme mot.
+        """
         shuffle(self.__dico_MOTUS_length(wordlength))
         return self.dico_MOTUS.get(wordlength, [f"{wordlength}",])
     
-    def dico_MOTUS_one_word(self, wordlength:WordLength)->str:
+    def dico_MOTUS_one_word(self, wordlength:WordLength)->str:      # - return one word with desired length
+        """ Renvoi un mot (aléatoire) du dictionnaire des mots MOTUS de longueur désirée 'wordlength'. """
         return choice(self.__shuffle_words(wordlength=wordlength))
     
     
