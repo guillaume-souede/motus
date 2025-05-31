@@ -63,23 +63,23 @@ class Application(tk.Tk):
         self.labelFont = tkFont.Font(self,family='Courier New',size=11,weight='bold',slant='roman')
         self.menuFont = tkFont.Font(self, family='Serif', size=11, weight='normal', slant='italic')
         # ---------------------------------------------------------------------
-        self.__MOTUS_word:str=""            # ---- le mot à trouver en mode 'Humain vs IA'
-        self.__MOTUS_Player:str = "human"   # ---- type du joueur MOTUS, humain ou IA
-        self.__dico_Letters:dict = ({})     # ---- dictionnaire de décomposition du mot en lettres
-        self.player_status = "idle"         # ---- status du joueur : winner/loser/idle
-        self.OK,self.IS,self.NO = 0,0,0     # ---- variable définissant le nombre et le type de lettres trouvées en mode 'human'
-        self.vnbessais = tk.IntVar(value=6) # ---- nombre de mots proposables pour la partie
+        self.__MOTUS_word:str=""                                # ---- le mot à trouver en mode 'Humain vs IA'
+        self.__MOTUS_Player:str = "human"                       # ---- type du joueur MOTUS, humain ou IA
+        self.__dico_Letters:dict = ({})                         # ---- dictionnaire de décomposition du mot en lettres
+        self.player_status = "idle"                             # ---- status du joueur : winner/loser/idle
+        self.OK,self.IS,self.NO = 0,0,0                         # ---- variable définissant le nombre et le type de lettres trouvées en mode 'human'
+        self.vnbessais = tk.IntVar(value=6)                     # ---- nombre de mots proposables pour la partie
         self.vnblettres = tk.IntVar(value=wordlengthlist[0])    # -- Nombre de lettres du mot MOTUS
         self.vrequest = tk.StringVar(value=" Votre mot de 6 à 9 lettres ...")   # - proposition de mot en mode 'human'
         self.lmodejeu = (' Humain vs IA ',' IA vs Humain ')     # -- liste des 2 modes de jeu pour la tk.Spinbox()
         # ---------- Interception de la croix rouge en haut à droite ----------
         self.protocol('WM_DELETE_WINDOW',self.Quit)
         # ---- Taille de la fenètre du jeu fonction de la résolution écran ----
-        MAX_WIDTH, MAX_HEIGHT = self.maxsize()      # --- renvoi la taille écran --
+        MAX_WIDTH, MAX_HEIGHT = self.maxsize()                  # --- renvoi la taille écran --
         self.app_size = min(MAX_WIDTH-100,self.backImage.width()), min(MAX_HEIGHT-150,self.backImage.height())
         self.minsize(self.backImage.width()//2, self.backImage.height()//2)
         # ---------------------------------------------------------------------
-        self.title("MOTUS v1.0 (c)AMOUROUX Bernard  Mai 2025")
+        self.title("MOTUS v2.0 (c)AMOUROUX Bernard  Mai 2025")
         [self.columnconfigure(i, weight=0) for i in range(41)]
         [self.rowconfigure(i, weight=0) for i in range(41)]
         self.resizable(False, False)
@@ -181,9 +181,11 @@ class Application(tk.Tk):
             human_word = self.vrequest.get().strip()
             self.computerplayer = IA_Computer(self, self.gameBoard)
             self.player_status = self.computerplayer.valide_Mot(human_word)
-            if self.player_status != "idle":
-                self.choose_new_game("Rejouer contre l'IA ?", 0)
-            
+            if self.player_status == "winner":
+                self.choose_new_game("!!! IA vainqueur !!!\n\nPour changer de mode, choisissez 'Rejouer' puis 'Abandonner'",0)
+            if self.player_status == "loser":
+                self.choose_new_game("Oups, IA pas trouvé !\n\nPour changer de mode, choisissez 'Rejouer' puis 'Abandonner'",0)
+                    
     def choose_new_game(self, message:str, image_ID:int):
         choix = My_MessageBox(self,"Choix de la partie MOTUS",message=message,action=0).go()
         if choix == "yes":
@@ -226,6 +228,9 @@ class Application(tk.Tk):
         self.entryRequest.focus_force()
     
     def __abort_GameBoard(self):
+        # ----------------- Abandon du jeu / status du joueur -----------------
+        self.player_status = "loser"
+        # ---------------------------------------------------------------------
         self.unbind("<Return>",self.validButton.__funcID)
         self.entryLabel.configure(state="disabled",fg="grey50")
         self.entryRequest.configure(state="readonly",fg="grey50")
@@ -243,7 +248,7 @@ class Application(tk.Tk):
         """ Fenêtre-message à propos.
             Indique le nom de l'auteurs ainsi que la licence.
         """
-        message = "MOTUS v1.0.10"+"\n\nCopyright (C) 2025\nBernard Amouroux\n" \
+        message = "MOTUS v2.0"+"\n\nCopyright (C) 2025\nBernard Amouroux\n" \
         "\nDonnées :\nDictionnaire des mots MOTUS\nhttps://www.motus.france2.fr\n\n" \
         "Sur une idée du projet JAVA 'MOTUS' de\nJan AMOUROUX \nGuillaume SOUÈDE\n\nétudiants à l'Université de Toulouse\n" \
         "Master BBS - Bio-informatique et Biologie des Systèmes\n\n" \

@@ -1,5 +1,8 @@
         
-    Actuellement le jeu propose le mode 'Joueur' uniquement. La version 2 de ce MOTUS proposera l'IA comme adversaire !. On pourra alors sélectionner : Joueur et Ordinateur. 
+    Ce jeu de MOTUS permet de jouer selon deux modes.
+        Le premier mode est celui ou l'Humain joue contre la machine. C'est donc cette dernière qui propose le mot MOTUS à découvrir
+        Le second mode est donc l'IA contre l'Humain. C'est à vous à lui faire rechercher un mot
+        La sélection se fait à l'aide d'une petite boite de choix dans la barre du haut. On peut alors sélectionner : 'Humain vs IA' ou 'IA vs Humain. 
 
     Dans les deux cas, il s'agit de deviner un mot dont le nombre de lettres (entre 6 et 9) et le nombre d'essais (entre 6 et 10) sont fixés à l’avance.
 
@@ -16,8 +19,8 @@ Remarque : Seules les lettres réellement présentes dans le mot secret seront c
 
 Modes disponibles :
 
-- En mode Joueur, le mot à deviner est choisi aléatoirement, et le joueur doit le retrouver.
+- En mode 'Humain vs IA', le mot à deviner est choisi aléatoirement par l'IA dans le dictionnaire, et le joueur doit le retrouver.
 
-- En mode Ordinateur, le joueur saisit un mot, et l’intelligence artificielle tente de le deviner.
+- En mode 'IA vs Humain', le joueur saisit un mot, et l’intelligence artificielle tente de le deviner.
 
     La partie est gagnée lorsque le mot est trouvé, quel que soit le mode choisi.

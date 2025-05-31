@@ -11,7 +11,7 @@ dico_path:str = "data"
 images_path:str  = "images"
 
 default_help_filename = "rules.txt"
-default_dico_filename = "motsMotus.txt"
+default_dico_filename = "frgut.txt"
 default_MOTUS_background = "defaut.png"
 
 COLOR_OK = "red"

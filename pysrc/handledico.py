@@ -48,18 +48,21 @@ class Handle_DicoMotus():
         self.__dico_MOTUS:dict[str:[list]] = ({})
         self.__load_dicofile()
         # ---- for test only ----
-        seed(1)
+        #seed(1)
     
     def __load_dicofile(self):
         bad_chars = """ \n\r\t"""
         fname = op.join(getcwd(), dico_path, self.__filename)
         if op.isfile(fname):
             with open(fname, mode="rt", encoding='utf-8') as motusfile:
-                for world in motusfile:
-                    w = world.strip(bad_chars); l = len(w)
-                    if not f"{l}" in self.__dico_MOTUS:
-                        self.__dico_MOTUS[f"{l}"] = []
-                    self.__dico_MOTUS[f"{l}"].append(w)
+                for word in motusfile:
+                    w = word.strip(bad_chars); l = len(w)
+                    if not l in range(6,10):
+                        continue
+                    else:
+                        if not f"{l}" in self.__dico_MOTUS:
+                            self.__dico_MOTUS[f"{l}"] = []
+                        self.__dico_MOTUS[f"{l}"].append(w)
         else:
             raise FileNotFoundError(f" Fichier dictionnaire '{fname}' non trouvé !")
                     
@@ -89,7 +92,8 @@ class Handle_DicoMotus():
 if __name__ == "__main__":
     
     dico = Handle_DicoMotus(None, "motsMotus.txt")
-    randomwords = [print(dico.dico_MOTUS_one_word(f"{l}")) for l in range(6,10)] 
+    randomwords = [print(dico.dico_MOTUS_one_word(f"{l}")) for l in range(6,10)]
+    [print(f"Nombre de mots de {l} lettres: {len(dico.dico_MOTUS[str(l)])}") for l in range(6,10)]
     print(f"'alexis' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('alexis',dico.dico_MOTUS,'6')}")
     print(f"'elixir' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('elixir',dico.dico_MOTUS,'6')}")
     
