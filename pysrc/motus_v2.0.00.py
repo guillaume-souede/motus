@@ -176,7 +176,7 @@ class Application(tk.Tk):
         self.__MOTUS_Player = "human" if self.spboxmode.get().strip() == "Humain vs IA" else "computer"
     
     def invalid_word(self, word:str):
-            self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{word}' est invalide",5)
+        self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{word}' est invalide",5)
     
     def valide_word(self, word:str) -> bool:
         return word in self.dico_MOTUS.dico_MOTUS[f"{self.vnblettres.get()}"]
@@ -251,7 +251,7 @@ class Application(tk.Tk):
 \t-/- Dictionnaire '{self.dico_MOTUS.filename}' de {len(self.dico_MOTUS.dico_MOTUS[str(letters)])} mots."
         # ---------------------------------------------------------------------    
         if playgame: self.__init_GameBoard(nb_letters=letters,nb_tries=tries)   
-        self.barre_Etat.update_vltexte(message, 1)
+        self.barre_Etat.get_message = message
     
     def __init_GameBoard(self, nb_letters:int, nb_tries:int):
         self.gameBoard.grid_remove()
