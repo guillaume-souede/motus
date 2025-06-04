@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Bibliotheque 'Handle_Dico'. Lecture et chargement du dictionnaire
 des mots pour le jeu MOTUS inspiré du jeu télévisé diffusé sur France2.
@@ -31,8 +32,11 @@ import os.path as op
 import tkinter as tk
 
 from os import getcwd
+from unicodedata import normalize,category
 from random import shuffle,choice,seed
 from configs import *
+# ---- For test only ----
+#seed(1)
 
 
 class Handle_DicoMotus():
@@ -51,12 +55,22 @@ class Handle_DicoMotus():
         #seed(1)
     
     def __load_dicofile(self):
-        bad_chars = """ \n\r\t"""
+        """ Lecture du fichier des mots français avec normalisation au format "NFC"
+            caractères accentués normalisée unicode UTF-8 ou format "NFD" par 
+            décomposition des caractères accentués et filtrage de tous les 
+            caractères de type "Mn" (marques non espacées = accents).
+            Création du dictionnaire des mots de longueur 6 à 9 lettres pour MOTUS.
+        """
         fname = op.join(getcwd(), dico_path, self.__filename)
         if op.isfile(fname):
             with open(fname, mode="rt", encoding='utf-8') as motusfile:
                 for word in motusfile:
-                    w = word.strip(bad_chars); l = len(w)
+                    # ---------------------------------------------------------
+                    # -- Lecture du mot puis normalisation avec/sans accents --
+                    #word = ''.join(c for c in normalize('NFD', word) if category(c) != 'Mn')
+                    word = normalize('NFC', word).strip()  # -- ici avec les accents --
+                    # ---------------------------------------------------------
+                    w = word; l = len(w)
                     if not l in range(6,10):
                         continue
                     else:
@@ -65,6 +79,10 @@ class Handle_DicoMotus():
                         self.__dico_MOTUS[f"{l}"].append(w)
         else:
             raise FileNotFoundError(f" Fichier dictionnaire '{fname}' non trouvé !")
+    
+    @property
+    def filename(self) -> str:
+        return self.__filename
                     
     @property
     def dico_MOTUS(self)->dict:                                     # - return full dictionary
@@ -92,8 +110,8 @@ class Handle_DicoMotus():
 if __name__ == "__main__":
     
     dico = Handle_DicoMotus(None, "motsMotus.txt")
-    randomwords = [print(dico.dico_MOTUS_one_word(f"{l}")) for l in range(6,10)]
+    randomwords = [[print(dico.dico_MOTUS_one_word(f"{l}")) for l in range(6,10)] for _ in range(5)]
     [print(f"Nombre de mots de {l} lettres: {len(dico.dico_MOTUS[str(l)])}") for l in range(6,10)]
-    print(f"'alexis' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('alexis',dico.dico_MOTUS,'6')}")
-    print(f"'elixir' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('elixir',dico.dico_MOTUS,'6')}")
+    print(f"'emirat' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('emirat',dico.dico_MOTUS,'6')}")
+    print(f"'élixir' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('élixir',dico.dico_MOTUS,'6')}")
     

@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Bibliotheque 'computer' qui contient l'interface pour les
 méthodes de l'IA en mode 'IA vs Human'.
@@ -27,8 +28,8 @@ __date__ = "$Date: 2025/05/18 07:00 $"
 __copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
-import re
 import tkinter as tk
+import re,unicodedata
 
 from configs import *
 from random import choice
@@ -48,15 +49,23 @@ class IA_Computer():
         self.__dico_Motus:Handle_DicoMotus = master.dico_MOTUS  # - recupere le Handle_DicoMotus() du parent
         self.__search_word:list = (['.',]* self.__nb_letters)   # - lettres du mot collectées à leur position
         self.__is_word_letters = set()                          # - set() des lettres contenues dans le mot 
-        self.__MOTUS_word:str = ""                              # - Mot MOTUS que doit trouver l'IA
-        # --------------------- 1er mot proposé par l'IA ----------------------
-        self.__IA_word:str = self.__dico_Motus.dico_MOTUS_one_word(f"{self.__nb_letters}")
-        self.__list_IA_Words:list = self.__dico_Motus.dico_MOTUS[f"{self.__nb_letters}"]        
+        self.__IA_status:PlayerStatus = "idle"                  # - status du joueur 'IA_Computer'
+        # ------------ Mot de l'utilisateur que doit trouver l'IA -------------
+        self.__MOTUS_word:str = ""                  
+        # -------- Création liste de mots et 1er mot proposé par l'IA ---------
+        self.__init_WordsList()
         # ---------------------------------------------------------------------
-                
-    def __valide_proposition(self, proposition:str)->bool:
-        """ Valide le mot s'il est présent dans le dictionnaire des mots """
-        return proposition.strip().lower() in self.__list_IA_Words
+    
+    @property
+    def IA_status(self) -> PlayerStatus:
+        return self.__IA_status
+    @IA_status.setter
+    def IA_status(self, ia_status:PlayerStatus):
+        self.__IA_status = ia_status 
+    
+    def __init_WordsList(self):
+        self.__list_IA_Words:list = self.__dico_Motus.dico_MOTUS[f"{self.__nb_letters}"]                
+        self.__IA_word:str = self.__dico_Motus.dico_MOTUS_one_word(f"{self.__nb_letters}")
 
     def __find_free_word(self, IA_word:str) -> list:
         """ Recherche de la position du premier mot libre de 0 à 6...9 """
@@ -70,6 +79,34 @@ class IA_Computer():
                 dummy.append(((btn_ID,tries,IA_word[l]),records[l][2]))
             self.TR = records[0][0][1]
         return self.TR, dummy
+    
+    def valide_Mot(self, human_word) -> PlayerStatus:
+        self.IA_status = "idle"
+        self.__MOTUS_word = human_word
+        # -----------------------------------------------------------------
+        while self.IA_status == "idle":
+            self.OK,self.IS,self.NO = 0, 0, 0
+            word_nbr, buttons = self.__find_free_word(self.__IA_word)
+            # -- recherche des lettres qui ne sont pas dans le mot MOTUS --
+            NO_letters = self.__look_for_NO_letters(self.__MOTUS_word, self.__IA_word)
+            buttons = self.__draw_NO_letters(bad_letters=NO_letters, buttons=buttons)
+            IS_letters = self.__look_for_IS_letters(self.__MOTUS_word, self.__IA_word)
+            buttons = self.__draw_IS_letters(is_letters=IS_letters, buttons=buttons)
+            OK_letters = self.__look_for_OK_letters(self.__MOTUS_word, self.__IA_word)
+            buttons = self.__draw_OK_letters(ok_letters=OK_letters, buttons=buttons)
+            # -----------------------------------------------------------------            
+            if self.OK == self.__nb_letters:
+                self.IA_status = "winner"
+            elif word_nbr == self.__nb_tries-1 and self.OK < self.__nb_letters:
+                self.IA_status = "loser"
+            else:    
+                try:
+                    self.__IA_word = choice(self.__list_IA_Words)
+                except IndexError:
+                    self.__init_WordsList()
+        # ------------- Reinitialisation de la liste des mots -------------                            
+        self.__init_WordsList()
+        return self.IA_status
     
     def __draw_NO_letters(self, bad_letters:list, buttons:list):
         for idx,button in buttons:
@@ -98,51 +135,14 @@ class IA_Computer():
             et change la couleur de fond, le relief de ces lettres.
         """
         for idx,button in buttons:
-            print(f"idx: {idx} -/- ok_letters: {ok_letters}")
+            #print(f"idx: {idx} -/- ok_letters: {ok_letters}")
             if (idx[0] % self.__nb_letters, idx[2]) in  ok_letters:
                 button.configure(bg=COLOR_OK,relief='flat',activebackground=COLOR_OK)
                 button.flash()
                 self.OK += 1
         return buttons
         
-    def valide_Mot(self, human_word):
-        resultat:PlayerStatus = "idle"
-        if self.__valide_proposition(human_word):
-            self.__MOTUS_word = human_word
-            self.__master.validButton.configure(state='disabled')
-            self.__master.entryRequest.configure(state='disabled')
-            # -----------------------------------------------------------------
-            while resultat == "idle":
-                self.OK,self.IS,self.NO = 0, 0, 0
-                word_nbr, buttons = self.__find_free_word(self.__IA_word)
-                # -- recherche des lettres qui ne sont pas dans le mot MOTUS --
-                NO_letters = self.__look_for_NO_letters(self.__MOTUS_word, self.__IA_word)
-                buttons = self.__draw_NO_letters(bad_letters=NO_letters, buttons=buttons)
-                
-                IS_letters = self.__look_for_IS_letters(self.__MOTUS_word, self.__IA_word)
-                buttons = self.__draw_IS_letters(is_letters=IS_letters, buttons=buttons)
-                
-                OK_letters = self.__look_for_OK_letters(self.__MOTUS_word, self.__IA_word)
-                buttons = self.__draw_OK_letters(ok_letters=OK_letters, buttons=buttons)
-                
-                if self.OK == self.__nb_letters:
-                    resultat = "winner"
-                    break
-                elif word_nbr == self.__nb_tries-1 and self.OK < self.__nb_letters:
-                    resultat = "loser"
-                    break
-                else:
-                    # ----- On choisit un autre mot dans le dictionnaire ------
-                    self.__IA_word = choice(self.__list_IA_Words)
-                    print(f"self.__IA_word: {self.__IA_word}")
-            return resultat
-        else:
-            message = self.__master.barre_Etat.get_message
-            self.__master.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{human_word}' est invalide")
-            self.__master.barre_Etat.get_message = message
-        return resultat
-
-    def __update_search_word(self, letters:list):
+    def __update_search_OK_words(self, letters:list):
         """ Crée le pattern du mot à rechercher pour mettre à jour
             la liste des mots pour poursuivre la recherche.
         """
@@ -151,23 +151,25 @@ class IA_Computer():
         pattern = "".join([w for w in self.__search_word])
         self.__list_IA_Words = [word.group() for word in [re.match(pattern,word) \
                                                    for word in self.__list_IA_Words] if word != None]
-            
+    
     def __look_for_OK_letters(self,ref_word:str, test_word:str) -> list:
         """ Retourne uniquement les lettres de 'test_word' présentes dans 'ref_word' 
             bien placées avec leur place dans le mot.
         """
         ok_letters = list(map(lambda s:s[0], list(filter(lambda w:w[0]==w[1], \
                                         list(zip(enumerate(ref_word),enumerate(test_word)))))))
-        self.__update_search_word(ok_letters)
+        if ok_letters:
+            self.__update_search_OK_words(ok_letters)
         return ok_letters
         
     def __look_for_NO_letters(self,ref_word:str, test_word:str) -> list:
         """ Retourne uniquement les lettres de 'test_word' non présentes dans 'ref_word'
-            et met à jour la liste des mots du dictionnaire des mots ceux dont les
-            lettres ne sont pas dans le mot de référence, ici le mot MOTUS.
+            Met à jour la liste des mots sans ceux dont les lettres ne sont pas dans
+            le mot de référence, ici le mot MOTUS.
         """
         bad_letters = list(set(test_word) - set(ref_word))
-        self.__list_IA_Words = list(filter(lambda word:len([w for w in word if w in bad_letters]) == 0 ,self.__list_IA_Words))        
+        self.__list_IA_Words = list(filter(lambda word:len([w for w in word \
+                                               if w in bad_letters]) == 0 ,self.__list_IA_Words))        
         return bad_letters
     
     def __look_for_IS_letters(self,ref_word:str, test_word:str) -> list:
@@ -175,6 +177,9 @@ class IA_Computer():
             et rajoute le tuple (None, letter) au set() 'self.__current_word'.
         """
         is_letters = list(zip([None]*self.__nb_letters,list((set(ref_word) & set(test_word)))))
-        self.__list_IA_Words = list(filter(lambda word:[w for w in word if w in map(lambda s:s[1], is_letters)],self.__list_IA_Words))
-        self.__is_word_letters.update(is_letters)
+        if is_letters:
+            self.__is_word_letters.update(is_letters)
+            self.__list_IA_Words = list(filter(lambda word:[w for w in word \
+                                       if w in map(lambda s:s[1], self.__is_word_letters)],self.__list_IA_Words))
+            #print(f"is_letters: {self.__is_word_letters} ---> len(self.__list_IA_Words): {len(self.__list_IA_Words)}")
         return is_letters

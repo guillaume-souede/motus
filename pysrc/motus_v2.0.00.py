@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -- encode utf-8 --
+# coding: utf-8
 """
 MOTUS - Une étude Python POO , adaptation du jeu télévisé "MOTUS"
 sur France Télévision en mode graphique (TKinter) et Python 3.9.5
@@ -34,9 +34,10 @@ import os.path as op
 import tkinter as tk
 import tkinter.font as tkFont
 
+from unicodedata import normalize
 from handledico import Handle_DicoMotus
-from gameboard import GameBoard
 from computer import IA_Computer
+from gameboard import GameBoard
 from human import Human_Player
 
 from gui_tools import *
@@ -63,13 +64,14 @@ class Application(tk.Tk):
         self.labelFont = tkFont.Font(self,family='Courier New',size=11,weight='bold',slant='roman')
         self.menuFont = tkFont.Font(self, family='Serif', size=11, weight='normal', slant='italic')
         # ---------------------------------------------------------------------
+        self.__IA_status = ""                                   # ---- status du joueur IA : winner/loser/idle
+        self.__human_status = ""                                # ---- status du joueur Humain : winner/loser/idle
         self.__MOTUS_word:str=""                                # ---- le mot à trouver en mode 'Humain vs IA'
         self.__MOTUS_Player:str = "human"                       # ---- type du joueur MOTUS, humain ou IA
         self.__dico_Letters:dict = ({})                         # ---- dictionnaire de décomposition du mot en lettres
-        self.player_status = "idle"                             # ---- status du joueur : winner/loser/idle
         self.OK,self.IS,self.NO = 0,0,0                         # ---- variable définissant le nombre et le type de lettres trouvées en mode 'human'
         self.vnbessais = tk.IntVar(value=6)                     # ---- nombre de mots proposables pour la partie
-        self.vnblettres = tk.IntVar(value=wordlengthlist[0])    # -- Nombre de lettres du mot MOTUS
+        self.vnblettres = tk.IntVar(value=6)                    # ---- Nombre de lettres du mot MOTUS
         self.vrequest = tk.StringVar(value=" Votre mot de 6 à 9 lettres ...")   # - proposition de mot en mode 'human'
         self.lmodejeu = (' Humain vs IA ',' IA vs Humain ')     # -- liste des 2 modes de jeu pour la tk.Spinbox()
         # ---------- Interception de la croix rouge en haut à droite ----------
@@ -84,11 +86,12 @@ class Application(tk.Tk):
         [self.rowconfigure(i, weight=0) for i in range(41)]
         self.resizable(False, False)
         self.configure(bg='wheat')
-        # ---------------------------------------------------------------------        
+        # ---------------------------------------------------------------------
         self.dico_MOTUS = Handle_DicoMotus(self, filename)
         self.messageBox = Win_MessageBox(self)
+        self.humanPlayer:Human_Player = None    
         self.cree_widgets()
-        self.playGame()
+        #self.playGame()
     
     @property
     def dico_Letters(self) -> dict:
@@ -144,8 +147,7 @@ class Application(tk.Tk):
         self.validButton.grid(column=12,row=0,columnspan=2,padx=10,sticky='nsew')
         self.validButton.__funcID = self.bind("<Return>", self.playGame)
         # -----------------------------------------------------------------------------------------
-        self.abortButton = tk.Button(self,text='Abandonner',bg='wheat',activebackground='red',
-                                                    state='disabled', command=self.__abort_GameBoard)
+        self.abortButton = tk.Button(self,text='Abandonner',bg='wheat',activebackground='red',state='disabled')
         self.abortButton.grid(column=36,row=0,padx=5,columnspan=4,sticky="nsew")
         # -----------------------------------------------------------------------------------------
         # --------------- Création du tk.Canvas() pour affichage de l'image de fond ---------------
@@ -161,9 +163,9 @@ class Application(tk.Tk):
         self.dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(), 6, 6))
         self.gameBoard.presentation_motus()     # ----- Gameboard en 6x6 pour la présentation ----- 
         # -----------------------------------------------------------------------------------------
-        message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum {self.vnbessais.get()} essais"
-        self.barre_Etat = Window_StateBar(self,"",1,col=0,row=41,cspan=38,pady=5)
-        self.barre_Etat.update_vltexte(message, 1)
+        message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum \
+{self.vnbessais.get()} essais\t-/- Dictionnaire '{self.dico_MOTUS.filename}' de {len(self.dico_MOTUS.dico_MOTUS[str(self.vnblettres.get())])} mots."
+        self.barre_Etat = Window_StateBar(self,"",1,defMessage=message,col=0,row=41,cspan=38,pady=5)
         # -----------------------------------------------------------------------------------------
         tk.Button(self,bg='lightgreen',border=1,command=self.__show_rules,text="Règles du jeu",
                     activebackground='lightblue').grid(column=38,row=41,columnspan=2,padx=2,pady=2,sticky="n")
@@ -173,18 +175,52 @@ class Application(tk.Tk):
     def get_Mode_Jeu(self):
         self.__MOTUS_Player = "human" if self.spboxmode.get().strip() == "Humain vs IA" else "computer"
     
+    def invalid_word(self, word:str):
+            self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{word}' est invalide",5)
+    
+    def valide_word(self, word:str) -> bool:
+        return word in self.dico_MOTUS.dico_MOTUS[f"{self.vnblettres.get()}"]
+        
     def playGame(self, event=None):
-        if self.__MOTUS_Player == "human":
+        # ---------------------------------------------------------------------
+        # -- Récupération du mot proposé et normalisation avec/sans accents ---
+        #word = ''.join(c for c in normalize('NFD', self.vrequest.get()) if category(c) != 'Mn')
+        word = normalize('NFC',self.vrequest.get().lower()) # - avec accents --
+        # ---------------------------------------------------------------------
+        if self.__MOTUS_Player == "human" and self.valide_word(word=word):
+            # -----------------------------------------------------------------
             self.humanPlayer = Human_Player(self, self.gameBoard)
-            self.humanPlayer.valide_Mot(event)
-        else:
-            human_word = self.vrequest.get().strip()
+            self.__human_status = self.humanPlayer.valide_Mot(word)
+            # -----------------------------------------------------------------
+            if self.__human_status == "winner":
+                self.gameBoard.grid_remove()
+                message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{self.MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"
+                winner_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
+                                                       image=self.winnerImage, anchor="center", tags='img_winner')
+                self.choose_new_game(message, winner_img)    
+                self.gameBoard.grid()
+            if self.__human_status == "loser":
+                self.gameBoard.grid_remove()
+                message = f"\n{'Vous avez perdu le mot MOTUS est :':100}\n{self.MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"    
+                loser_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
+                                                       image=self.loserImage, anchor="center", tags='img_winner')
+                self.choose_new_game(message, loser_img)
+                self.gameBoard.grid()    
+        elif self.__MOTUS_Player == "computer" and self.valide_word(word):
+            self.validButton.configure(state='disabled')
+            self.entryRequest.configure(state='disabled')
+            # --------- IA_player joue jusqu'à ce qu'il gagne ou perde --------
             self.computerplayer = IA_Computer(self, self.gameBoard)
-            self.player_status = self.computerplayer.valide_Mot(human_word)
-            if self.player_status == "winner":
+            self.__IA_status = self.computerplayer.valide_Mot(word)
+            # -----------------------------------------------------------------
+            if self.__IA_status == "winner":
                 self.choose_new_game("!!! IA vainqueur !!!\n\nPour changer de mode, choisissez 'Rejouer' puis 'Abandonner'",0)
-            if self.player_status == "loser":
+            if self.__IA_status == "loser":
                 self.choose_new_game("Oups, IA pas trouvé !\n\nPour changer de mode, choisissez 'Rejouer' puis 'Abandonner'",0)
+            self.entryRequest.configure(state='normal')            
+            self.validButton.configure(state='active')
+        else:
+            self.invalid_word(word=word)
                     
     def choose_new_game(self, message:str, image_ID:int):
         choix = My_MessageBox(self,"Choix de la partie MOTUS",message=message,action=0).go()
@@ -198,8 +234,8 @@ class Application(tk.Tk):
             
     def create_GameBoard(self, playgame:bool=True):
         # --------------- Fonction de validation du tk.Entry() ----------------
-        def _validateCmd(value:str, max:int):
-            return bool(len(value) <= int(max))
+        def _validateCmd(value:str, max:int):            
+           return bool(len(value) <= int(max))
         # ---------------------------------------------------------------------
         self.OK, self.IS, self.NO = 0, 0, 0
         letters, tries = self.vnblettres.get(), self.vnbessais.get()
@@ -209,35 +245,40 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         if self.__MOTUS_Player == "human":
             self.MOTUS_word = self.dico_MOTUS.dico_MOTUS_one_word(f"{letters}")
-            #print(f"self.__MOTUS_Player: {self.__MOTUS_Player} -/- self.__MOTUS_word: {self.MOTUS_word}")
-        message = f" Info : Découvrir un mot MOTUS de {letters} lettres avec au maximum {tries} essais"
-        self.dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),letters,tries))
+            print(f"self.MOTUS_word: {self.MOTUS_word}")
+        # ---------------------------------------------------------------------    
+        message = f" Info : Découvrir un MOTUS de {letters} lettres avec au maximum {tries} essais \
+\t-/- Dictionnaire '{self.dico_MOTUS.filename}' de {len(self.dico_MOTUS.dico_MOTUS[str(letters)])} mots."
+        # ---------------------------------------------------------------------    
         if playgame: self.__init_GameBoard(nb_letters=letters,nb_tries=tries)   
         self.barre_Etat.update_vltexte(message, 1)
     
     def __init_GameBoard(self, nb_letters:int, nb_tries:int):
+        self.gameBoard.grid_remove()
+        self.dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),nb_letters,nb_tries))
         self.entryLabel.configure(state="normal",fg="black")
         self.entryRequest.configure(state="normal",fg="black")
         self.entryRequest.select_range(0, tk.END)
         self.spboxletters.configure(state="disabled")
         self.spboxtries.configure(state="disabled")
+        self.spboxmode.configure(state="disabled")
         self.playButton.configure(state="disabled")
-        self.abortButton.configure(state="normal")
+        self.abortButton.configure(state="normal",text="Abandonner",command=self.__abort_GameBoard)
         self.validButton.__funcID = self.bind("<Return>", self.playGame)
         self.validButton.configure(state="normal")
         self.entryRequest.focus_force()
+        self.gameBoard.grid()
     
     def __abort_GameBoard(self):
-        # ----------------- Abandon du jeu / status du joueur -----------------
-        self.player_status = "loser"
-        # ---------------------------------------------------------------------
+        self.gameBoard.grid_remove()
         self.unbind("<Return>",self.validButton.__funcID)
         self.entryLabel.configure(state="disabled",fg="grey50")
-        self.entryRequest.configure(state="readonly",fg="grey50")
+        self.entryRequest.configure(state="disabled",fg="grey50")
         self.vrequest.set(f" mot MOTUS : {self.MOTUS_word.upper()}")
         self.spboxletters.configure(state="readonly")
         self.spboxtries.configure(state="readonly")
-        self.abortButton.configure(state="disabled")
+        self.spboxmode.configure(state="readonly")
+        self.abortButton.configure(state="normal",text="Quitter le jeu",command=self.Quit)
         self.validButton.configure(state="disabled")
         self.playButton.configure(state="active")
     
@@ -265,8 +306,11 @@ class Application(tk.Tk):
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
-        filename = sys.argv[1] if op.isfile(sys.argv[1]) else None
-    else: filename = None
+        filename = op.basename(sys.argv[1]) if op.isfile(op.join(os.getcwd(),"data",sys.argv[1])) else None
+        print(f"isfile: {op.join(os.getcwd(),'data',sys.argv[1])}\nfilename: {filename}")
+    else: 
+        print(f"len(sys(argv)): {len(sys.argv)}")
+        filename = None
         
     app = Application(filename)
     app.mainloop()

@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Bibliotheque 'human' qui contient l'interface pour les
 méthodes du joueur en mode 'Human vs IA'.
@@ -38,46 +39,25 @@ class Human_Player():
     def __init__(self, master:tk.Tk, gameboard:GameBoard):
         
         self.__master = master
-        self.__gameboard = gameboard
-        self.__dico_MOTUS = master.dico_MOTUS       # - recupere le Handle_DicoMotus() du parent
         self.__dico_Letters = master.dico_Letters
-        self.__nb_letters = gameboard.nb_Letters
-        self.__nb_tries = gameboard.nb_Tries
+        self.__gameboard:GameBoard = gameboard
+        self.__nb_letters = self.__gameboard.nb_Letters
+        self.__nb_tries = self.__gameboard.nb_Tries
+        self.__human_status:PlayerStatus = "idle"
         self.OK,self.IS,self.NO = 0,0,0             # - variables définissants le nombre et le type de lettres trouvées
-        self.__name:str = "Tony"
         
-
-    def valide_Mot(self, event:tk.Event=None):
-        proposition = self.__master.vrequest.get().strip()
-        if self.__valide_proposition(proposition) or len(proposition)==self.__nb_letters:
-            # ---- Recherche et écriture du mot dans les cases du premier mot libre ----
-            word_nbr, buttons = self.__find_free_word(proposition)
-            buttons = self.__draw_OK_letters(word=proposition, buttons=buttons)
-            buttons = self.__draw_IS_letters(word=proposition, buttons=buttons)
-            buttons = self.__draw_NO_letters(word=proposition, buttons=buttons)
-            if (word_nbr == self.__gameboard.nb_Tries -1) or (self.OK == self.__nb_letters):
-                resultat = self.__win_loose_game()
-                self.__master.gameBoard.grid_remove()
-                if resultat == "winner":
-                    message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{self.__master.MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"    
-                    winner_img = self.__master.background.create_image(self.__master.app_size[0]//2, 
-                                          self.__master.app_size[1]//2,image=self.__master.winnerImage, 
-                                                                       anchor="center", tags='img_winner')
-                    self.__master.choose_new_game(message, winner_img)    
-                if resultat == "loser":
-                    message = f"\n{'Vous avez perdu le mot MOTUS est :':100}\n{self.__master.MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"    
-                    loser_img = self.__master.background.create_image(self.__master.app_size[0]//2, 
-                                          self.__master.app_size[1]//2,image=self.__master.loserImage, 
-                                                                      anchor="center", tags='img_winner')
-                    self.__master.choose_new_game(message, loser_img)
-                self.__master.gameBoard.grid()
-        elif event:
-            message = self.__master.barre_Etat.get_message
-            self.__master.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{proposition}' est invalide")
-            self.__master.barre_Etat.get_message = message
-            
-    def __valide_proposition(self, proposition:str)->bool:
-        return proposition in self.__dico_MOTUS.dico_MOTUS[f"{self.__nb_letters}"]
+    def valide_Mot(self, word:str) -> PlayerStatus:
+        # - Recherche et écriture du mot dans les cases du premier mot libre --
+        word_nbr, buttons = self.__find_free_word(word)
+        # ---------------------------------------------------------------------
+        buttons = self.__draw_OK_letters(word=word, buttons=buttons)
+        buttons = self.__draw_IS_letters(word=word, buttons=buttons)
+        buttons = self.__draw_NO_letters(word=word, buttons=buttons)
+        if (word_nbr == self.__gameboard.nb_Tries -1) or (self.OK == self.__nb_letters):
+            self.__human_status = self.__win_loose_game()
+        else:
+            self.__human_status = "idle"
+        return self.__human_status
     
     def __win_loose_game(self) -> PlayerStatus:
         """ Methode qui renvoi le status du joueur : 'winner' ou 'looser' """
@@ -90,7 +70,7 @@ class Human_Player():
         for idx,button in buttons:
             button.configure(bg=COLOR_NO,relief='flat',activebackground=COLOR_NO)
             button.flash()
-        self.NO = len(buttons)
+            self.NO = len(buttons)
         return buttons
         
     def __draw_IS_letters(self, word:str, buttons:list):

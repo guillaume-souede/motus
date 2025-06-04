@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from typing import Literal
 
 WordLength = Literal["6", "7", "8", "9"]
@@ -11,7 +13,10 @@ dico_path:str = "data"
 images_path:str  = "images"
 
 default_help_filename = "rules.txt"
-default_dico_filename = "frgut.txt"
+#default_dico_filename = "frgut.txt"
+default_dico_filename = "frgut_MOTUS.txt"
+#default_dico_filename = "motsMotus-300.txt"
+#default_dico_filename = "motsMotus-30.txt"
 default_MOTUS_background = "defaut.png"
 
 COLOR_OK = "red"

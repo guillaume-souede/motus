@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Bibliotheque 'GameBoard'. Surcharges de la classes tKinter Frame
 pour afficher le tableau de lettres composé de Tkinter Buttons()
@@ -52,7 +53,7 @@ class GameBoard(My_LabelFrame):
         tab_options:dict = {'bg':'orange','bd':5,'relief':'groove','labelanchor':'n'}
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
-        My_LabelFrame.__init__(self, master, name='gameBoard', pad=(2,2,0,0), *args, **kwargs)
+        My_LabelFrame.__init__(self, master, name='!gameBoard', pad=(2,2,0,0), *args, **kwargs)
         self.update()
 
     @property

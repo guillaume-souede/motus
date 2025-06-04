@@ -1,8 +1,16 @@
         
+                MOTUS v2.0 d'après le jeu télévisé MOTUS diffusé sur France Télévision
+
     Ce jeu de MOTUS permet de jouer selon deux modes.
-        Le premier mode est celui ou l'Humain joue contre la machine. C'est donc cette dernière qui propose le mot MOTUS à découvrir
-        Le second mode est donc l'IA contre l'Humain. C'est à vous à lui faire rechercher un mot
-        La sélection se fait à l'aide d'une petite boite de choix dans la barre du haut. On peut alors sélectionner : 'Humain vs IA' ou 'IA vs Humain. 
+    Le premier mode est celui ou l'Humain joue contre la machine. Vous devez découvrir le mot MOTUS choisi par l'IA.
+    Le second mode est l'IA contre l'Humain. C'est à vous à lui faire rechercher un mot dans le même dictionnaire que dans le premier mode de jeu.
+    La sélection du mode de jeu se fait à l'aide d'une petite boite de choix dans la barre du haut. On peut alors sélectionner 'Humain vs IA' ou 'IA vs Humain'. 
+    
+    Le dictionnaire tient compte des caractères accentuée tels les "é, è, à, ç etc ..."
+
+    La partie débute lorsque le joueur 'Humain' clique sur le bouton "Jouer". 
+En mode 'Humain vs IA', chaque proposition est saisie dans le champ 'votre proposition : ' et le joueur valide avec le bouton 'Valider'. Le mot s'affiche, la réflexion débute ...
+En mode 'IA vs Human', le mot que l'on veut faire découvrir est saisi dans le champ 'votre propositions' puis click sur le bouton 'Valider' pour lancer la partie ... de l'IA ...
 
     Dans les deux cas, il s'agit de deviner un mot dont le nombre de lettres (entre 6 et 9) et le nombre d'essais (entre 6 et 10) sont fixés à l’avance.
 
