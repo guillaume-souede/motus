@@ -45,11 +45,19 @@ class Handle_DicoMotus():
     def valid_player_MOTUS(cls, proposition:str, dico:dict, word_length:WordLength) -> bool:
         return proposition in dico[word_length]
     
-    def __init__(self, master:tk.Tk, filename:str=None):
+    def __init__(self, master:tk.Tk, parameters:Saveload_CFG=None):
         
         self.__master = master      # pour développement futur, sera déjà déclaré !
-        self.__filename = filename if filename != None else default_dico_filename
-        self.__dico_MOTUS:dict[str:[list]] = ({})
+        # ---------------------------------------------------------------------
+        if isinstance(parameters, Saveload_CFG):
+            self.__filename, self.__dico_path = parameters.options.dicofilename, parameters.options.dicopath
+            self.__accent = bool(parameters.options.accentchar)
+        else:
+            self.__filename = parameters if isinstance(parameters,str) else default_dico_filename
+            self.__dico_path = dico_path
+            self.__accent:bool = False
+        # ---------------------------------------------------------------------
+        self.__dico_MOTUS:dict[WordLength:[list]] = ({})
         self.__load_dicofile()
         # ---- for test only ----
         #seed(1)
@@ -61,14 +69,17 @@ class Handle_DicoMotus():
             caractères de type "Mn" (marques non espacées = accents).
             Création du dictionnaire des mots de longueur 6 à 9 lettres pour MOTUS.
         """
-        fname = op.join(getcwd(), dico_path, self.__filename)
+        if self.__dico_MOTUS: self.__dico_MOTUS.clear()
+        fname = op.join(getcwd(), self.__dico_path, self.__filename)
         if op.isfile(fname):
             with open(fname, mode="rt", encoding='utf-8') as motusfile:
                 for word in motusfile:
                     # ---------------------------------------------------------
                     # -- Lecture du mot puis normalisation avec/sans accents --
-                    #word = ''.join(c for c in normalize('NFD', word) if category(c) != 'Mn')
-                    word = normalize('NFC', word).strip()  # -- ici avec les accents --
+                    if self.__accent:      # -------- avec les accents --------
+                        word = normalize('NFC', word).strip()
+                    else:                  # -------- sans les accents --------
+                        word = ''.join(c for c in normalize('NFD', word) if category(c) != 'Mn').strip()
                     # ---------------------------------------------------------
                     w = word; l = len(w)
                     if not l in range(6,10):
@@ -85,9 +96,13 @@ class Handle_DicoMotus():
         return self.__filename
                     
     @property
-    def dico_MOTUS(self)->dict:                                     # - return full dictionary
+    def dico_MOTUS(self) -> dict:                                     # - return full dictionary
         """ Renvoi le dictionnaire complet des mots MOTUS """
-        return self.__dico_MOTUS             
+        return self.__dico_MOTUS
+    @dico_MOTUS.setter
+    def dico_MOTUS(self, filename:str):
+        self.__filename = filename
+        self.__load_dicofile()         
     
     def __dico_MOTUS_length(self, wordlength:WordLength)->list:     # - return value of dictionary[worldlength]
         """ Propriété qui renvoi la liste des mots du dictionnaire MOTUS 
@@ -114,4 +129,5 @@ if __name__ == "__main__":
     [print(f"Nombre de mots de {l} lettres: {len(dico.dico_MOTUS[str(l)])}") for l in range(6,10)]
     print(f"'emirat' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('emirat',dico.dico_MOTUS,'6')}")
     print(f"'élixir' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('élixir',dico.dico_MOTUS,'6')}")
+    print(f"'émirat' is on dico_MOTUS['6']: {Handle_DicoMotus.valid_player_MOTUS('émirat',dico.dico_MOTUS,'6')}")
     

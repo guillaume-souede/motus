@@ -29,6 +29,7 @@ __license__ = "GPL 3"
 
 import os.path as op
 import tkinter as tk
+import tkinter.filedialog as tkFileDialog
 
 from os import getcwd
 from configs import *
@@ -166,6 +167,8 @@ class My_MessageBox(tk.Toplevel):
         self.quitButton = tk.Button(self,text=title2,width=12,font=btn_font,
                                             activebackground="tan",command=self.no_command,padx=10)
         self.quitButton.grid(column=3,row=4,pady=10,sticky="ne")
+        # ---------------------------------------------------------------------
+        self.focus_set()
 
     def valide_ok_command(self, event):
         print(f"event: {event}")
@@ -175,7 +178,9 @@ class My_MessageBox(tk.Toplevel):
             de l'huile qui lors du choix renvoi le nom de l'huile choisie
             et ferme la fenetre Toplevel.
         """
-        self.lift(self.__master)        # mise au premier plan de la Toplevel    
+        self.lift(self.__master)        # mise au premier plan de la Toplevel
+        self.wait_visibility()
+        self.grab_set() 
         self.how = None                 # Nom de la procédure exécutée en sortie
         self.mainloop()                 # Sortie de la Boucle principale par "self.quit(how)"
         self.destroy()                  # Fermeture de la fenetre Toplevel
@@ -207,11 +212,18 @@ class My_MessageBox(tk.Toplevel):
 
 class Game_Rules(tk.Toplevel):
         
-    def __init__(self, master, filename:str=None, *args, **kwargs):
+    def __init__(self, master, parameters:"Saveload_CFG"=None, *args, **kwargs):
          
         self.__master = master
-        self.__filename = filename if filename else op.join(getcwd(),dico_path,default_help_filename)
-        self.__vtitle = tk.StringVar(value="Aide de MOTUS v1.0.10 (c)AMOUROUX Bernard 05/2025")
+        # ---------------------------------------------------------------------
+        if isinstance(parameters, Saveload_CFG):
+            self.__filename, self.__help_path = parameters.options.helpfilename, parameters.options.dicopath
+        else:
+            self.__filename = parameters if isinstance(parameters,str) else default_help_filename
+            self.__help_path = dico_path 
+        # ---------------------------------------------------------------------
+        self.__filename =  op.join(getcwd(),self.__help_path,self.__filename)
+        self.__vtitle = tk.StringVar(value="Aide de MOTUS v2.0.10 (c)AMOUROUX Bernard 05/2025")
         self.__dico_lines:dict[int:str] = ({})
         # ---------------------------------------------------------------------
         tab_options:dict = {'bd':3,'bg':'ivory','relief':'ridge','name':"!my_gameRules"}        
@@ -230,6 +242,7 @@ class Game_Rules(tk.Toplevel):
         # ---------------------------------------------------------------------
         self.__text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
         self.__load_helpfile()
+        self.withdraw()
     
     def show_helpfile(self):
         self.create_widgets()
@@ -253,7 +266,6 @@ class Game_Rules(tk.Toplevel):
         # ---------------------------------------------------------------------
         versb = tk.Scrollbar(self, orient=tk.VERTICAL)
         versb.grid(column=1,row=0,sticky='nse')
-        #self.text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
         self.__text_help.grid(column=0,row=0,padx=10,pady=10,sticky="nsew")
         self.__text_help['yscrollcommand'] = versb.set   
         versb['command'] = self.__text_help.yview
@@ -262,6 +274,8 @@ class Game_Rules(tk.Toplevel):
         # ---------------------------------------------------------------------
         self.__look_for_tags(self.__text_help.get("1.0", tk.END),text_tags)
         self.__text_help.configure(state="disabled")
+        self.lift(self.__master)
+        self.deiconify()
     
     def __look_for_tags(self, help_text:str,text_tags:list):
         """ Methode qui ajoute des tags au texte. La recherche du pattern se fait
@@ -301,7 +315,7 @@ class OneClick_CopyPaste():
         
         self.__master = master
         self.__widget = widget
-        self.__commandList = commandsList
+        self.__commandList = commandsList        
         self.__NoSel = [2, 3]
         if nosel : self.__NoSel.extend(nosel)
         # ----- Pour pouvoir Couper/Coller dans le widget Text() pour test ----
@@ -315,35 +329,30 @@ class OneClick_CopyPaste():
             [popup_menu.entryconfigure(i, state = 'disabled') for i in nosel \
                                                       if not self.__widget.tag_ranges('sel')]
         # ---------------------------------------------------------------------
-        #def add_commandsList(commandlist:list):
-        #    [popup_menu.add_command(label=cmd[0],accelerator=cmd[1],command=cmd[2]) for cmd in commandlist]
-        # ---------------------------------------------------------------------
         popup_menu = tk.Menu(self.master,tearoff=0,font=menu_Font,postcommand=lambda :nomenupopup(self.__NoSel))
         popup_menu.add_command(label="  OneClick Copy/Paste",accelerator ="and Cut ",
                                                         background='orange',activebackground='orange')
+        popup_menu.configure(background="ivory", activebackground='tan',borderwidth=2,relief="solid")
         popup_menu.add_separator()
-        popup_menu.add_command(label="Copier",accelerator="Ctrl-C",command=self.__menucopier,activebackground='tan')
-        popup_menu.add_command(label="Couper",accelerator="Ctrl-X",command=self.__menucouper,activebackground='tan')
-        popup_menu.add_command(label="Coller",accelerator="Ctrl-V",command=self.__menucoller,activebackground='tan')
+        popup_menu.add_command(label="Copier",accelerator="Ctrl-C",command=self.__menucopier)
+        popup_menu.add_command(label="Couper",accelerator="Ctrl-X",command=self.__menucouper)
+        popup_menu.add_command(label="Coller",accelerator="Ctrl-V",command=self.__menucoller)
         popup_menu.add_separator()
+        # ---------------------------------------------------------------------
         if self.__commandList: 
-            #add_commandsList(self.__commandList) 
             [popup_menu.add_command(label=cmd[0],accelerator=cmd[1],command=cmd[2]) for cmd in self.__commandList]
         # ---------------------------------------------------------------------
         try:
             popup_menu.tk_popup(event.x_root, event.y_root)
-            self.__widget.configure(state='normal')
         except Exception as e:
             print(f"Erreur interne : {e}")
             popup_menu.grab_release()
                 
     def __menucoller(self, event=None):
         try:
-            texttopaste = self.master.clipboard_get()
-            [self.__widget.insert(tk.INSERT, w) for w in texttopaste]
+            [self.__widget.insert(tk.INSERT, w) for w in self.master.clipboard_get()]
         except:
             print("Rien à coller/Texte en lecture seule")
-            return
 
     def __menucopier(self, event=None)-> bool:        
         self.master.clipboard_clear()
@@ -354,12 +363,261 @@ class OneClick_CopyPaste():
         return False
 
     def __menucouper(self, event=None):
-        if self.__menucopier() and self.__widget.cget('state') != 'disabled':
+        if self.__menucopier() and self.__widget.cget('state') == 'normal':
             self.__widget.delete('sel.first', 'sel.last')
         else:
             print("Rien à couper/Texte en lecture seule")
+
+
+class Motus_PopupMenu():
+    """ Classe Menu popup paramétrable.
+        Les parametres du contructeur sont:
+            'master': widget appelant dont le parent est un tk.Toplevel()
+        Les 2 paramètres suivants sont optionnels et non nécessaire pour 'Copier/Coller Couper' !
+            'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
+            'nosel' : list[int] liste des indices des rubrique dont l'état sera 'disabled'
+    """
+    def __init__(self, master:object, commandsList:tuple=None, nosel:list=None):
+        
+        self.__master = master
+        self.__commandList = commandsList
+        self.__NoSel = nosel
+            
+    def show_Menu_Popup(self, event:tk.Event):
+        menu_Font = ('Arial 12 bold italic')
+        # ---------------------------------------------------------------------
+        def nomenupopup(nosel:list):                
+            [popup_menu.entryconfigure(i, state = 'disabled') for i in nosel]
+        # ---------------------------------------------------------------------
+        popup_menu = tk.Menu(self.__master,tearoff=0,font=menu_Font,postcommand=lambda :nomenupopup(self.__NoSel))
+        popup_menu.add_command(label=" MOTUS popup menu",accelerator ="  -/-  ",
+                                                        background='orange',activebackground='orange')
+        popup_menu.configure(background="ivory", activebackground='tan',borderwidth=2,relief="solid")
+        popup_menu.add_separator()
+        self.add_Popup_Commands(popupmenu=popup_menu,commands=self.__commandList)
+        # ---------------------------------------------------------------------
+        try:
+            popup_menu.tk_popup(event.x_root, event.y_root)
+        except Exception as e:
+            print(f"Erreur interne : {e}")
+            popup_menu.grab_release()    
+
+
+    def add_Popup_Commands(self, popupmenu:tk.Menu, commands:tuple):
+        for command in commands:
+            if command[0] == "separator":
+                popupmenu.add_separator()
+            else:
+                popupmenu.add_command(label=command[0],accelerator=command[1],command=command[2])   
+                
+
+class Parameters_Box(tk.Toplevel):
+    
+    def __init__(self, master, parameters:App_Options, *args, **kwargs):
+         
+        self.__master = master
+        self.__parameters = parameters
+        # ---------------------------------------------------------------------
+         
+        self.vgamemode = tk.StringVar(value=parameters.gamemode)
+        print(f"Parameters_Box().vgamemode: {self.vgamemode.get()}")
+        # ---------------------------------------------------------------------
+        self.vparamfile =  op.join(getcwd(),parameters.dicopath,parameters.paramfilename)
+        self.vdicofile = tk.StringVar(value=parameters.dicofilename)
+        self.vhelpfile = tk.StringVar(value=parameters.helpfilename)
+        self.vbackfile = tk.StringVar(value=parameters.backfilename)
+        self.vimagepath = tk.StringVar(value=parameters.imagepath)
+        self.vdatapath = tk.StringVar(value=parameters.dicopath)
+        self.vaccentchar = tk.IntVar(value=parameters.accentchar)
+        self.vnblettres = tk.IntVar(value=wordlengthlist[0]) 
+        self.vnbtries = tk.IntVar(value=wordlengthlist[0])
+        # ---------------------------------------------------------------------
+        tab_options:dict = {'bd':3,'bg':'ivory','relief':'ridge','name':"!my_appParameters"}        
+        for key in list(tab_options.keys()):
+            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
+        super().__init__(master, *args, **kwargs)
+        # ---------------------------------------------------------------------        
+        self.protocol("WM_DELETE_WINDOW", self.no_command)
+        # ---------------------------------------------------------------------        
+        self.txt_font = ('Courier\ New 12 bold italic')
+        self.btn_font = ('Arial 12 bold roman')
+        self.lbl_font = ('Serif 12 normal italic')
+        self.spb_font = ('Serif 11 normal italic')
+        # ---------------------------------------------------------------------        
+        self.minsize(master.app_size[0]//3, master.app_size[1]//3)
+        [self.columnconfigure(index=i, weight=1) for i in range(20)]
+        self.rowconfigure(index=0, weight=1)
+        # ---------------------------------------------------------------------        
+        title = "Paramétrage de MOTUS v2.0.10 (c)AMOUROUX Bernard 06/2025"
+        self.bind("<Return>", self.ok_command)
+        self.bind("<Escape>", self.no_command)
+        self.title(title)
+        # ---------------------------------------------------------------------
+        self.create_widgets()
+    
+    def create_widgets(self):
+        # ---------------------------------------------------------------------
+        frame0 = My_LabelFrame(self,0,0,cspan=20,rspan=20,bg='wheat',bd=2,relief="groove")
+        tk.Label(frame0,bg='tan',bd=0,font=self.lbl_font,justify="center",anchor="center",width=32,
+                    text=f"\tFichier de configuration :").grid(row=0,columnspan=12,sticky='nsew')
+        tk.Label(frame0,bg='tan',bd=0,font=self.txt_font,text=f"\t{self.__parameters.paramfilename}",
+                   width=38,justify="center",anchor="w").grid(column=15,row=0,columnspan=8,sticky='nsew')
+        # ---------------------------------------------------------------------
+        frame1 = My_LabelFrame(frame0,0,1,cspan=20,rspan=18,bg='wheat',bd=2,relief="ridge",pad=(2,2,0,0))
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Fichier dictionnaire  :",anchor="sw",
+                           width=22,font=self.lbl_font).grid(column=0,row=0,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vdicofile,state="readonly").grid(row=0,
+                                                           ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                     command=self.sel_Dictfile,).grid(row=0,column=15,columnspan=4,padx=10,sticky="se")
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Fichier d'aide MOTUS  :",anchor="sw",
+                           width=22,font=self.lbl_font).grid(column=0,row=1,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vhelpfile,state="readonly").grid(row=1,
+                                                           ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                      command=self.sel_helpfile).grid(row=1,column=15,columnspan=4,padx=10,sticky="se")
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Image de fond d'écran :",anchor="sw",
+                           width=22,font=self.lbl_font).grid(column=0,row=2,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vbackfile,state="readonly").grid(row=2,
+                                                           ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                      command=self.sel_backfile).grid(row=2,column=15,columnspan=4,padx=10,sticky="se")
+        # ---------------------------------------------------------------------
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,anchor="s",width=40,
+                    text=f"{'Dossiers des dictionnaires, paramètres et images :'}",
+                          font=self.lbl_font).grid(column=0,row=3,rowspan=3,columnspan=20,sticky='nsew')
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Dossier des données :",anchor="sw",
+                            width=22,font=self.lbl_font).grid(column=0,row=6,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vdatapath,state="readonly").grid(row=6,
+                                                            ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                       command=self.sel_datapath).grid(row=6,column=15,columnspan=4,padx=10,sticky="se")
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Dossier des images  :",anchor="sw",
+                            width=22,font=self.lbl_font).grid(column=0,row=7,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vimagepath,state="readonly").grid(row=7,
+                                                            ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                      command=self.sel_imagepath).grid(row=7,column=15,columnspan=4,padx=10,sticky="se")
+        # ---------------------------------------------------------------------
+        chkboxlbl = My_LabelFrame(frame1,0,8,cspan=20,rspan=11,bg=frame1.cget('bg'),
+                                      relief="ridge",text=' Paramètres divers',pad=(2,2,0,2))
+        tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vaccentchar,
+                                indicatoron=1,font=self.spb_font,text=" : mots accentués",
+                                        anchor='w',).grid(column=0,row=0,columnspan=4,sticky='nsew')
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"\tLongueur du mot : ",anchor="w",
+                                font=self.spb_font).grid(column=4,columnspan=7,row=0,sticky="nsew")
+        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnblettres,wrap=True,
+                              from_=wordlengthlist[0],to=wordlengthlist[-1],state='readonly',
+                                    width=2,font=self.txt_font).grid(column=11,row=0,sticky='w')    
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"\tNombre d'essais : ",
+                                font=self.spb_font).grid(column=12,columnspan=7,row=0,sticky="nsew")
+        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnbtries,wrap=True,
+                                      from_=wordlengthlist[0],to=10,state='readonly',width=2,
+                                              font=self.txt_font).grid(column=19,row=0,sticky='w')
+        
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f" Mode de jeu : ",
+                                font=self.spb_font).grid(column=0,columnspan=2,row=1,sticky="nsew")
+        print(f"Parameters_Box().self.__parameters.gamemode: {self.__parameters.gamemode}")
+        gamemode = gamemodelist[0] if self.__parameters.gamemode=="human" else \
+                        gamemodelist[1] if self.__parameters.gamemode=="computer" else gamemodelist[2]
+        print(f"Parameters_Box().gamemode: {gamemode}")
+        self.spbgmode = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
+                                textvariable=self.vgamemode,values=gamemodelist,wrap=True,width=15)
+        while self.spbgmode.get() != gamemode: self.spbgmode.invoke('buttonup')
+        
+        self.spbgmode.grid(column=2,row=1,columnspan=3,sticky="se")
+        # ---------------------------------------------------------------------        
+        tk.Button(frame0,bg='tan',bd=3,activebackground="lightgreen",state="active",width=12,font=self.btn_font,
+                      text="Valider",command=self.ok_command).grid(column=2,row=19,columnspan=3,pady=5,sticky="w")
+        tk.Button(frame0,bg='tan',activebackground="red",text="Annuler",font=self.btn_font,bd=3,width=12,
+                               command=self.no_command).grid(column=15,row=19,columnspan=4,pady=5,sticky="e")
+    
+    def sel_Dictfile(self):
+        fname = tkFileDialog.askopenfilename(parent=self,initialdir = op.join(getcwd(),self.vdatapath.get()),
+                                        title = "Choix du dictionnaire MOTUS",initialfile=self.vdicofile.get(),
+                                                      filetypes = (("Motus dico","*.txt"),("Tous types","*.*")))
+        if fname:
+            self.vdicofile.set(op.basename(fname))
+    
+    def sel_helpfile(self):
+        fname = tkFileDialog.askopenfilename(parent=self, initialdir = op.join(getcwd(),self.vdatapath.get()),
+                                        title = "Choix du fichier d'aide MOTUS",initialfile=self.vhelpfile.get(),
+                                                        filetypes = (("Aide Motus","*.txt"),("Tous types","*.*")))
+        if fname:
+            self.vhelpfile.set(op.basename(fname))
+    
+    def sel_backfile(self):
+        fname = tkFileDialog.askopenfilename(parent=self, initialdir = op.join(getcwd(),self.vimagepath.get()),
+                                      title = "Choix de l'Image de fond d'écran",initialfile=self.vbackfile.get(),
+                                        filetypes = (("Image PNG","*.png"),("Image GIF","*.gif"),("Tous types","*.*")))
+        if fname:
+            self.vbackfile.set(op.basename(fname))
+    
+    def sel_datapath(self):
+        pname = tkFileDialog.askdirectory(initialdir = op.join(getcwd(),self.vdatapath.get()),
+                                                parent = self, title = "Choix du dossier des données")
+        if pname:
+            self.vdatapath.set(op.basename(pname))
+    
+    def sel_imagepath(self):
+        pname = tkFileDialog.askdirectory(initialdir=op.join(getcwd(),self.vimagepath.get()),
+                                                        parent=self,title="Choix du dossier des images")
+        if pname:
+            self.vimagepath.set(op.basename(pname))
+    
+    def __valid_parameters(self, event=None) -> App_Options:
+        # ---------------------------------------------------------------------
+        index = gamemodelist.index(self.vgamemode.get())
+        self.__parameters.gamemode = "human" if index == 0 else "computer" if index == 1 else "fighters"
+        # ---------------------------------------------------------------------
+        self.__parameters.dicofilename = self.vdicofile.get()
+        self.__parameters.helpfilename = self.vhelpfile.get()
+        self.__parameters.backfilename = self.vbackfile.get()
+        self.__parameters.accentchar = self.vaccentchar.get()
+        self.__parameters.nb_letters = self.vnblettres.get()
+        self.__parameters.imagepath = self.vimagepath.get()
+        self.__parameters.dicopath = self.vdatapath.get()
+        self.__parameters.nb_tries = self.vnbtries.get()
+        # ---------------------------------------------------------------------
+        return self.__parameters
+
+    def go(self) -> App_Options:
+        """ Methode qui permet de garder le focus sur la fenetre de choix
+            de l'huile qui lors du choix renvoi le nom de l'huile choisie
+            et ferme la fenetre Toplevel.
+        """
+        self.lift(self.__master)            # mise au premier plan de la Toplevel
+        self.wait_visibility()
+        self.grab_set() 
+        self.how = self.__valid_parameters  # Nom de la procédure exécutée en sortie
+        self.mainloop()                     # Sortie de la Boucle principale par "self.quit(how)"
+        self.destroy()                      # Fermeture de la fenetre Toplevel
+        return self.how
+        
+    def ok_command(self, event=None):
+        self.Quit(self.__valid_parameters(event))
+        
+    def no_command(self, event=None):
+        self.Quit(event)
+        
+    def Quit(self, how=None):
+        """ Sortie de la boucle principale et non fermeture de la fenetre
+            Exécution de la methode "how" qui permet de récupérer la
+            donnée voulue en sotie en fin de méthode "go()"
+        """
+        self.how = how
+        self.quit()                     # Exit mainloop()
+        
     
 # ----------------------------- Méthodes diverses -----------------------------    
+
+def Select_Dictionary_File(master) -> str:
+    fname = tkFileDialog.askopenfilename(parent=master, initialdir = op.join(getcwd(),"data"),
+                      title = "Choix du dictionnaire MOTUS",initialfile=default_dico_filename,
+                                    filetypes = (("Motus dico","*.txt"),("Tous types","*.*")))
+    if fname:
+        return fname
+
 def get_widget(parent, pathname:str)->object:
     """ Retourne l'objet dont le nom est 'pathname' et qui appartient à 'parent' """
     try:
@@ -376,18 +634,34 @@ if __name__ == "__main__":
         
     root = tk.Tk()
     root.app_size = root.maxsize()
-    rules = Game_Rules(root)
+    #rules = Game_Rules(root,default_help_filename)
     # -------------------------------------------------------------------------
     #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
     #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
-    new_menu = [("copy","Ctrl-C",do_Nothing),("Paste","Ctrl-V",do_Nothing),("Cut","Ctrl-X",do_Nothing)]
+    new_menu = [(" Paramètres","Ctrl-P",do_Nothing),(" Dictionnaire MOTUS","Ctrl-D",do_Nothing),
+                (" Changer Mode de jeu","Ctrl-M",do_Nothing),("separator","",None),(" Quitter","",quit)]
     # -------------------------------------------------------------------------
-    menu = OneClick_CopyPaste(rules,rules.get_TextWidget(),new_menu, [6,7])
-    rules.bind("<Button-3>", menu.show_Menu_Popup)
-    rules.show_helpfile()
+    #menu = OneClick_CopyPaste(rules,rules.get_TextWidget(),new_menu, [6,7])
+    menu = Motus_PopupMenu(root,new_menu,[2,3,4])
+    #rules.bind("<Button-3>", menu.show_Menu_Popup)
+    #rules.show_helpfile()
+    #rules.lift(root)
     #msgbox = Win_MessageBox(root)
     #msgbox.message = "Win Message Box"
     #msgbox.lift(root)
     #message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
     #print(My_MessageBox(root,"Faites votre choix de partie",message,0).go())
+    # -------------------------------------------------------------------------
+    """
+    dicofile = Select_Dictionary_File(root)
+    config = Saveload_CFG()
+    print(f"Dico filename: {dicofile}")
+    if dicofile: config.options.dicofilename = op.basename(dicofile)
+    winparams = Parameters_Box(root,config.options).go()
+    if winparams:     
+        print(f"winparams:\n{winparams}")
+    # -------------------------------------------------------------------------
+    """
+    player = Choose_GameMode(root, PlayerMode).go()
     root.mainloop()
+    
