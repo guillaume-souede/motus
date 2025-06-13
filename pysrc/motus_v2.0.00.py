@@ -61,43 +61,37 @@ class Application(tk.Tk):
         else:
             exit(1)
         # -------------- Initialisation des images de fond du jeu -------------
-        self.backImage = tk.PhotoImage(master=self,
-                                file=op.join(os.getcwd(),imgpath,background))
-        self.winnerImage = tk.PhotoImage(master=self,
-                                file=op.join(os.getcwd(),imgpath,"victoire.png"))
-        self.loserImage = tk.PhotoImage(master=self,
-                                file=op.join(os.getcwd(),imgpath,"defaite.png"))
-        self.abortImage = tk.PhotoImage(master=self,
-                                file=op.join(os.getcwd(),imgpath,"dommage.gif"))
+        self.backImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,background))
+        self.winnerImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,"victoire.png"))
+        self.loserImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,"defaite.png"))
+        self.abortImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,"dommage.gif"))
         # ---------- Initialisation des polices de caractères du jeu ----------
         self.labelFont = tkFont.Font(self,family='Courier New',size=11,weight='bold',slant='roman')
         self.menuFont = tkFont.Font(self, family='Serif', size=11, weight='normal', slant='italic')
         # ---------------------------------------------------------------------
-        self.__IA_status = ""                                   # ---- status du joueur IA : winner/loser/idle
-        self.__human_status = ""                                # ---- status du joueur Humain : winner/loser/idle
-        self.__MOTUS_word:str=""                                # ---- le mot à trouver en mode 'Humain vs IA'
-
+        self.__IA_status = ""                   # ---- status du joueur IA : winner/loser/idle
+        self.__human_status = ""                # ---- status du joueur Humain : winner/loser/idle
+        self.__MOTUS_word:str=""                # ---- le mot à trouver en mode 'Humain vs IA'
         self.__MOTUS_Player:str = self.app_Parameters.options.gamemode  # ---- type du joueur MOTUS, humain ou IA
-        print(f"self.__MOTUS_Player: {self.__MOTUS_Player}")
-
-        self.__dico_Letters:dict = ({})                         # ---- dictionnaire de décomposition du mot en lettres
+        self.__dico_Letters:dict = ({})         # ---- dictionnaire de décomposition du mot en lettres
         self.vnbessais = tk.IntVar(value=self.app_Parameters.options.nb_tries)    # ---- nombre de mots proposables pour la partie
         self.vnblettres = tk.IntVar(value=self.app_Parameters.options.nb_letters) # ---- Nombre de lettres du mot MOTUS
-        self.vrequest = tk.StringVar(value=" Votre mot de 6 à 9 lettres ...")     # ---- proposition de mot en mode 'human'
+        self.vrequest = tk.StringVar(value=f" Votre mot de {self.vnblettres.get()} lettres ...")     # ---- proposition de mot en mode 'human'
         # ---------- Interception de la croix rouge en haut à droite ----------
         self.protocol('WM_DELETE_WINDOW',self.Quit)
         # ---- Taille de la fenètre du jeu fonction de la résolution écran ----
-        MAX_WIDTH, MAX_HEIGHT = self.maxsize()                  # --- renvoi la taille écran --
-        self.app_size = min(MAX_WIDTH-100,self.backImage.width()), min(MAX_HEIGHT-150,self.backImage.height())
+        MAX_WIDTH, MAX_HEIGHT = self.maxsize()  # --- renvoi la taille écran --
+        self.app_size = min(MAX_WIDTH-100,self.backImage.width()), min(MAX_HEIGHT-200,self.backImage.height())
         self.minsize(self.backImage.width()//2, self.backImage.height()//2)
         # -------------------------------------------------------------------------
-        #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
+        #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:callable)
         #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
         commandsList = [(" Paramètres de MOTUS"," Alt-P ",self.parameters), (" Choix du dictionnaire des mots","",self.select_dictionary),
                         (" Changer Mode de jeu","",self.select_gamemode), (" Difficulté  du jeu","",None),
                         ("separator","",None),(" Quitter MOTUS"," Alt-F4 ",self.Quit)]
+        self.event_add("<<PopupMenu>>","<Control-M>","<Control-m>","<Button-3>")
         self.popupMenu = Motus_PopupMenu(self, commandsList, [5])
-        self.bind_all("<Button-3>", self.popupMenu.show_Menu_Popup)
+        self.bind_all("<<PopupMenu>>", self.popupMenu.show_Menu_Popup)
         self.bind("<Alt-F4>",self.Quit)
     # -------------------------------------------------------------------------
         self.title("MOTUS v2.0 (c)AMOUROUX Bernard  Mai 2025")
@@ -186,7 +180,7 @@ class Application(tk.Tk):
         message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum" \
                   f"{self.vnbessais.get()} essais\t-/- Dictionnaire '{self.dico_MOTUS.filename}' de" \
                   f"{len(self.dico_MOTUS.dico_MOTUS[str(self.vnblettres.get())])} mots.\t\tClick " \
-                  f"bouton Droit de la souris pour le menu contextuel de MOTUS" 
+                  f"bouton Droit de la souris ou 'Ctrl-M' pour le menu contextuel de MOTUS" 
         self.barre_Etat = Window_StateBar(self,"",1,defMessage=message,col=0,row=41,cspan=38,pady=5)
         # -----------------------------------------------------------------------------------------
         tk.Button(self,bg='lightgreen',border=1,command=self.__show_rules,text="Règles du jeu",
@@ -198,7 +192,7 @@ class Application(tk.Tk):
         message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum" \
                   f"{self.vnbessais.get()} essais\t-/- Dictionnaire '{self.dico_MOTUS.filename}' de" \
                   f"{len(self.dico_MOTUS.dico_MOTUS[str(self.vnblettres.get())])} mots.\t\tClick " \
-                  f"bouton Droit de la souris pour le menu contextuel de MOTUS" 
+                  f"bouton Droit de la souris ou 'Ctrl-M' pour le menu contextuel de MOTUS" 
         self.barre_Etat.update_vltexte(message, 2)
         self.barre_Etat.get_message = message
     

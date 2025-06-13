@@ -34,6 +34,7 @@ import tkinter.filedialog as tkFileDialog
 from os import getcwd
 from configs import *
 
+
 class My_LabelFrame(tk.LabelFrame):
 
     def __init__(self,master,col=0,row=0,cspan=1,rspan=1,pad=(0,0,0,0),sticky='nsew', *args, **kwargs):
@@ -302,74 +303,7 @@ class Game_Rules(tk.Toplevel):
         self.destroy()
 
 
-class OneClick_CopyPaste():
-    """ Classe Menu popup copier/coller couper.
-        Les parametres du contructeur sont:
-            'master': widget appelant dont le parent est un tk.Toplevel()
-            'widget': le widget tk.Text() de l'appelant.
-        Les 2 paramètres suivants sont optionnels et non nécessaire pour 'Copier/Coller Couper' !
-            'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
-            'nosel' : list[int] liste des indices des rubrique dont l'état sera 'disabled'
-    """
-    def __init__(self, master:object, widget:tk.Text, commandsList:tuple=None, nosel:list=None):
-        
-        self.__master = master
-        self.__widget = widget
-        self.__commandList = commandsList        
-        self.__NoSel = [2, 3]
-        if nosel : self.__NoSel.extend(nosel)
-        # ----- Pour pouvoir Couper/Coller dans le widget Text() pour test ----
-        self.master = master.get_Parent()
-            
-    def show_Menu_Popup(self, event:tk.Event):
-        
-        menu_Font = ('Arial 12 bold italic')
-        # ---------------------------------------------------------------------
-        def nomenupopup(nosel:list):                
-            [popup_menu.entryconfigure(i, state = 'disabled') for i in nosel \
-                                                      if not self.__widget.tag_ranges('sel')]
-        # ---------------------------------------------------------------------
-        popup_menu = tk.Menu(self.master,tearoff=0,font=menu_Font,postcommand=lambda :nomenupopup(self.__NoSel))
-        popup_menu.add_command(label="  OneClick Copy/Paste",accelerator ="and Cut ",
-                                                        background='orange',activebackground='orange')
-        popup_menu.configure(background="ivory", activebackground='tan',borderwidth=2,relief="solid")
-        popup_menu.add_separator()
-        popup_menu.add_command(label="Copier",accelerator="Ctrl-C",command=self.__menucopier)
-        popup_menu.add_command(label="Couper",accelerator="Ctrl-X",command=self.__menucouper)
-        popup_menu.add_command(label="Coller",accelerator="Ctrl-V",command=self.__menucoller)
-        popup_menu.add_separator()
-        # ---------------------------------------------------------------------
-        if self.__commandList: 
-            [popup_menu.add_command(label=cmd[0],accelerator=cmd[1],command=cmd[2]) for cmd in self.__commandList]
-        # ---------------------------------------------------------------------
-        try:
-            popup_menu.tk_popup(event.x_root, event.y_root)
-        except Exception as e:
-            print(f"Erreur interne : {e}")
-            popup_menu.grab_release()
-                
-    def __menucoller(self, event=None):
-        try:
-            [self.__widget.insert(tk.INSERT, w) for w in self.master.clipboard_get()]
-        except:
-            print("Rien à coller/Texte en lecture seule")
-
-    def __menucopier(self, event=None)-> bool:        
-        self.master.clipboard_clear()
-        idx = self.__widget.tag_ranges('sel')
-        if (idx):
-            self.master.clipboard_append(self.__widget.selection_get())
-            return True
-        return False
-
-    def __menucouper(self, event=None):
-        if self.__menucopier() and self.__widget.cget('state') == 'normal':
-            self.__widget.delete('sel.first', 'sel.last')
-        else:
-            print("Rien à couper/Texte en lecture seule")
-
-
-class Motus_PopupMenu():
+class Motus_PopupMenu(tk.Menu):
     """ Classe Menu popup paramétrable.
         Les parametres du contructeur sont:
             'master': widget appelant dont le parent est un tk.Toplevel()
@@ -382,34 +316,35 @@ class Motus_PopupMenu():
         self.__master = master
         self.__commandList = commandsList
         self.__NoSel = nosel
+        
+        super().__init__(master,tearoff=0,font=('Arial 12 bold italic'),postcommand=lambda :self.nomenupopup(self.__NoSel))
             
     def show_Menu_Popup(self, event:tk.Event):
-        menu_Font = ('Arial 12 bold italic')
-        # ---------------------------------------------------------------------
-        def nomenupopup(nosel:list):                
-            [popup_menu.entryconfigure(i, state = 'disabled') for i in nosel]
-        # ---------------------------------------------------------------------
-        popup_menu = tk.Menu(self.__master,tearoff=0,font=menu_Font,postcommand=lambda :nomenupopup(self.__NoSel))
-        popup_menu.add_command(label=" MOTUS popup menu",accelerator ="  -/-  ",
+        self.delete(0, 'end')   # -- reset de la liste des commandes ajoutées -
+        self.add_command(label=" MOTUS popup menu",accelerator =" Ctrl-M ",
                                                         background='orange',activebackground='orange')
-        popup_menu.configure(background="ivory", activebackground='tan',borderwidth=2,relief="solid")
-        popup_menu.add_separator()
-        self.add_Popup_Commands(popupmenu=popup_menu,commands=self.__commandList)
+        self.configure(background="ivory", activebackground='tan',borderwidth=2,relief="solid")
+        self.add_separator()
+        self.add_Popup_Commands(commands=self.__commandList)
         # ---------------------------------------------------------------------
         try:
-            popup_menu.tk_popup(event.x_root, event.y_root)
+            self.tk_popup(event.x_root, event.y_root)
+            print(f"event: {event}")
         except Exception as e:
             print(f"Erreur interne : {e}")
-            popup_menu.grab_release()    
+            self.grab_release()
+             
+    def nomenupopup(self,nosel:list):                
+        [self.entryconfigure(i, state = 'disabled') for i in nosel]
 
-
-    def add_Popup_Commands(self, popupmenu:tk.Menu, commands:tuple):
+    def add_Popup_Commands(self, commands:tuple):
         for command in commands:
             if command[0] == "separator":
-                popupmenu.add_separator()
+                self.add_separator()
             else:
-                popupmenu.add_command(label=command[0],accelerator=command[1],command=command[2])   
-                
+                self.add_command(label=command[0],accelerator=command[1],command=command[2])   
+    
+                    
 
 class Parameters_Box(tk.Toplevel):
     
@@ -634,7 +569,7 @@ if __name__ == "__main__":
         
     root = tk.Tk()
     root.app_size = root.maxsize()
-    #rules = Game_Rules(root,default_help_filename)
+    rules = Game_Rules(root,default_help_filename)
     # -------------------------------------------------------------------------
     #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
     #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
@@ -643,16 +578,15 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     #menu = OneClick_CopyPaste(rules,rules.get_TextWidget(),new_menu, [6,7])
     menu = Motus_PopupMenu(root,new_menu,[2,3,4])
-    #rules.bind("<Button-3>", menu.show_Menu_Popup)
-    #rules.show_helpfile()
-    #rules.lift(root)
+    rules.bind("<Button-3>", menu.show_Menu_Popup)
+    rules.show_helpfile()
+    rules.lift(root)
     #msgbox = Win_MessageBox(root)
     #msgbox.message = "Win Message Box"
     #msgbox.lift(root)
     #message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
     #print(My_MessageBox(root,"Faites votre choix de partie",message,0).go())
     # -------------------------------------------------------------------------
-    """
     dicofile = Select_Dictionary_File(root)
     config = Saveload_CFG()
     print(f"Dico filename: {dicofile}")
@@ -661,7 +595,5 @@ if __name__ == "__main__":
     if winparams:     
         print(f"winparams:\n{winparams}")
     # -------------------------------------------------------------------------
-    """
-    player = Choose_GameMode(root, PlayerMode).go()
     root.mainloop()
     

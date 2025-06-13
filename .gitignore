@@ -16,6 +16,7 @@ old_files/computer.py
 old_files/configs.py
 old_files/gameboard.py
 old_files/gui_tools.py
+old_files/gui_tools_v1.1.py
 old_files/handledico.py
 old_files/human.py
 old_files/motus_v0.0.01.py
@@ -25,13 +26,13 @@ old_files/motus_v2.0.00.py
 old_files/computer.org.py
 old_files/computer_v3.py
 old_files/human_v1.py
+pysrc/__pycache__/configs.cpython-38.pyc
+pysrc/__pycache__/gameboard.cpython-38.pyc
+pysrc/__pycache__/gui_tools.cpython-38.pyc
+pysrc/__pycache__/handledico.cpython-38.pyc
 old_files/__pycache__/configs.cpython-38.pyc
 old_files/__pycache__/gameboard.cpython-38.pyc
 old_files/__pycache__/gui_tools.cpython-38.pyc
 old_files/__pycache__/handledico.cpython-38.pyc
 data/__frgut_MOTUS.txt__
 data/motsMotus-300.txt
-pysrc/__pycache__/configs.cpython-38.pyc
-pysrc/__pycache__/gameboard.cpython-38.pyc
-pysrc/__pycache__/gui_tools.cpython-38.pyc
-pysrc/__pycache__/handledico.cpython-38.pyc
