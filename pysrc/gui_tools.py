@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Bibliotheque 'GUI_Tools'. Quelques surcharges de classes tKinter 
 pour le jeu MOTUS inspiré du jeu télévisé diffusé sur France2
@@ -16,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DNA_GBRecords_GUI v2 (C) 2025  Bernard AMOUROUX
+'gui_tools' library for MOTUS v3.0 (C) 2025  Bernard AMOUROUX
 This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.
@@ -31,9 +32,66 @@ import os.path as op
 import tkinter as tk
 import tkinter.filedialog as tkFileDialog
 
+from time import time
 from os import getcwd
 from configs import *
 
+
+class Chronometre(tk.Frame):
+    
+    def __init__(self, master, mode:Gamehardness, *args, **kwargs):
+        
+        self.master = master
+        self.__dict_modes:dict = {"easy":0,"normal":120,"hardu":60,"terrible":30,'infaisable':10} 
+        # ---------------------------------------------------------------------
+        tab_options:dict = {'bg':'grey90' if mode == "easy" else 'ivory', 'bd':3, 
+                                     'relief':'ridge' if mode != "easy" else 'sunken'}
+        print(f"tab_options: {tab_options}")
+        for key in list(tab_options.keys()):
+            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
+        super().__init__(master, *args, **kwargs)
+        # ---------------------------------------------------------------------
+        self.__vchrono = tk.StringVar(value="00:00")     # temps en secondes
+        self.__rebour:bool = mode != "easy"
+        self.__max_time = self.__dict_modes.get(mode, 'normal')
+        self.__time = self.__max_time
+        self.actif = False
+        # ---------------------------------------------------------------------
+        self.create_widget()
+
+    @property
+    def elapsed_time(self) -> int:
+        return self.__time
+
+    def create_widget(self):
+        tk.Label(self, bg=self.cget('bg'),font=("Sans Serif", 16), fg="black" if self.__rebour else "grey75",
+                                      border=0,textvariable=self.__vchrono).grid(column=0,row=0,sticky="nsew")
+        self.update_idle()
+
+    def __format_time(self):
+        minutes = self.__time // 60
+        secondes = self.__time % 60
+        return f" {minutes:02} : {secondes:02} "
+
+    def update_idle(self):
+        if self.actif and not self.__rebour:
+            self.__time += 1 
+        if self.actif and self.__rebour and self.__time > 0:
+            self.__time -= 1
+        self.__vchrono.set(self.__format_time())
+        self.master.after(1000, self.update_idle)
+
+    def start_chrono(self):
+        self.actif = True
+
+    def pause_chrono(self):
+        self.actif = False
+
+    def reset_chrono(self, start:bool=True):
+        self.actif = start
+        self.__vchrono.set(" 00 : 00 ")
+        self.__time = self.__max_time
+    
 
 class My_LabelFrame(tk.LabelFrame):
 
@@ -112,8 +170,8 @@ class Win_MessageBox(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.Quit)
         self.resizable(False, False)
         
-        tk.Message(self,bg='wheat',width=400,aspect=100,justify=tk.CENTER,
-                                           textvariable=self.__vmessage).grid(padx=10,pady=10)
+        tk.Message(self,bg='wheat',width=500,aspect=100,justify=tk.CENTER,font=("Courier New",14,"bold","italic"),
+                                           textvariable=self.__vmessage).grid(padx=10,pady=10,sticky="nsew")
         tk.Button(self,width = 8,bg='tan',text='Ok',command=self.Quit).grid()
         self.bind('<Return>', self.Quit)
         self.withdraw()
@@ -311,15 +369,25 @@ class Motus_PopupMenu(tk.Menu):
             'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
             'nosel' : list[int] liste des indices des rubrique dont l'état sera 'disabled'
     """
-    def __init__(self, master:object, commandsList:tuple=None, nosel:list=None):
+    def __init__(self, master:tk.Tk, commandsList:tuple=None, nosel:list=None):
         
         self.__master = master
         self.__commandList = commandsList
+        #self.__button:tk.Button = None
         self.__NoSel = nosel
         
         super().__init__(master,tearoff=0,font=('Arial 12 bold italic'),postcommand=lambda :self.nomenupopup(self.__NoSel))
             
     def show_Menu_Popup(self, event:tk.Event):
+        # --------------- Recherche de l'état du bouton 'Jouer' ---------------
+        button = self.nametowidget(self.__master.__dict__.get('playButton',"."))
+        if isinstance(button, tk.Button): 
+            state = bool(button.cget('state') == "disabled")
+            if state and 4 in self.__NoSel:
+                self.__NoSel.remove(4) 
+            elif not state and not 4 in self.__NoSel:
+                self.__NoSel.append(4)
+        # ---------------------------------------------------------------------
         self.delete(0, 'end')   # -- reset de la liste des commandes ajoutées -
         self.add_command(label=" MOTUS popup menu",accelerator =" Ctrl-M ",
                                                         background='orange',activebackground='orange')
@@ -329,7 +397,6 @@ class Motus_PopupMenu(tk.Menu):
         # ---------------------------------------------------------------------
         try:
             self.tk_popup(event.x_root, event.y_root)
-            print(f"event: {event}")
         except Exception as e:
             print(f"Erreur interne : {e}")
             self.grab_release()
@@ -343,8 +410,7 @@ class Motus_PopupMenu(tk.Menu):
                 self.add_separator()
             else:
                 self.add_command(label=command[0],accelerator=command[1],command=command[2])   
-    
-                    
+        
 
 class Parameters_Box(tk.Toplevel):
     
@@ -353,17 +419,15 @@ class Parameters_Box(tk.Toplevel):
         self.__master = master
         self.__parameters = parameters
         # ---------------------------------------------------------------------
-         
-        self.vgamemode = tk.StringVar(value=parameters.gamemode)
-        print(f"Parameters_Box().vgamemode: {self.vgamemode.get()}")
-        # ---------------------------------------------------------------------
         self.vparamfile =  op.join(getcwd(),parameters.dicopath,parameters.paramfilename)
         self.vdicofile = tk.StringVar(value=parameters.dicofilename)
         self.vhelpfile = tk.StringVar(value=parameters.helpfilename)
         self.vbackfile = tk.StringVar(value=parameters.backfilename)
+        self.vdifficulty = tk.StringVar(value=parameters.difficulty)
         self.vimagepath = tk.StringVar(value=parameters.imagepath)
-        self.vdatapath = tk.StringVar(value=parameters.dicopath)
         self.vaccentchar = tk.IntVar(value=parameters.accentchar)
+        self.vgamemode = tk.StringVar(value=parameters.gamemode)
+        self.vdatapath = tk.StringVar(value=parameters.dicopath)
         self.vnblettres = tk.IntVar(value=wordlengthlist[0]) 
         self.vnbtries = tk.IntVar(value=wordlengthlist[0])
         # ---------------------------------------------------------------------
@@ -438,34 +502,38 @@ class Parameters_Box(tk.Toplevel):
                                       relief="ridge",text=' Paramètres divers',pad=(2,2,0,2))
         tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vaccentchar,
                                 indicatoron=1,font=self.spb_font,text=" : mots accentués",
-                                        anchor='w',).grid(column=0,row=0,columnspan=4,sticky='nsew')
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"\tLongueur du mot : ",anchor="w",
-                                font=self.spb_font).grid(column=4,columnspan=7,row=0,sticky="nsew")
+                                        anchor='w',).grid(column=0,row=0,columnspan=3,sticky='nsew')
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"\tLongueur du mot : ",anchor="se",
+                                font=self.spb_font).grid(column=3,columnspan=3,row=0,sticky="nsw")
         tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnblettres,wrap=True,
                               from_=wordlengthlist[0],to=wordlengthlist[-1],state='readonly',
-                                    width=2,font=self.txt_font).grid(column=11,row=0,sticky='w')    
+                                    width=2,font=self.txt_font).grid(column=6,row=0,sticky='w')    
         tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"\tNombre d'essais : ",
-                                font=self.spb_font).grid(column=12,columnspan=7,row=0,sticky="nsew")
+                                font=self.spb_font).grid(column=7,columnspan=2,row=0,sticky="nsew")
         tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnbtries,wrap=True,
                                       from_=wordlengthlist[0],to=10,state='readonly',width=2,
-                                              font=self.txt_font).grid(column=19,row=0,sticky='w')
-        
+                                              font=self.txt_font).grid(column=12,row=0,sticky='w')
+        # ---------------------------------------------------------------------        
         tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f" Mode de jeu : ",
                                 font=self.spb_font).grid(column=0,columnspan=2,row=1,sticky="nsew")
-        print(f"Parameters_Box().self.__parameters.gamemode: {self.__parameters.gamemode}")
         gamemode = gamemodelist[0] if self.__parameters.gamemode=="human" else \
                         gamemodelist[1] if self.__parameters.gamemode=="computer" else gamemodelist[2]
-        print(f"Parameters_Box().gamemode: {gamemode}")
         self.spbgmode = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
                                 textvariable=self.vgamemode,values=gamemodelist,wrap=True,width=15)
         while self.spbgmode.get() != gamemode: self.spbgmode.invoke('buttonup')
-        
-        self.spbgmode.grid(column=2,row=1,columnspan=3,sticky="se")
+        self.spbgmode.grid(column=2,row=1,columnspan=2,sticky="nsew")
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"    Difficulté : ", anchor="w",
+                                font=self.spb_font).grid(column=4,columnspan=2,row=1,sticky="nse")
+        self.spbdifficulty = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
+                                textvariable=self.vdifficulty,values=gamehardlist,wrap=True,width=10)
+        while self.spbdifficulty.get() != self.__parameters.difficulty: self.spbdifficulty.invoke('buttonup')
+        self.spbdifficulty.grid(column=6,row=1,columnspan=2,sticky="sw")
         # ---------------------------------------------------------------------        
         tk.Button(frame0,bg='tan',bd=3,activebackground="lightgreen",state="active",width=12,font=self.btn_font,
                       text="Valider",command=self.ok_command).grid(column=2,row=19,columnspan=3,pady=5,sticky="w")
         tk.Button(frame0,bg='tan',activebackground="red",text="Annuler",font=self.btn_font,bd=3,width=12,
                                command=self.no_command).grid(column=15,row=19,columnspan=4,pady=5,sticky="e")
+        # ---------------------------------------------------------------------        
     
     def sel_Dictfile(self):
         fname = tkFileDialog.askopenfilename(parent=self,initialdir = op.join(getcwd(),self.vdatapath.get()),
@@ -505,6 +573,7 @@ class Parameters_Box(tk.Toplevel):
         index = gamemodelist.index(self.vgamemode.get())
         self.__parameters.gamemode = "human" if index == 0 else "computer" if index == 1 else "fighters"
         # ---------------------------------------------------------------------
+        self.__parameters.difficulty = self.vdifficulty.get()
         self.__parameters.dicofilename = self.vdicofile.get()
         self.__parameters.helpfilename = self.vhelpfile.get()
         self.__parameters.backfilename = self.vbackfile.get()
@@ -569,7 +638,12 @@ if __name__ == "__main__":
         
     root = tk.Tk()
     root.app_size = root.maxsize()
-    rules = Game_Rules(root,default_help_filename)
+    
+    chrono = Chronometre(root, mode="normal")
+    chrono.start_chrono()
+    chrono.grid()
+    
+    #rules = Game_Rules(root,default_help_filename)
     # -------------------------------------------------------------------------
     #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
     #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
@@ -578,19 +652,19 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     #menu = OneClick_CopyPaste(rules,rules.get_TextWidget(),new_menu, [6,7])
     menu = Motus_PopupMenu(root,new_menu,[2,3,4])
-    rules.bind("<Button-3>", menu.show_Menu_Popup)
-    rules.show_helpfile()
-    rules.lift(root)
+    #rules.bind("<Button-3>", menu.show_Menu_Popup)
+    #rules.show_helpfile()
+    #rules.lift(root)
     #msgbox = Win_MessageBox(root)
     #msgbox.message = "Win Message Box"
     #msgbox.lift(root)
     #message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
     #print(My_MessageBox(root,"Faites votre choix de partie",message,0).go())
     # -------------------------------------------------------------------------
-    dicofile = Select_Dictionary_File(root)
+    #dicofile = Select_Dictionary_File(root)
     config = Saveload_CFG()
-    print(f"Dico filename: {dicofile}")
-    if dicofile: config.options.dicofilename = op.basename(dicofile)
+    #print(f"Dico filename: {dicofile}")
+    #if dicofile: config.options.dicofilename = op.basename(dicofile)
     winparams = Parameters_Box(root,config.options).go()
     if winparams:     
         print(f"winparams:\n{winparams}")

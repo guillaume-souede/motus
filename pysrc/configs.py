@@ -1,4 +1,32 @@
 # coding: utf-8
+"""
+Bibliotheque 'GUI_Tools'. Quelques surcharges de classes tKinter 
+pour le jeu MOTUS inspiré du jeu télévisé diffusé sur France2
+Copyright (C) 2025  Bernard AMOUROUX
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+'configs' library for MOTUS v3.0 (C) 2025  Bernard AMOUROUX
+This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; type `show c' for details.
+"""
+
+__author__ = "Bernard AMOUROUX"
+__date__ = "$Date: 2025/05/18 07:00 $"
+__copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
+__license__ = "GPL 3"
 
 import os
 import os.path as op
@@ -11,6 +39,8 @@ wordlengthlist:list=[c for c in range(6,10)]
 
 PlayerMode = Literal["human","computer","fighters"]
 gamemodelist:list = ["Humain vs IA","IA vs Humain","Humain vs Humain"]
+Gamehardness = Literal["easy","normal","hardu","terrible","infaisable"]
+gamehardlist:list = ["easy","normal","hardu","terrible","infaisable"]
 
 PlayerStatus = Literal["winner","loser","idle"]
 PlayerGenre = Literal["homme","femme","lgbt"]
@@ -45,7 +75,15 @@ class App_Options(object):
         self.__nb_letters:int = 6   # -- nombre de caractères défaut
         self.__nb_tries:int = 6     # -- nombre maxi propositions 
         # -------------------------------------------------
-        self.__game_mode:PlayerMode = "human"   
+        self.__game_difficulty:Gamehardness = "easy" 
+        self.__game_mode:PlayerMode = "human"
+    
+    @property
+    def difficulty(self) -> Gamehardness:
+        return self.__game_difficulty
+    @difficulty.setter
+    def difficulty(self, difficulty:Gamehardness):
+        self.__game_difficulty = difficulty
     
     @property
     def gamemode(self) -> PlayerMode:
@@ -118,7 +156,7 @@ class App_Options(object):
         self.__back_filename = filename
         
     def __str__(self) -> str:
-        return "\n".join([f"{key[12:]:15}: {getattr(self, key)}" for key in self.__dict__.keys()])
+        return "\n".join([f"{key[12:]:17}: {getattr(self, key)}" for key in self.__dict__.keys()])
             
         
         

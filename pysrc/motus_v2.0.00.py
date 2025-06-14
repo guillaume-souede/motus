@@ -2,7 +2,7 @@
 # coding: utf-8
 """
 MOTUS - Une étude Python POO , adaptation du jeu télévisé "MOTUS"
-sur France Télévision en mode graphique (TKinter) et Python 3.9.5
+sur France Télévision en mode graphique (TKinter) et Python 3.8.10
 Copyright (C) 2025  Bernard AMOUROUX
 
 This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DNA_GBRecords_GUI v2 (C) 2025  Bernard AMOUROUX
+MOTUS v3.0 (C) 2025  Bernard AMOUROUX
 This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.
@@ -65,6 +65,7 @@ class Application(tk.Tk):
         self.winnerImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,"victoire.png"))
         self.loserImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,"defaite.png"))
         self.abortImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,"dommage.gif"))
+        self.selectImage = tk.PhotoImage(master=self,file=op.join(os.getcwd(),imgpath,"tutoriel.png"))
         # ---------- Initialisation des polices de caractères du jeu ----------
         self.labelFont = tkFont.Font(self,family='Courier New',size=11,weight='bold',slant='roman')
         self.menuFont = tkFont.Font(self, family='Serif', size=11, weight='normal', slant='italic')
@@ -86,14 +87,14 @@ class Application(tk.Tk):
         # -------------------------------------------------------------------------
         #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:callable)
         #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
-        commandsList = [(" Paramètres de MOTUS"," Alt-P ",self.parameters), (" Choix du dictionnaire des mots","",self.select_dictionary),
+        commandsList = [(" Paramètres de MOTUS","",self.parameters), (" Choix du dictionnaire des mots","",self.select_dictionary),
                         (" Changer Mode de jeu","",self.select_gamemode), (" Difficulté  du jeu","",None),
                         ("separator","",None),(" Quitter MOTUS"," Alt-F4 ",self.Quit)]
         self.event_add("<<PopupMenu>>","<Control-M>","<Control-m>","<Button-3>")
-        self.popupMenu = Motus_PopupMenu(self, commandsList, [5])
+        self.popupMenu = Motus_PopupMenu(self, commandsList, nosel=[4,5])
         self.bind_all("<<PopupMenu>>", self.popupMenu.show_Menu_Popup)
         self.bind("<Alt-F4>",self.Quit)
-    # -------------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         self.title("MOTUS v2.0 (c)AMOUROUX Bernard  Mai 2025")
         [self.columnconfigure(i, weight=0) for i in range(41)]
         [self.rowconfigure(i, weight=0) for i in range(41)]
@@ -101,6 +102,7 @@ class Application(tk.Tk):
         self.configure(bg='wheat')
         # ---------------------------------------------------------------------
         self.dico_MOTUS = Handle_DicoMotus(self, self.app_Parameters)
+        self.chronometre = Chronometre(self, self.app_Parameters.options.difficulty)
         self.game_rules = Game_Rules(self, self.app_Parameters)
         self.messageBox = Win_MessageBox(self)
         self.cree_widgets()
@@ -145,20 +147,22 @@ class Application(tk.Tk):
         gamemode = self.__get_player_mode()
         while self.spboxmode.get() != gamemode: self.spboxmode.invoke('buttonup')
         self.spboxmode.grid(column=3,row=0,columnspan=5,padx=5,sticky='w')
-        self.playButton = tk.Button(framegames,bg='wheat',activebackground='orange',
-                                text=' Jouer ',width=12,state='active',command=self.create_GameBoard)
+        self.playButton = tk.Button(framegames,bg='wheat',activebackground='orange',name='!playButton',
+                                    text=' Jouer ',width=12,state='active',command=self.create_GameBoard)
         self.playButton.grid(column=8,row=0,padx=5,columnspan=4,sticky="e")
         # -----------------------------------------------------------------------------------------
-        frameEntry = My_LabelFrame(self,col=23,row=0,cspan=13,bg="wheat",bd=2,pad=(2,2,0,0))
+        self.chronometre.grid(column=21,row=0,columnspan=3,sticky="we")
+        # -----------------------------------------------------------------------------------------
+        frameEntry = My_LabelFrame(self,col=24,row=0,cspan=12,bg="wheat",bd=2,pad=(2,2,0,0))
         self.entryLabel = tk.Label(frameEntry,text=" Votre proposition : ",bg=self.cget('bg'),
                                                         state="disabled",disabledforeground="grey50")
         self.entryLabel.grid(column=0,row=0,columnspan=4,sticky='w')
-        self.entryRequest = tk.Entry(frameEntry,bg='ivory',readonlybackground='grey90',width=26,
+        self.entryRequest = tk.Entry(frameEntry,bg='ivory',readonlybackground='grey90',width=22,
                 state='readonly',fg="grey50",disabledforeground="grey50",textvariable=self.vrequest)
-        self.entryRequest.grid(column=4,row=0,columnspan=6,sticky='w')
+        self.entryRequest.grid(column=4,row=0,columnspan=4,sticky='e')
         self.validButton = tk.Button(frameEntry,bg='ivory',text=" Valider ",state="disabled")
         self.validButton.configure(activebackground="lightgreen",command=self.playGame)
-        self.validButton.grid(column=12,row=0,columnspan=2,padx=10,sticky='nsew')
+        self.validButton.grid(column=11,row=0,columnspan=2,padx=10,sticky='nsew')
         self.validButton.__funcID = self.bind("<Return>", self.playGame)
         # -----------------------------------------------------------------------------------------
         self.abortButton = tk.Button(self,text='Abandonner',bg='wheat',activebackground='red',state='disabled')
@@ -186,8 +190,9 @@ class Application(tk.Tk):
         tk.Button(self,bg='lightgreen',border=1,command=self.__show_rules,text="Règles du jeu",
                     activebackground='lightblue').grid(column=38,row=41,columnspan=2,padx=2,pady=2,sticky="n")
         # -----------------------------------------------------------------------------------------        
-        self.fenetre_a_propos(self.messageBox) 
-    
+        self.fenetre_a_propos(self.messageBox)
+        self.update_idletasks()
+
     def update_barre_etat(self):
         message = f" Info : Découvrir un MOTUS de {self.vnblettres.get()} lettres avec au maximum" \
                   f"{self.vnbessais.get()} essais\t-/- Dictionnaire '{self.dico_MOTUS.filename}' de" \
@@ -223,16 +228,6 @@ class Application(tk.Tk):
         gamemode = self.spboxmode.get()
         self.__MOTUS_Player = "human" if gamemode == "Humain vs IA" else \
                                 "computer" if gamemode == "IA vs Humain" else "fighters"
-
-    def select_gamemode(self):
-        self.gameBoard.grid_remove()
-        self.entryRequest.configure(state="disabled",fg="grey50")
-        self.vrequest.set(f" mot MOTUS : {self.MOTUS_word.upper()}")
-        self.abortButton.configure(state="disabled")
-        self.validButton.configure(state="disabled")
-        self.playButton.configure(state="active")
-        self.spboxmode.configure(state="normal")
-        self.__get_mode_jeu()
         
     def parameters(self):
         options = Parameters_Box(self, self.app_Parameters.options).go()
@@ -244,7 +239,6 @@ class Application(tk.Tk):
                 self.barre_Etat.update_vltexte("Erreur lors le l'écriture des paramètres")
             
     def playGame(self, event=None):
-        # ---------------------------------------------------------------------
         # -- Récupération du mot proposé et normalisation avec/sans accents ---
         #word = ''.join(c for c in normalize('NFD', self.vrequest.get()) if category(c) != 'Mn')
         word = normalize('NFC',self.vrequest.get().lower()) # - avec accents --
@@ -267,7 +261,9 @@ class Application(tk.Tk):
                 loser_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
                                                        image=self.loserImage, anchor="center", tags='img_winner')
                 self.choose_new_game(message, loser_img)
-                self.gameBoard.grid()    
+                self.gameBoard.grid()
+            else:
+                self.chronometre.reset_chrono()
         elif self.__MOTUS_Player == "computer" and self.valide_word(word):
             self.validButton.configure(state='disabled')
             self.entryRequest.configure(state='disabled')
@@ -287,6 +283,7 @@ class Application(tk.Tk):
             self.invalid_word(word=word)
                     
     def choose_new_game(self, message:str, image_ID:int):
+        self.chronometre.reset_chrono(start=False)
         choix = My_MessageBox(self,"Choix de la partie MOTUS",message=message,action=0).go()
         if choix == "yes":
             self.background.delete(image_ID)
@@ -307,10 +304,12 @@ class Application(tk.Tk):
         self.entryRequest.configure(validatecommand=(_Cmd,"%P",letters),validate="key")
         # ---------------------------------------------------------------------
         if self.__MOTUS_Player == "human":
+            self.chronometre.start_chrono()
             self.MOTUS_word = self.dico_MOTUS.dico_MOTUS_one_word(f"{letters}")
-            print(f"self.MOTUS_word: {self.MOTUS_word}")
+            print(f"self.MOTUS_word: {self.MOTUS_word}")            
         # ---------------------------------------------------------------------    
-        self.__init_GameBoard(nb_letters=letters,nb_tries=tries)   
+        self.__init_GameBoard(nb_letters=letters,nb_tries=tries)
+        
     
     def __init_GameBoard(self, nb_letters:int, nb_tries:int):
         self.gameBoard.grid_remove()
@@ -327,9 +326,26 @@ class Application(tk.Tk):
         self.validButton.configure(state="normal")
         self.entryRequest.focus_force()
         self.gameBoard.grid()
+
+    def select_gamemode(self):
+        self.gameBoard.grid_remove()
+        self.chronometre.reset_chrono(start=False)
+        self.gameBoard.presentation_motus()
+        self.vrequest.set(f" mot MOTUS : {self.MOTUS_word.upper()}")
+        self.entryRequest.configure(state="disabled",fg="grey50")
+        self.abortButton.configure(state="disabled")
+        self.validButton.configure(state="disabled")
+        self.playButton.configure(state="active")
+        self.spboxmode.configure(state="normal")
+        select_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
+                                           image=self.selectImage, anchor="center")
+        self.after(3000, self.background.delete, select_img)
+        self.after(1500, self.gameBoard.grid)
+        self.__get_mode_jeu()
     
     def __abort_GameBoard(self):
         self.gameBoard.grid_remove()
+        self.chronometre.reset_chrono(start=False)
         self.unbind("<Return>",self.validButton.__funcID)
         self.entryRequest.configure(state="disabled",fg="grey50")
         self.vrequest.set(f" mot MOTUS : {self.MOTUS_word.upper()}")
@@ -346,7 +362,7 @@ class Application(tk.Tk):
         self.after(2500, self.background.delete, dommage_img)
         self.after(2500, self.gameBoard.grid)
         self.gameBoard.presentation_motus()     
-    
+
     def __show_rules(self):
         self.game_rules.show_helpfile()
         
@@ -354,7 +370,7 @@ class Application(tk.Tk):
         """ Fenêtre-message à propos.
             Indique le nom de l'auteurs ainsi que la licence.
         """
-        message = "MOTUS v2.0"+"\n\nCopyright (C) 2025\nBernard Amouroux\n" \
+        message = "MOTUS v3.0"+"\n\nCopyright (C) 2025\nBernard Amouroux\n" \
         "\nDonnées :\nDictionnaire des mots MOTUS\nhttps://www.motus.france2.fr\n\n" \
         "Sur une idée du projet JAVA 'MOTUS' de\nJan AMOUROUX \nGuillaume SOUÈDE\n\nétudiants à l'Université de Toulouse\n" \
         "Master BBS - Bio-informatique et Biologie des Systèmes\n\n" \
@@ -363,6 +379,18 @@ class Application(tk.Tk):
         msgbox.boxtitle('À propos')
         msgbox.message = message
         msgbox.lift(self)
+    
+    def update_idletasks(self):
+        if self.app_Parameters.options.difficulty != "easy":
+            if not self.chronometre.elapsed_time > 0:
+                self.chronometre.pause_chrono()       
+                self.__human_status = "loser"
+                self.__abort_GameBoard()
+                self.messageBox.boxtitle('!!! Vous avez perdu !!!')
+                self.messageBox.message = f"\n  Le temps imparti est dépassé\t\n\nLe mot MOTUS était : {self.__MOTUS_word.upper()}\n\nVous avez perdu\n"
+                self.messageBox.lift()
+            self.after(1000, self.update_idletasks)
+        return super().update_idletasks()
         
     def Quit(self):
         self.quit()
