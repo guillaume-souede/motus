@@ -29,13 +29,13 @@ __date__ = "$Date: 2025/05/18 07:00 $"
 __copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
-import sys,os,re
+import sys,os
 import os.path as op
 import tkinter as tk
 import tkinter.font as tkFont
 
-from unicodedata import normalize
 from handledico import Handle_DicoMotus
+from unicodedata import normalize,category
 from computer import IA_Computer
 from gameboard import GameBoard
 from human import Human_Player
@@ -95,7 +95,7 @@ class Application(tk.Tk):
         self.bind_all("<<PopupMenu>>", self.popupMenu.show_Menu_Popup)
         self.bind("<Alt-F4>",self.Quit)
         # ---------------------------------------------------------------------
-        self.title("MOTUS v2.0 (c)AMOUROUX Bernard  Mai 2025")
+        self.title(f"MOTUS v3.0\tdifficulté : {self.app_Parameters.options.difficulty.upper():^12}\t\t(c)AMOUROUX Bernard  Mai 2025")
         [self.columnconfigure(i, weight=0) for i in range(41)]
         [self.rowconfigure(i, weight=0) for i in range(41)]
         self.resizable(False, False)
@@ -233,15 +233,24 @@ class Application(tk.Tk):
         options = Parameters_Box(self, self.app_Parameters.options).go()
         if options:
             if self.app_Parameters.cfg_backup():
-                self.barre_Etat.update_vltexte("Sauvegarde des paramètres OK", 5)
-                self.barre_Etat.update_vltexte(" !!! Redémarrage de MOTUS nécessaire pour que la prise en compte des nouveaux paramètres soit effective !!!")
+                self.barre_Etat.update_vltexte("Sauvegarde des paramètres OK")
+                message = f" !!! Redémarrage de MOTUS nécessaire pour que la prise en compte" \
+                          f" des nouveaux paramètres soit effective !!!"
+                choix = My_MessageBox(self,"Redémarrage de MOTUS",message=message,action=2).go()
+                # -- Redémarrage du programme sans créer de nouveau process ---
+                if choix == "yes":
+                    python = sys.executable             # Chemin vers l'exécutable Python
+                    os.execl(python, python, *sys.argv) # Remplace le process courant par un nouveau
+                # --------------------------------------------------------------
             else:
                 self.barre_Etat.update_vltexte("Erreur lors le l'écriture des paramètres")
             
     def playGame(self, event=None):
         # -- Récupération du mot proposé et normalisation avec/sans accents ---
-        #word = ''.join(c for c in normalize('NFD', self.vrequest.get()) if category(c) != 'Mn')
-        word = normalize('NFC',self.vrequest.get().lower()) # - avec accents --
+        if bool(self.app_Parameters.options.accentchar):
+            word = normalize('NFC',self.vrequest.get().lower()) # - avec accents --
+        else:
+            word = ''.join(c for c in normalize('NFD', self.vrequest.get().lower()) if category(c) != 'Mn')
         # ---------------------------------------------------------------------
         if self.__MOTUS_Player == "human" and self.valide_word(word=word):
             # -----------------------------------------------------------------
@@ -272,9 +281,9 @@ class Application(tk.Tk):
             self.__IA_status = self.computerplayer.valide_Mot(word)
             # -----------------------------------------------------------------
             if self.__IA_status == "winner":
-                self.choose_new_game("!!! IA vainqueur !!!\n\nPour changer de mode, choisissez 'Rejouer' puis 'Abandonner'",0)
+                self.choose_new_game("!!! IA vainqueur !!!\n\nChanger mode de jeu ?, Ctrl-M ou click droit pour le menu contextuel",0)
             if self.__IA_status == "loser":
-                self.choose_new_game("Oups, IA pas trouvé !\n\nPour changer de mode, choisissez 'Rejouer' puis 'Abandonner'",0)
+                self.choose_new_game("Oups, IA pas trouvé !\n\nChanger mode de jeu ?, Ctrl-M ou click droit pour le menu contextuel",0)
             self.entryRequest.configure(state='normal')            
             self.validButton.configure(state='active')
         elif self.__MOTUS_Player == "fighters":

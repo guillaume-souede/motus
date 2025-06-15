@@ -30,6 +30,7 @@ __license__ = "GPL 3"
 
 import os.path as op
 import tkinter as tk
+import tkinter.font as tkFont
 import tkinter.filedialog as tkFileDialog
 
 from time import time
@@ -46,7 +47,6 @@ class Chronometre(tk.Frame):
         # ---------------------------------------------------------------------
         tab_options:dict = {'bg':'grey90' if mode == "easy" else 'ivory', 'bd':3, 
                                      'relief':'ridge' if mode != "easy" else 'sunken'}
-        print(f"tab_options: {tab_options}")
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
         super().__init__(master, *args, **kwargs)
@@ -55,6 +55,7 @@ class Chronometre(tk.Frame):
         self.__rebour:bool = mode != "easy"
         self.__max_time = self.__dict_modes.get(mode, 'normal')
         self.__time = self.__max_time
+        self.__mode = mode
         self.actif = False
         # ---------------------------------------------------------------------
         self.create_widget()
@@ -64,8 +65,10 @@ class Chronometre(tk.Frame):
         return self.__time
 
     def create_widget(self):
-        tk.Label(self, bg=self.cget('bg'),font=("Sans Serif", 16), fg="black" if self.__rebour else "grey75",
-                                      border=0,textvariable=self.__vchrono).grid(column=0,row=0,sticky="nsew")
+        lbl_font = tkFont.Font(family='Sans Serif',size=16,weight='normal',slant='roman')
+        #metrique = int(lbl_font.measure(f" {self.__mode:^10} ")/12)
+        tk.Label(self, bg=self.cget('bg'),font=lbl_font,fg="black" if self.__rebour else "grey75",
+                            textvariable=self.__vchrono,border=0,).grid(column=0,row=0,sticky="nsew")
         self.update_idle()
 
     def __format_time(self):
@@ -201,7 +204,7 @@ class My_MessageBox(tk.Toplevel):
         self.__master = master
         self.__vtitle = tk.StringVar(value=title)
         self.__vmessage = tk.StringVar(value=message)
-        tab_action = [(" Rejouer "," Quitter "),("Oui","Non")]
+        tab_action = [(" Rejouer "," Quitter "),("Oui","Non"),(" Redémarrer "," Plus tard ")]
         # ---------------------------------------------------------------------
         tab_options:dict = {'bd':3,'bg':'wheat','relief':'ridge','name':"!my_MessageBox"}        
         for key in list(tab_options.keys()):
@@ -209,13 +212,14 @@ class My_MessageBox(tk.Toplevel):
         super().__init__(master, *args, **kwargs)
         # ---------------------------------------------------------------------        
         self.protocol("WM_DELETE_WINDOW", self.choose_cancel)
-        msg_font = ('Courier\ New 18 bold italic')
+        msg_font = ('Courier\ New 16 bold italic')
         btn_font = ('Courier\ New 14 bold italic')
         self.bind("<Escape>", self.no_command)
         self.bind("<Return>", self.ok_command)
         self.title(self.__vtitle.get())
         self.resizable(False, False)
         # ---------------------------------------------------------------------
+        self.withdraw()
         title1,title2 = tab_action[action][0], tab_action[action][1]
         tk.Message(self,bg='wheat',width=600,aspect=100,justify=tk.CENTER,font=msg_font,
                                                textvariable=self.__vmessage).grid(padx=10,pady=10,
@@ -227,6 +231,7 @@ class My_MessageBox(tk.Toplevel):
                                             activebackground="tan",command=self.no_command,padx=10)
         self.quitButton.grid(column=3,row=4,pady=10,sticky="ne")
         # ---------------------------------------------------------------------
+        self.deiconify()
         self.focus_set()
 
     def valide_ok_command(self, event):
