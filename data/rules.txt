@@ -1,29 +1,30 @@
         
                 MOTUS v2.0 d'après le jeu télévisé MOTUS diffusé sur France Télévision
 
-    Ce jeu de MOTUS permet de jouer selon deux modes.
+    Ce jeu de MOTUS permet de jouer selon deux modes (prochainement trois avec le mode 'Fighters').
     Le premier mode est celui ou l'Humain joue contre la machine. Vous devez découvrir le mot MOTUS choisi par l'IA.
-    Le second mode est l'IA contre l'Humain. C'est à vous à lui faire rechercher un mot dans le même dictionnaire que dans le premier mode de jeu.
-    La sélection du mode de jeu se fait à l'aide d'une petite boite de choix dans la barre du haut. On peut alors sélectionner 'Humain vs IA' ou 'IA vs Humain'. 
+    Le second mode est l'IA contre l'Humain. C'est à vous à lui faire rechercher un mot contenu dans le même dictionnaire MOTUS, que vous pouvez définir.
+    La sélection du mode de jeu se fait à l'aide d'une petite boite de choix dans la barre du haut. 
+    On peut alors sélectionner 'Humain vs IA' ou 'IA vs Humain' et bientôt 'Humain vs Humain'. 
     
-    Un menu contextuel apparaît dès que l'on clique à droite avec la souris ou au clavier 'Ctrl-M'. A partir de ce menu, on a accès à la boite des paramètre de MOTUS, au choix du mode de jeu et à la difficulté souhaitée.
+    Un menu contextuel apparaît dès que l'on clique à droite avec la souris ou au clavier 'Ctrl-M'. A partir de ce menu, on a accès à la boite des paramètre de MOTUS, au choix du mode de jeu et à la difficulté souhaitée entre autre.
 
-    Le dictionnaire peut tenir compte des caractères accentuée tels les "é, è, à, ç ...". Ce choix se fait à l'aide de la boite de dialogue des paramètres.
-    Par défaut, l'accentuation n'est pas prise en compte. 
+    Le dictionnaire peut tenir compte des caractères accentuée tels les "é, è, à, ç ...". Ce choix se fait à l'aide de la boite de dialogue des paramètres. Par défaut, l'accentuation n'est pas prise en compte. 
 
     La partie débute lorsque le joueur 'Humain' clique sur le bouton "Jouer". 
-En mode 'Humain vs IA', chaque proposition est saisie dans le champ 'votre proposition : ' et le joueur valide avec le bouton 'Valider'. Le mot s'affiche, la réflexion débute ...
-En mode 'IA vs Human', le mot que l'on veut faire découvrir est saisi dans le champ 'votre propositions' puis click sur le bouton 'Valider' pour lancer la partie ... de l'IA ...
+    En mode 'Humain vs IA', chaque proposition est saisie dans le champ 'votre proposition : ' et le joueur valide avec le bouton 'Valider'. Le mot s'affiche, la réflexion débute ... 
+Une horloge donne le décompte du temps de réflexion restant. Une fois arrivé à Zéro, vous avez perdu. Le décompte se réinitialise à chaque nouvelle proposition de votre part.  
+    En mode 'IA vs Human', le mot que l'on veut faire découvrir est saisi dans le champ 'votre propositions' puis click sur le bouton 'Valider' pour lancer la partie ... de l'IA ...
 
-    Dans les deux cas, il s'agit de deviner un mot dont le nombre de lettres (entre 6 et 9) et le nombre d'essais (entre 6 et 10) sont fixés à l’avance.
+    Dans les deux cas, il s'agit de deviner un mot dont le nombre de lettres (entre 6 et 9) et le nombre de propositions (entre 6 et 10) sont fixés à l’avance.
 
-    À chaque tour, le joueur écrit un mot. Celui-ci est accepté uniquement s’il contient le bon nombre de lettres et s’il est correctement orthographié (mot reconnu).
+    À chaque tour, le joueur écrit un mot. Celui-ci est accepté uniquement s’il contient le bon nombre de lettres et s’il est correctement orthographié (mot dans le dictionnaire MOTUS).
 
     Une fois le mot validé, chaque lettre est affichée avec un code couleur :
 
- Carré Rouge  = Lettre bien placée : présente dans le mot et à la bonne position, 
- Carré Bleu   = Lettre bien placée : présente dans le mot mais pas à la bonne place, 
- Carré Jaune  = Lettre absente du mot.
+ Carré Rouge   = Lettre bien placée : présente dans le mot et à la bonne position, 
+ Carré Bleu    = Lettre mal placée  : présente dans le mot mais pas à la bonne place, 
+ Carré Jaune   = Lettre absente du mot.
 
 Remarque : Seules les lettres réellement présentes dans le mot secret seront colorées. Les répétitions non justifiées restent en bleu.
 

@@ -108,6 +108,7 @@ class My_LabelFrame(tk.LabelFrame):
 
         self.grid(column=col, row=row, columnspan=cspan, rowspan=rspan,
                                   padx=pad[0], pady=pad[1], ipadx=pad[2], ipady=pad[3], sticky=sticky)
+        [self.grid_columnconfigure(r, weight=1) for r in range(cspan)]        
         [self.grid_rowconfigure(r, weight=1) for r in range(rspan)]
 
     def name(self):
@@ -290,7 +291,7 @@ class Game_Rules(tk.Toplevel):
         self.__vtitle = tk.StringVar(value="Aide de MOTUS v2.0.10 (c)AMOUROUX Bernard 05/2025")
         self.__dico_lines:dict[int:str] = ({})
         # ---------------------------------------------------------------------
-        tab_options:dict = {'bd':3,'bg':'ivory','relief':'ridge','name':"!my_gameRules"}        
+        tab_options:dict = {'bd':3, 'bg':'ivory', 'relief':'ridge', 'name':"!my_gameRules"}        
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
         super().__init__(master, *args, **kwargs)
@@ -306,22 +307,8 @@ class Game_Rules(tk.Toplevel):
         # ---------------------------------------------------------------------
         self.__text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
         self.__load_helpfile()
-        self.withdraw()
-    
-    def show_helpfile(self):
         self.create_widgets()
         
-    def __load_helpfile(self):
-        """ Charge le fichier d'aide au format texte donné au constructeur de
-            la classe et à défaut le fichier de la librairie 'configs.py'
-            contenu dans la constante 'default_help_filename'.
-        """
-        if not op.isfile(self.__filename):
-            raise FileNotFoundError(f"Bad file name: {self.__filename}")
-        with open(file=self.__filename, mode='rt', encoding="utf-8") as helpfile:
-            for idx,line in enumerate(helpfile.readlines()):
-                self.__dico_lines[idx] = line.rstrip()
-    
     def create_widgets(self):
         # ------------------ Tags à placer dans le tk.Text() ------------------
         text_tags = [(" Carré Rouge  ","ok",COLOR_OK),
@@ -339,7 +326,18 @@ class Game_Rules(tk.Toplevel):
         self.__look_for_tags(self.__text_help.get("1.0", tk.END),text_tags)
         self.__text_help.configure(state="disabled")
         self.lift(self.__master)
-        self.deiconify()
+        #self.grid()
+    
+    def __load_helpfile(self):
+        """ Charge le fichier d'aide au format texte donné au constructeur de
+            la classe et à défaut le fichier de la librairie 'configs.py'
+            contenu dans la constante 'default_help_filename'.
+        """
+        if not op.isfile(self.__filename):
+            raise FileNotFoundError(f"Bad file name: {self.__filename}")
+        with open(file=self.__filename, mode='rt', encoding="utf-8") as helpfile:
+            for idx,line in enumerate(helpfile.readlines()):
+                self.__dico_lines[idx] = line.rstrip()
     
     def __look_for_tags(self, help_text:str,text_tags:list):
         """ Methode qui ajoute des tags au texte. La recherche du pattern se fait
@@ -424,6 +422,7 @@ class Parameters_Box(tk.Toplevel):
         self.__master = master
         self.__parameters = parameters
         # ---------------------------------------------------------------------
+        self.vfullscreen = tk.IntVar(value=int(parameters.fullscreen))
         self.vparamfile =  op.join(getcwd(),parameters.dicopath,parameters.paramfilename)
         self.vdicofile = tk.StringVar(value=parameters.dicofilename)
         self.vhelpfile = tk.StringVar(value=parameters.helpfilename)
@@ -465,9 +464,9 @@ class Parameters_Box(tk.Toplevel):
         tk.Label(frame0,bg='tan',bd=0,font=self.lbl_font,justify="center",anchor="center",width=32,
                     text=f"\tFichier de configuration :").grid(row=0,columnspan=12,sticky='nsew')
         tk.Label(frame0,bg='tan',bd=0,font=self.txt_font,text=f"\t{self.__parameters.paramfilename}",
-                   width=38,justify="center",anchor="w").grid(column=15,row=0,columnspan=8,sticky='nsew')
+                   width=38,justify="center",anchor="w").grid(column=12,row=0,columnspan=8,sticky='nsew')
         # ---------------------------------------------------------------------
-        frame1 = My_LabelFrame(frame0,0,1,cspan=20,rspan=18,bg='wheat',bd=2,relief="ridge",pad=(2,2,0,0))
+        frame1 = My_LabelFrame(frame0,0,1,cspan=20,rspan=9,bg='wheat',bd=2,relief="ridge",pad=(2,2,0,0))
         tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Fichier dictionnaire  :",anchor="sw",
                            width=22,font=self.lbl_font).grid(column=0,row=0,columnspan=5,sticky='nsew')
         tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vdicofile,state="readonly").grid(row=0,
@@ -503,21 +502,19 @@ class Parameters_Box(tk.Toplevel):
         tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
                       command=self.sel_imagepath).grid(row=7,column=15,columnspan=4,padx=10,sticky="se")
         # ---------------------------------------------------------------------
-        chkboxlbl = My_LabelFrame(frame1,0,8,cspan=20,rspan=11,bg=frame1.cget('bg'),
-                                      relief="ridge",text=' Paramètres divers',pad=(2,2,0,2))
+        chkboxlbl = My_LabelFrame(frame1,0,8,cspan=20,rspan=2,bg=frame0.cget('bg'),
+                                      relief="ridge",text=' Paramètres divers',pad=(0,0,0,0))
         tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vaccentchar,
                                 indicatoron=1,font=self.spb_font,text=" : mots accentués",
                                         anchor='w',).grid(column=0,row=0,columnspan=3,sticky='nsew')
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"\tLongueur du mot : ",anchor="se",
-                                font=self.spb_font).grid(column=3,columnspan=3,row=0,sticky="nsw")
-        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnblettres,wrap=True,
-                              from_=wordlengthlist[0],to=wordlengthlist[-1],state='readonly',
-                                    width=2,font=self.txt_font).grid(column=6,row=0,sticky='w')    
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"\tNombre d'essais : ",
-                                font=self.spb_font).grid(column=7,columnspan=2,row=0,sticky="nsew")
+        tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vfullscreen,
+                                indicatoron=1,font=self.spb_font,text=" : mode plein écran/fenêtré",
+                                        width=26,anchor='center',).grid(column=3,row=0,columnspan=8,sticky='nsew') 
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Nombre d'essais : ",anchor='e',
+                                font=self.spb_font).grid(column=11,columnspan=8,row=0,padx=10,sticky="w")
         tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnbtries,wrap=True,
-                                      from_=wordlengthlist[0],to=10,state='readonly',width=2,
-                                              font=self.txt_font).grid(column=12,row=0,sticky='w')
+                                      from_=wordlengthlist[0],to=11,state='readonly',width=2,
+                                              font=self.txt_font).grid(column=19,row=0,sticky='e')
         # ---------------------------------------------------------------------        
         tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f" Mode de jeu : ",
                                 font=self.spb_font).grid(column=0,columnspan=2,row=1,sticky="nsew")
@@ -526,13 +523,18 @@ class Parameters_Box(tk.Toplevel):
         self.spbgmode = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
                                 textvariable=self.vgamemode,values=gamemodelist,wrap=True,width=15)
         while self.spbgmode.get() != gamemode: self.spbgmode.invoke('buttonup')
-        self.spbgmode.grid(column=2,row=1,columnspan=2,sticky="nsew")
+        self.spbgmode.grid(column=2,row=1,columnspan=2,sticky="ew")
         tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"    Difficulté : ", anchor="w",
-                                font=self.spb_font).grid(column=4,columnspan=2,row=1,sticky="nse")
+                                font=self.spb_font).grid(column=4,columnspan=1,row=1,sticky="nsew")
         self.spbdifficulty = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
                                 textvariable=self.vdifficulty,values=gamehardlist,wrap=True,width=10)
         while self.spbdifficulty.get() != self.__parameters.difficulty: self.spbdifficulty.invoke('buttonup')
-        self.spbdifficulty.grid(column=6,row=1,columnspan=2,sticky="sw")
+        self.spbdifficulty.grid(column=6,row=1,columnspan=2,sticky="ew")
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Longueur du mot : ",anchor="e",
+                    font=self.spb_font).grid(column=17,columnspan=2,row=1,padx=10,sticky="nsew")
+        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnblettres,wrap=True,
+                              from_=wordlengthlist[0],to=wordlengthlist[-1],state='readonly',
+                                    width=2,font=self.txt_font).grid(column=19,row=1,sticky='w')    
         # ---------------------------------------------------------------------        
         tk.Button(frame0,bg='tan',bd=3,activebackground="lightgreen",state="active",width=12,font=self.btn_font,
                       text="Valider",command=self.ok_command).grid(column=2,row=19,columnspan=3,pady=5,sticky="w")
@@ -578,6 +580,7 @@ class Parameters_Box(tk.Toplevel):
         index = gamemodelist.index(self.vgamemode.get())
         self.__parameters.gamemode = "human" if index == 0 else "computer" if index == 1 else "fighters"
         # ---------------------------------------------------------------------
+        self.__parameters.fullscreen = bool(self.vfullscreen.get())
         self.__parameters.difficulty = self.vdifficulty.get()
         self.__parameters.dicofilename = self.vdicofile.get()
         self.__parameters.helpfilename = self.vhelpfile.get()
@@ -648,7 +651,7 @@ if __name__ == "__main__":
     chrono.start_chrono()
     chrono.grid()
     
-    #rules = Game_Rules(root,default_help_filename)
+    rules = Game_Rules(root,default_help_filename)
     # -------------------------------------------------------------------------
     #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
     #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
@@ -657,9 +660,9 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     #menu = OneClick_CopyPaste(rules,rules.get_TextWidget(),new_menu, [6,7])
     menu = Motus_PopupMenu(root,new_menu,[2,3,4])
-    #rules.bind("<Button-3>", menu.show_Menu_Popup)
+    rules.bind("<Button-3>", menu.show_Menu_Popup)
     #rules.show_helpfile()
-    #rules.lift(root)
+    rules.lift(root)
     #msgbox = Win_MessageBox(root)
     #msgbox.message = "Win Message Box"
     #msgbox.lift(root)

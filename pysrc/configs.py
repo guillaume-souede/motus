@@ -70,13 +70,21 @@ class App_Options(object):
         self.__help_filename:str = default_help_filename
         self.__back_filename:str = default_MOTUS_background
         # -------------------------------------------------
-        self.__accent_char:int = 0  # 1 = avec caractères accentués
+        self.__accent_char:int = 0      # 1 = avec caractères accentués
         # -------------------------------------------------
-        self.__nb_letters:int = 6   # -- nombre de caractères défaut
-        self.__nb_tries:int = 6     # -- nombre maxi propositions 
+        self.__nb_letters:int = 6       # -- nombre de caractères défaut
+        self.__nb_tries:int = 6         # -- nombre maxi propositions 
         # -------------------------------------------------
+        self.__fullscreen:bool = False  # -- bascule mode plein écran/fenêtré
         self.__game_difficulty:Gamehardness = "easy" 
         self.__game_mode:PlayerMode = "human"
+    
+    @property
+    def fullscreen(self) -> bool:
+        return self.__fullscreen
+    @fullscreen.setter
+    def fullscreen(self, fullscreen):
+        self.__fullscreen = fullscreen
     
     @property
     def difficulty(self) -> Gamehardness:

@@ -39,6 +39,7 @@ from unicodedata import normalize,category
 from computer import IA_Computer
 from gameboard import GameBoard
 from human import Human_Player
+from time import sleep
 
 from gui_tools import *
 from configs import *
@@ -73,7 +74,7 @@ class Application(tk.Tk):
         self.__IA_status = ""                   # ---- status du joueur IA : winner/loser/idle
         self.__human_status = ""                # ---- status du joueur Humain : winner/loser/idle
         self.__MOTUS_word:str=""                # ---- le mot à trouver en mode 'Humain vs IA'
-        self.__MOTUS_Player:str = self.app_Parameters.options.gamemode  # ---- type du joueur MOTUS, humain ou IA
+        self.__MOTUS_Player:str = self.app_Parameters.options.gamemode   # ---- type du joueur MOTUS, humain ou IA
         self.__dico_Letters:dict = ({})         # ---- dictionnaire de décomposition du mot en lettres
         self.vnbessais = tk.IntVar(value=self.app_Parameters.options.nb_tries)    # ---- nombre de mots proposables pour la partie
         self.vnblettres = tk.IntVar(value=self.app_Parameters.options.nb_letters) # ---- Nombre de lettres du mot MOTUS
@@ -83,27 +84,31 @@ class Application(tk.Tk):
         # ---- Taille de la fenètre du jeu fonction de la résolution écran ----
         MAX_WIDTH, MAX_HEIGHT = self.maxsize()  # --- renvoi la taille écran --
         self.app_size = min(MAX_WIDTH-100,self.backImage.width()), min(MAX_HEIGHT-200,self.backImage.height())
-        self.minsize(self.backImage.width()//2, self.backImage.height()//2)
-        # -------------------------------------------------------------------------
+        self.minsize(self.app_size[0], self.app_size[1])
+        # ----------------- Mise en place plein écran oui/non -----------------
+        self.__fullscreen:bool = self.app_Parameters.options.fullscreen
+        self.attributes("-fullscreen", self.__fullscreen)
+        # ---------------------------------------------------------------------
         #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:callable)
         #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
         commandsList = [(" Paramètres de MOTUS","",self.parameters), (" Choix du dictionnaire des mots","",self.select_dictionary),
                         (" Changer Mode de jeu","",self.select_gamemode), (" Difficulté  du jeu","",None),
+                        ("separator","",None),(" Mode plein écran on/off","F11",self.__toggle_fullscreen),
                         ("separator","",None),(" Quitter MOTUS"," Alt-F4 ",self.Quit)]
         self.event_add("<<PopupMenu>>","<Control-M>","<Control-m>","<Button-3>")
         self.popupMenu = Motus_PopupMenu(self, commandsList, nosel=[4,5])
         self.bind_all("<<PopupMenu>>", self.popupMenu.show_Menu_Popup)
+        self.bind("<F11>",self.__toggle_fullscreen)
         self.bind("<Alt-F4>",self.Quit)
         # ---------------------------------------------------------------------
-        self.title(f"MOTUS v3.0\tdifficulté : {self.app_Parameters.options.difficulty.upper():^12}\t\t(c)AMOUROUX Bernard  Mai 2025")
-        [self.columnconfigure(i, weight=0) for i in range(41)]
-        [self.rowconfigure(i, weight=0) for i in range(41)]
-        self.resizable(False, False)
+        self.title(f"MOTUS v3.0\t{'version '+self.app_Parameters.options.difficulty.upper():^20}\t\t(c)AMOUROUX Bernard  Mai 2025")
+        [self.columnconfigure(i, weight=1) for i in range(41)]
+        [self.rowconfigure(i, weight=1) for i in range(41)]
         self.configure(bg='wheat')
         # ---------------------------------------------------------------------
-        self.dico_MOTUS = Handle_DicoMotus(self, self.app_Parameters)
         self.chronometre = Chronometre(self, self.app_Parameters.options.difficulty)
-        self.game_rules = Game_Rules(self, self.app_Parameters)
+        self.dico_MOTUS = Handle_DicoMotus(self, self.app_Parameters)
+        #self.game_rules = Game_Rules(self, self.app_Parameters)
         self.messageBox = Win_MessageBox(self)
         self.cree_widgets()
     
@@ -120,7 +125,19 @@ class Application(tk.Tk):
     @MOTUS_word.setter
     def MOTUS_word(self, motusword:str):
         self.__MOTUS_word = motusword
-        
+    
+    def __exit_fullscreen(self, event:tk.Event=None):
+        self.__fullscreen = False
+        self.attributes("-zoomed", self.__fullscreen)
+
+    def __toggle_fullscreen(self, event:tk.Event=None):
+        self.__fullscreen = not self.__fullscreen
+        self.withdraw()
+        self.update_idletasks()
+        sleep(0.05)
+        self.attributes("-fullscreen",self.__fullscreen)
+        self.deiconify()
+    
     def cree_widgets(self):
         # -----------------------------------------------------------------------------------------
         frameletters = My_LabelFrame(self,bd=2,bg="wheat",cspan=9,pad=(2,2,0,0))
@@ -165,7 +182,8 @@ class Application(tk.Tk):
         self.validButton.grid(column=11,row=0,columnspan=2,padx=10,sticky='nsew')
         self.validButton.__funcID = self.bind("<Return>", self.playGame)
         # -----------------------------------------------------------------------------------------
-        self.abortButton = tk.Button(self,text='Abandonner',bg='wheat',activebackground='red',state='disabled')
+        self.abortButton = tk.Button(self,text='Quitter le jeu',bg='wheat',activebackground='red')
+        self.abortButton.configure(state='normal',command=self.Quit)
         self.abortButton.grid(column=36,row=0,padx=5,columnspan=4,sticky="nsew")
         # -----------------------------------------------------------------------------------------
         # --------------- Création du tk.Canvas() pour affichage de l'image de fond ---------------
@@ -177,7 +195,7 @@ class Application(tk.Tk):
         self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
                                         image=self.backImage, anchor="center", tags='img_background')
         # -----------------------------------------------------------------------------------------
-        self.gameBoard = GameBoard(self.frame0,self.dico_Letters,col=9,row=20,cspan=20,rspan=20)
+        self.gameBoard = GameBoard(self.frame0,self.dico_Letters,col=18,row=38)   #,cspan=20,rspan=20)
         self.dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(), 6, 6))
         self.gameBoard.presentation_motus()     # ----- Gameboard en 6x6 pour la présentation ----- 
         # -----------------------------------------------------------------------------------------
@@ -373,7 +391,8 @@ class Application(tk.Tk):
         self.gameBoard.presentation_motus()     
 
     def __show_rules(self):
-        self.game_rules.show_helpfile()
+        Game_Rules(self, self.app_Parameters)
+        
         
     def fenetre_a_propos(self, msgbox:Win_MessageBox):
         """ Fenêtre-message à propos.

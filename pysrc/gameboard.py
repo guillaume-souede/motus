@@ -53,7 +53,8 @@ class GameBoard(My_LabelFrame):
         tab_options:dict = {'bg':'orange','bd':5,'relief':'groove','labelanchor':'n'}
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
-        My_LabelFrame.__init__(self, master, name='!gameBoard', pad=(2,2,0,0), *args, **kwargs)
+        My_LabelFrame.__init__(self, master, name='!gameBoard', pad=(0,0,0,0), *args, **kwargs)
+        self.grid_anchor('center')
         self.update()
 
     @property
@@ -101,7 +102,14 @@ class GameBoard(My_LabelFrame):
                                               pady=2, ipady=padXY[nb_letters-6][1], sticky="new")
                 # ----- dico_buttons :   (n°Lettre, n°mot,lettre mot), état, objet) ------
                 self.__dico_buttons[(i,j)] = ((btn_ID,i," "), False, btn)
+        self.update_idletasks()
         return self.__dico_buttons
+
+    def update_idletasks(self):
+        cspan, rspan = (self.nb_Letters*3)+2, (self.nb_Tries*4)
+        [self.columnconfigure(index=i, weight=0) for i in range(cspan)]
+        [self.rowconfigure(index=i, weight=0) for i in range(rspan)]
+        return super().update_idletasks()
     
     def presentation_motus(self):
         init_text = "mot    mot    mot       MOTUS!      "
