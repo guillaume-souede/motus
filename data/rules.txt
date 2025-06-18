@@ -1,5 +1,5 @@
         
-                MOTUS v2.0 d'après le jeu télévisé MOTUS diffusé sur France Télévision
+                MOTUS v4.0 d'après le jeu télévisé MOTUS diffusé sur France Télévision
 
     Ce jeu de MOTUS permet de jouer selon deux modes (prochainement trois avec le mode 'Fighters').
     Le premier mode est celui ou l'Humain joue contre la machine. Vous devez découvrir le mot MOTUS choisi par l'IA.

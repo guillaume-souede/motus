@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'gui_tools' library for MOTUS v3.0 (C) 2025  Bernard AMOUROUX
+'gui_tools' library for MOTUS v4.0 (C) 2025  Bernard AMOUROUX
 This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.
@@ -288,7 +288,7 @@ class Game_Rules(tk.Toplevel):
             self.__help_path = dico_path 
         # ---------------------------------------------------------------------
         self.__filename =  op.join(getcwd(),self.__help_path,self.__filename)
-        self.__vtitle = tk.StringVar(value="Aide de MOTUS v2.0.10 (c)AMOUROUX Bernard 05/2025")
+        self.__vtitle = tk.StringVar(value="Aide de MOTUS v4.0 (c)AMOUROUX Bernard 05/2025")
         self.__dico_lines:dict[int:str] = ({})
         # ---------------------------------------------------------------------
         tab_options:dict = {'bd':3, 'bg':'ivory', 'relief':'ridge', 'name':"!my_gameRules"}        
@@ -308,6 +308,7 @@ class Game_Rules(tk.Toplevel):
         self.__text_help = tk.Text(self,bg='ivory',bd=0,font=self.txt_font,wrap="word",relief="flat",width=90)
         self.__load_helpfile()
         self.create_widgets()
+        self.withdraw()
         
     def create_widgets(self):
         # ------------------ Tags à placer dans le tk.Text() ------------------
@@ -325,8 +326,6 @@ class Game_Rules(tk.Toplevel):
         # ---------------------------------------------------------------------
         self.__look_for_tags(self.__text_help.get("1.0", tk.END),text_tags)
         self.__text_help.configure(state="disabled")
-        self.lift(self.__master)
-        #self.grid()
     
     def __load_helpfile(self):
         """ Charge le fichier d'aide au format texte donné au constructeur de
@@ -361,7 +360,7 @@ class Game_Rules(tk.Toplevel):
         return self.__text_help
     
     def Quit(self, event=None):
-        self.destroy()
+        self.withdraw()
 
 
 class Motus_PopupMenu(tk.Menu):
@@ -376,7 +375,6 @@ class Motus_PopupMenu(tk.Menu):
         
         self.__master = master
         self.__commandList = commandsList
-        #self.__button:tk.Button = None
         self.__NoSel = nosel
         
         super().__init__(master,tearoff=0,font=('Arial 12 bold italic'),postcommand=lambda :self.nomenupopup(self.__NoSel))
@@ -451,7 +449,7 @@ class Parameters_Box(tk.Toplevel):
         [self.columnconfigure(index=i, weight=1) for i in range(20)]
         self.rowconfigure(index=0, weight=1)
         # ---------------------------------------------------------------------        
-        title = "Paramétrage de MOTUS v2.0.10 (c)AMOUROUX Bernard 06/2025"
+        title = "Paramétrage de MOTUS v4.0 (c)AMOUROUX Bernard 05/2025"
         self.bind("<Return>", self.ok_command)
         self.bind("<Escape>", self.no_command)
         self.title(title)
@@ -662,6 +660,7 @@ if __name__ == "__main__":
     menu = Motus_PopupMenu(root,new_menu,[2,3,4])
     rules.bind("<Button-3>", menu.show_Menu_Popup)
     #rules.show_helpfile()
+    rules.deiconify()
     rules.lift(root)
     #msgbox = Win_MessageBox(root)
     #msgbox.message = "Win Message Box"

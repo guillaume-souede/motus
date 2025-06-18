@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-Bibliotheque 'GUI_Tools'. Quelques surcharges de classes tKinter 
+Bibliotheque 'configs'. Quelques surcharges de classes tKinter 
 pour le jeu MOTUS inspiré du jeu télévisé diffusé sur France2
 Copyright (C) 2025  Bernard AMOUROUX
 
@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-'configs' library for MOTUS v3.0 (C) 2025  Bernard AMOUROUX
+'configs' library for MOTUS v4.0 (C) 2025  Bernard AMOUROUX
 This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.

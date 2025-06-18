@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DNA_GBRecords_GUI v2 (C) 2025  Bernard AMOUROUX
+MOTUS v4.0 (C) 2025  Bernard AMOUROUX
 This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.
@@ -28,8 +28,8 @@ __date__ = "$Date: 2025/05/18 07:00 $"
 __copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
+import re
 import tkinter as tk
-import re,unicodedata
 
 from configs import *
 from random import choice

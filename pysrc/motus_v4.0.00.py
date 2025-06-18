@@ -18,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-MOTUS v3.0 (C) 2025  Bernard AMOUROUX
+MOTUS v4.0 (C) may 2025  Bernard AMOUROUX
 This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.
@@ -39,7 +39,7 @@ from unicodedata import normalize,category
 from computer import IA_Computer
 from gameboard import GameBoard
 from human import Human_Player
-from time import sleep
+#from time import sleep
 
 from gui_tools import *
 from configs import *
@@ -84,7 +84,7 @@ class Application(tk.Tk):
         # ---- Taille de la fenètre du jeu fonction de la résolution écran ----
         MAX_WIDTH, MAX_HEIGHT = self.maxsize()  # --- renvoi la taille écran --
         self.app_size = min(MAX_WIDTH-100,self.backImage.width()), min(MAX_HEIGHT-200,self.backImage.height())
-        self.minsize(self.app_size[0], self.app_size[1])
+        self.minsize(MAX_WIDTH//2, MAX_HEIGHT//2)
         # ----------------- Mise en place plein écran oui/non -----------------
         self.__fullscreen:bool = self.app_Parameters.options.fullscreen
         self.attributes("-fullscreen", self.__fullscreen)
@@ -98,6 +98,7 @@ class Application(tk.Tk):
         self.event_add("<<PopupMenu>>","<Control-M>","<Control-m>","<Button-3>")
         self.popupMenu = Motus_PopupMenu(self, commandsList, nosel=[4,5])
         self.bind_all("<<PopupMenu>>", self.popupMenu.show_Menu_Popup)
+        self.bind("<Escape>", self.__exit_fullscreen)
         self.bind("<F11>",self.__toggle_fullscreen)
         self.bind("<Alt-F4>",self.Quit)
         # ---------------------------------------------------------------------
@@ -108,7 +109,7 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         self.chronometre = Chronometre(self, self.app_Parameters.options.difficulty)
         self.dico_MOTUS = Handle_DicoMotus(self, self.app_Parameters)
-        #self.game_rules = Game_Rules(self, self.app_Parameters)
+        self.game_rules = Game_Rules(self, self.app_Parameters)
         self.messageBox = Win_MessageBox(self)
         self.cree_widgets()
     
@@ -128,15 +129,15 @@ class Application(tk.Tk):
     
     def __exit_fullscreen(self, event:tk.Event=None):
         self.__fullscreen = False
-        self.attributes("-zoomed", self.__fullscreen)
+        self.attributes("-fullscreen", self.__fullscreen)
 
     def __toggle_fullscreen(self, event:tk.Event=None):
-        self.__fullscreen = not self.__fullscreen
+        # ---- Contournement du bug Tkinter() ----
+        self.after(150, self.deiconify)
         self.withdraw()
         self.update_idletasks()
-        sleep(0.05)
+        self.__fullscreen = not self.__fullscreen
         self.attributes("-fullscreen",self.__fullscreen)
-        self.deiconify()
     
     def cree_widgets(self):
         # -----------------------------------------------------------------------------------------
@@ -145,7 +146,7 @@ class Application(tk.Tk):
                               text=" Longueur du mot :").grid(column=0,row=0,columnspan=3,sticky="w")
         self.spboxletters = tk.Spinbox(frameletters,bd=2,relief='sunken',textvariable=self.vnblettres, 
                                            wrap=True,from_=wordlengthlist[0],to=wordlengthlist[-1],
-                                                width=2,state='readonly',font=('Arial 10 italic bold'))
+                                                width=3,state='readonly',font=('Arial 10 italic bold'))
         self.spboxletters.configure(command=self.update_barre_etat)
         self.spboxletters.grid(column=3, row=0, sticky='w')    
         tk.Label(frameletters, bd=0, bg='wheat',font=self.labelFont,
@@ -391,7 +392,9 @@ class Application(tk.Tk):
         self.gameBoard.presentation_motus()     
 
     def __show_rules(self):
-        Game_Rules(self, self.app_Parameters)
+        #Game_Rules(self, self.app_Parameters)
+        self.game_rules.deiconify()
+        self.game_rules.lift(self)
         
         
     def fenetre_a_propos(self, msgbox:Win_MessageBox):
