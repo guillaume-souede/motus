@@ -92,18 +92,18 @@ class Application(tk.Tk):
         #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:callable)
         #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
         commandsList = [(" Paramètres de MOTUS","",self.parameters), (" Choix du dictionnaire des mots","",self.select_dictionary),
-                        (" Changer Mode de jeu","",self.select_gamemode), (" Difficulté  du jeu","",None),
+                        (" Changer Mode de jeu","",self.select_gamemode), (" Difficulté  du jeu","",self.select_difficulty),
                         ("separator","",None),(" Mode plein écran on/off","F11",self.__toggle_fullscreen),
                         ("separator","",None),(" Quitter MOTUS"," Alt-F4 ",self.Quit)]
         self.event_add("<<PopupMenu>>","<Control-M>","<Control-m>","<Button-3>")
-        self.popupMenu = Motus_PopupMenu(self, commandsList, nosel=[4,5])
+        self.popupMenu = Motus_PopupMenu(self, commandsList, nosel=[4])
         self.bind_all("<<PopupMenu>>", self.popupMenu.show_Menu_Popup)
         self.bind("<Escape>", self.__exit_fullscreen)
         self.bind("<F11>",self.__toggle_fullscreen)
         self.bind("<Alt-F4>",self.Quit)
         # ---------------------------------------------------------------------
         self.title(f"MOTUS v3.0\t{'version '+self.app_Parameters.options.difficulty.upper():^20}\t\t(c)AMOUROUX Bernard  Mai 2025")
-        [self.columnconfigure(i, weight=1) for i in range(41)]
+        [self.columnconfigure(i, weight=1) for i in range(9,41)]
         [self.rowconfigure(i, weight=1) for i in range(41)]
         self.configure(bg='wheat')
         # ---------------------------------------------------------------------
@@ -193,7 +193,7 @@ class Application(tk.Tk):
         self.background = tk.Canvas(self.frame0, bd=3, relief='groove',name="!backImage",
                                                       width=self.app_size[0],height=self.app_size[1])
         self.background.grid(column=0, row=0, columnspan=40, rowspan=40, sticky='nsew')
-        self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
+        self.background.create_image((self.app_size[0]//2)+50, (self.app_size[1]//2)+50, 
                                         image=self.backImage, anchor="center", tags='img_background')
         # -----------------------------------------------------------------------------------------
         self.gameBoard = GameBoard(self.frame0,self.dico_Letters,col=18,row=38)   #,cspan=20,rspan=20)
@@ -333,6 +333,7 @@ class Application(tk.Tk):
         # ---------------------------------------------------------------------
         if self.__MOTUS_Player == "human":
             self.chronometre.start_chrono()
+            self.after(10, self.update_idletasks)  # -- redemarrer la boucle --
             self.MOTUS_word = self.dico_MOTUS.dico_MOTUS_one_word(f"{letters}")
             print(f"self.MOTUS_word: {self.MOTUS_word}")            
         # ---------------------------------------------------------------------    
@@ -354,7 +355,23 @@ class Application(tk.Tk):
         self.validButton.configure(state="normal")
         self.entryRequest.focus_force()
         self.gameBoard.grid()
-
+    
+    def select_difficulty(self):
+        difficulty = Difficulty_Popup(self).go()
+        if difficulty:
+            self.gameBoard.grid_remove()
+            self.app_Parameters.options.difficulty = difficulty[1]
+            self.title(f"MOTUS v3.0 - (c)AMOUROUX Bernard  Mai 2025\t{'Mode de jeu : '+self.app_Parameters.options.difficulty.upper():>140}")
+            self.chronometre.change_mode(self.app_Parameters.options.difficulty)
+            self.vrequest.set(f" mot MOTUS : {self.MOTUS_word.upper()}")
+            self.entryRequest.configure(state="disabled",fg="grey50")
+            self.validButton.configure(state="disabled")
+            self.entryLabel.configure(state="disabled")
+            self.abortButton.configure(state="normal")
+            self.playButton.configure(state="active")
+            self.spboxmode.configure(state="normal")            
+            self.gameBoard.grid()
+        
     def select_gamemode(self):
         self.gameBoard.grid_remove()
         self.chronometre.reset_chrono(start=False)
@@ -392,10 +409,8 @@ class Application(tk.Tk):
         self.gameBoard.presentation_motus()     
 
     def __show_rules(self):
-        #Game_Rules(self, self.app_Parameters)
         self.game_rules.deiconify()
         self.game_rules.lift(self)
-        
         
     def fenetre_a_propos(self, msgbox:Win_MessageBox):
         """ Fenêtre-message à propos.

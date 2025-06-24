@@ -104,6 +104,7 @@ class IA_Computer():
                     self.__IA_word = choice(self.__list_IA_Words)
                 except IndexError:
                     self.__init_WordsList()
+            print(f"self.__IA_word: {self.__IA_word}")
         # ------------- Reinitialisation de la liste des mots -------------                            
         self.__init_WordsList()
         return self.IA_status

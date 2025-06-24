@@ -46,7 +46,7 @@ class Chronometre(tk.Frame):
         self.__dict_modes:dict = {"easy":0,"normal":120,"hardu":60,"terrible":30,'infaisable':10} 
         # ---------------------------------------------------------------------
         tab_options:dict = {'bg':'grey90' if mode == "easy" else 'ivory', 'bd':3, 
-                                     'relief':'ridge' if mode != "easy" else 'sunken'}
+                                     'relief':'sunken' if mode == "easy" else 'ridge'}
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
         super().__init__(master, *args, **kwargs)
@@ -66,9 +66,9 @@ class Chronometre(tk.Frame):
 
     def create_widget(self):
         lbl_font = tkFont.Font(family='Sans Serif',size=16,weight='normal',slant='roman')
-        #metrique = int(lbl_font.measure(f" {self.__mode:^10} ")/12)
-        tk.Label(self, bg=self.cget('bg'),font=lbl_font,fg="black" if self.__rebour else "grey75",
-                            textvariable=self.__vchrono,border=0,).grid(column=0,row=0,sticky="nsew")
+        self.chrono_lbl = tk.Label(self,bg=self.cget('bg'),font=lbl_font,textvariable=self.__vchrono,border=0)
+        self.chrono_lbl.configure(fg="black" if self.__rebour else "grey75")
+        self.chrono_lbl.grid(column=0,row=0,sticky="nsew")
         self.update_idle()
 
     def __format_time(self):
@@ -82,7 +82,7 @@ class Chronometre(tk.Frame):
         if self.actif and self.__rebour and self.__time > 0:
             self.__time -= 1
         self.__vchrono.set(self.__format_time())
-        self.master.after(1000, self.update_idle)
+        self.after(1000, self.update_idle)
 
     def start_chrono(self):
         self.actif = True
@@ -90,6 +90,15 @@ class Chronometre(tk.Frame):
     def pause_chrono(self):
         self.actif = False
 
+    def change_mode(self, newmode:Gamehardness):
+        self.__max_time = self.__dict_modes.get(newmode, 'normal')
+        self.__rebour:bool = newmode != "easy"
+        self.__time = self.__max_time
+        self.configure(relief='ridge' if not self.__rebour else 'sunken')
+        #self.chrono_lbl.configure(bg='grey90' if not self.__rebour else 'ivory')
+        self.chrono_lbl.configure(bg=self.cget('bg'), fg="black" if self.__rebour else "grey75")
+        self.reset_chrono(start=False)
+        
     def reset_chrono(self, start:bool=True):
         self.actif = start
         self.__vchrono.set(" 00 : 00 ")
@@ -618,6 +627,85 @@ class Parameters_Box(tk.Toplevel):
         self.how = how
         self.quit()                     # Exit mainloop()
         
+        
+class Difficulty_Popup(tk.Toplevel):
+    """ Affichage d'une fenetre popup toujours au premier plan sans boutons système
+        Se ferme après avoir choisi un élément dans la liste.
+    """
+    def __init__(self, master, *args, **kwargs):
+        # ---------------------------------------------------------------------
+        self.__master = master
+        self.__difficulty = master.app_Parameters.options.difficulty
+        self.__difficulty_list:list[Gamehardness] = gamehardlist
+        self.vgamedif = tk.StringVar(value=self.__difficulty_list)
+        self.lst_font = tk.font.Font(family='Courier New',size=10,weight='bold',slant='italic')    
+        # ---------------------------------------------------------------------
+        tab_options:dict = {'bd':2, 'bg':'orange', 'relief':'flat'}        
+        for key in list(tab_options.keys()):
+            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
+        super().__init__(master, name="!difficulty_popup", *args, **kwargs)
+        # ---------------------------------------------------------------------        
+        self.overrideredirect(1)                                  # - Aucun bouton systeme sur la fenetre   
+        self.bind_class(self,'<Button2-Motion>',self.motion)      # - Bouton droit pour déplacer la fenètre popup
+        self.bind_class(self,"<Escape>", self.cancel_command)     # - pour quitter la popupList pas 'Esc'
+        self.event_add("<<Select_Item>>",'<Double-Button-1>','<KP_Enter>','<Return>')
+        self.bind_class(self,"<<Select_Item>>",self.select_item)  # - click gauche/Enter pour selectionner le codon 
+        # ---------------------------------------------------------------------
+        frame1 = My_LabelFrame(self, bd=0, bg='ivory', relief='flat')
+        self.lst = tk.Listbox(frame1,bg='ivory',bd=0,listvariable=self.vgamedif,activestyle="dotbox",
+                                       font=self.lst_font,relief='flat',width=12,height=6,state="normal")
+        self.lst.activate(self.lst.get(0, tk.END).index(self.__difficulty))
+        self.lst.select_set('active')
+        self.lst.grid(sticky='nsew')
+        self.lst.update()    
+        # ---------------------------------------------------------------------
+        pos = self.geometry()
+        mousexy = master.winfo_pointerxy() # - Récupère la position de la souris
+        self.lst_pos = f"{pos[:pos.find('+')]}"
+        self.geometry(f"{self.lst_pos}+{mousexy[0]}+{mousexy[1]-100}")
+        self.lst.focus_set()     
+        self.update()
+    
+    def getSelectItem(self):
+        """ Renvoi l'index et le libellé de la premiere sélection de la listbox """
+        idx = self.lst.index('active') if not self.lst.curselection() else self.lst.curselection()[0]
+        return int(idx), self.lst.get(idx)
+    
+    def motion(self, event):
+        mousexy = self.__master.winfo_pointerxy()
+        self.geometry(f"{self.lst_pos}+{mousexy[0]}+{mousexy[1]}")
+
+    def go(self):
+        """ Methode qui permet de garder le focus sur la fenetre de choix
+            de l'huile qui lors du choix renvoi le nom de l'huile choisie
+            et ferme la fenetre Toplevel.
+        """
+        self.lift(self.__master)        # mise au premier plan de la Toplevel
+        self.grab_set() 
+        self.how = self.getSelectItem   # Nom de la procédure exécutée en sortie
+        self.mainloop()                 # Sortie de la Boucle principale par "self.quit(how)"
+        self.destroy()                  # Fermeture de la fenetre Toplevel
+        return self.how
+
+    def select_item(self, event):
+        self.ok_command()
+        
+    def ok_command(self):
+        self.Quit(self.getSelectItem())
+
+    def cancel_command(self, event):
+        """ Sortie de la Toplevel avec "None" en retour """
+        self.Quit(None)
+        
+    def Quit(self, how=None):
+        """ Sortie de la boucle principale et non fermeture de la fenetre
+            Exécution de la methode "how" qui permet de récupérer la
+            donnée voulue en sotie en fin de méthode "go()"
+        """
+        #self.wm_attributes("-topmost", 0)                     # - Fenetre popup NON au premier plan
+        self.how = how
+        self.quit()              # Exit mainloop()
+        
     
 # ----------------------------- Méthodes diverses -----------------------------    
 
@@ -649,7 +737,7 @@ if __name__ == "__main__":
     chrono.start_chrono()
     chrono.grid()
     
-    rules = Game_Rules(root,default_help_filename)
+    #rules = Game_Rules(root,default_help_filename)
     # -------------------------------------------------------------------------
     #'commandsList': tuple de la forme (label_cmd:str, accel_cmd:str,commande:list[callable])
     #'nosel'       : list[int] liste des indices des rubrique dont l'état sera 'disabled'
@@ -657,11 +745,11 @@ if __name__ == "__main__":
                 (" Changer Mode de jeu","Ctrl-M",do_Nothing),("separator","",None),(" Quitter","",quit)]
     # -------------------------------------------------------------------------
     #menu = OneClick_CopyPaste(rules,rules.get_TextWidget(),new_menu, [6,7])
-    menu = Motus_PopupMenu(root,new_menu,[2,3,4])
-    rules.bind("<Button-3>", menu.show_Menu_Popup)
+    #menu = Motus_PopupMenu(root,new_menu,[2,3,4])
+    #rules.bind("<Button-3>", menu.show_Menu_Popup)
     #rules.show_helpfile()
-    rules.deiconify()
-    rules.lift(root)
+    #rules.deiconify()
+    #rules.lift(root)
     #msgbox = Win_MessageBox(root)
     #msgbox.message = "Win Message Box"
     #msgbox.lift(root)
@@ -670,11 +758,18 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     #dicofile = Select_Dictionary_File(root)
     config = Saveload_CFG()
+    root.app_Parameters = config
     #print(f"Dico filename: {dicofile}")
     #if dicofile: config.options.dicofilename = op.basename(dicofile)
-    winparams = Parameters_Box(root,config.options).go()
-    if winparams:     
-        print(f"winparams:\n{winparams}")
+    # -------------------------------------------------------------------------
+    difficulty = Difficulty_Popup(root).go()
+    print(f"selected difficulty: {difficulty}")
+    chrono.change_mode(difficulty[1])
+    chrono.start_chrono()
+
+    #winparams = Parameters_Box(root,config.options).go()
+    #if winparams:     
+    #    print(f"winparams:\n{winparams}")
     # -------------------------------------------------------------------------
     root.mainloop()
     
