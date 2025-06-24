@@ -143,7 +143,8 @@ class Window_StateBar(tk.Frame):
         super().__init__(master, *args, **kwargs)
         
         self.grid(column=col,row=row,columnspan=cspan,padx=2,pady=2,sticky=sticky)
-        tk.Label(self,bd=0,bg=self.cget('bg'),anchor="sw",height=1,textvariable=self.__vl_texte).grid()
+        tk.Label(self,bd=0,bg=self.cget('bg'),anchor="sw",height=1,
+                    font="Courier\ New 10 bold italic",textvariable=self.__vl_texte).grid()
         self.update_vltexte(defMessage if not message else message, waitime)
 
     @property

@@ -83,11 +83,11 @@ class IA_Computer():
     def valide_Mot(self, human_word) -> PlayerStatus:
         self.IA_status = "idle"
         self.__MOTUS_word = human_word
-        # -----------------------------------------------------------------
+        # ---------------------------------------------------------------------
         while self.IA_status == "idle":
             self.OK,self.IS,self.NO = 0, 0, 0
             word_nbr, buttons = self.__find_free_word(self.__IA_word)
-            # -- recherche des lettres qui ne sont pas dans le mot MOTUS --
+            # ---- recherche des lettres qui ne sont pas dans le mot MOTUS ----
             NO_letters = self.__look_for_NO_letters(self.__MOTUS_word, self.__IA_word)
             buttons = self.__draw_NO_letters(bad_letters=NO_letters, buttons=buttons)
             IS_letters = self.__look_for_IS_letters(self.__MOTUS_word, self.__IA_word)
@@ -104,8 +104,8 @@ class IA_Computer():
                     self.__IA_word = choice(self.__list_IA_Words)
                 except IndexError:
                     self.__init_WordsList()
-            print(f"self.__IA_word: {self.__IA_word}")
-        # ------------- Reinitialisation de la liste des mots -------------                            
+            #print(f"self.__IA_word: {self.__IA_word}")
+        # ------------- Reinitialisation de la liste des mots -----------------                            
         self.__init_WordsList()
         return self.IA_status
     
