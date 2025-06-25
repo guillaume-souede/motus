@@ -1121,3 +1121,28 @@ pysrc/build/exe.linux-x86_64-3.9/tk8.6/ttk/winTheme.tcl
 pysrc/build/exe.linux-x86_64-3.9/tk8.6/ttk/xpTheme.tcl
 images/motus (copie).ico
 images/motus.ico
+pysrc/build/exe.linux-x86_64-3.9/Motus_V4
+pysrc/build/exe.linux-x86_64-3.9/motus_v4.desktop
+pysrc/build/exe.linux-x86_64-3.9/audio/10748.wav
+pysrc/build/exe.linux-x86_64-3.9/audio/10755.mp3
+pysrc/build/exe.linux-x86_64-3.9/audio/10757.mp3
+pysrc/build/exe.linux-x86_64-3.9/audio/10758.wav
+pysrc/build/exe.linux-x86_64-3.9/audio/10759.mp3
+pysrc/build/exe.linux-x86_64-3.9/audio/10769.wav
+pysrc/build/exe.linux-x86_64-3.9/audio/11304.mp3
+pysrc/build/exe.linux-x86_64-3.9/audio/gagnant.wav
+pysrc/build/exe.linux-x86_64-3.9/audio/Générique Motus (A2, 1991).wav
+pysrc/build/exe.linux-x86_64-3.9/audio/generique.wav
+pysrc/build/exe.linux-x86_64-3.9/audio/motus-boule-noire.mp3
+pysrc/build/exe.linux-x86_64-3.9/audio/perdu.wav
+pysrc/build/exe.linux-x86_64-3.9/lib/audioop.cpython-39-x86_64-linux-gnu.so
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/__init__.pyc
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/_simpleaudio.cpython-39-x86_64-linux-gnu.so
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/shiny.pyc
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/test_audio/c.wav
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/test_audio/e.wav
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/test_audio/g.wav
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/test_audio/left_right.wav
+pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/test_audio/notes_2_16_44.wav
+motus_v4.desktop
+audio/Générique Motus (A2, 1991).wav

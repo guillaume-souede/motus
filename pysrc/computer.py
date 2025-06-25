@@ -31,10 +31,13 @@ __license__ = "GPL 3"
 import re
 import tkinter as tk
 
-from configs import *
+from os import getcwd
 from random import choice
+from simpleaudio import WaveObject
 from handledico import Handle_DicoMotus
 from gameboard import GameBoard
+from configs import *
+
 
 class IA_Computer():
     
@@ -45,11 +48,11 @@ class IA_Computer():
         self.__gameboard = gameboard
         self.__nb_tries = gameboard.nb_Tries
         self.__nb_letters = gameboard.nb_Letters
-        self.__dico_Buttons = self.__gameboard.dico_Buttons     # - dictionnaire des boutons du mot IA_word
-        self.__dico_Motus:Handle_DicoMotus = master.dico_MOTUS  # - recupere le Handle_DicoMotus() du parent
-        self.__search_word:list = (['.',]* self.__nb_letters)   # - lettres du mot collectées à leur position
-        self.__is_word_letters = set()                          # - set() des lettres contenues dans le mot 
-        self.__IA_status:PlayerStatus = "idle"                  # - status du joueur 'IA_Computer'
+        self.__dico_Buttons = self.__gameboard.dico_Buttons       # - dictionnaire des boutons du mot IA_word
+        self.__dico_Motus:Handle_DicoMotus = master.dico_MOTUS    # - recupere le Handle_DicoMotus() du parent
+        self.__search_word:list = (['.',]* self.__nb_letters)     # - lettres du mot collectées à leur position
+        self.__is_word_letters,self.is_OK_letters = set(),list()  # - set() des lettres contenues dans le mot 
+        self.__IA_status:PlayerStatus = "idle"                    # - status du joueur 'IA_Computer'
         # ------------ Mot de l'utilisateur que doit trouver l'IA -------------
         self.__MOTUS_word:str = ""                  
         # -------- Création liste de mots et 1er mot proposé par l'IA ---------
@@ -96,8 +99,12 @@ class IA_Computer():
             buttons = self.__draw_OK_letters(ok_letters=OK_letters, buttons=buttons)
             # -----------------------------------------------------------------            
             if self.OK == self.__nb_letters:
+                if self.__master.app_Parameters.options.soundgame:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","gagnant.wav")).play()
                 self.IA_status = "winner"
             elif word_nbr == self.__nb_tries-1 and self.OK < self.__nb_letters:
+                if self.__master.app_Parameters.options.soundgame:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","perdu.wav")).play()
                 self.IA_status = "loser"
             else:    
                 try:
@@ -116,6 +123,9 @@ class IA_Computer():
             """
             if button.cget('text').lower() in bad_letters:
                 button.configure(bg=COLOR_NO,relief='flat',activebackground=COLOR_NO)    
+                # ------------ Lecture du son lettre pas dans mot -------------
+                if self.__master.app_Parameters.options.lettersound:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","10748.wav")).play()
                 button.flash()
                 self.NO += 1
         return buttons
@@ -127,6 +137,9 @@ class IA_Computer():
         for idx,button in buttons:
             if button.cget('text').lower() in list(map(lambda l:l[1], is_letters)):
                 button.configure(bg=COLOR_IS,relief='flat',activebackground=COLOR_IS)
+                # -------------- Lecture du son lettre dans mot ---------------
+                if self.__master.app_Parameters.options.lettersound:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","10758.wav")).play()
                 button.flash()
                 self.IS += 1
         return buttons
@@ -139,19 +152,23 @@ class IA_Computer():
             #print(f"idx: {idx} -/- ok_letters: {ok_letters}")
             if (idx[0] % self.__nb_letters, idx[2]) in  ok_letters:
                 button.configure(bg=COLOR_OK,relief='flat',activebackground=COLOR_OK)
+                # ----------- Lecture du son lettre dans mot placé ------------
+                if self.__master.app_Parameters.options.lettersound:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","10769.wav")).play()
                 button.flash()
                 self.OK += 1
         return buttons
-        
-    def __update_search_OK_words(self, letters:list):
+    
+    @staticmethod    
+    def __update_search_OK_words(master:any, letters:list):
         """ Crée le pattern du mot à rechercher pour mettre à jour
             la liste des mots pour poursuivre la recherche.
         """
         for letter in letters:
-            self.__search_word[letter[0]] = letter[1]
-        pattern = "".join([w for w in self.__search_word])
-        self.__list_IA_Words = [word.group() for word in [re.match(pattern,word) \
-                                                   for word in self.__list_IA_Words] if word != None]
+            master.__search_word[letter[0]] = letter[1]
+        pattern = "".join([w for w in master.__search_word])
+        master.__list_IA_Words = [word.group() for word in [re.match(pattern,word) \
+                                                   for word in master.__list_IA_Words] if word != None]
     
     def __look_for_OK_letters(self,ref_word:str, test_word:str) -> list:
         """ Retourne uniquement les lettres de 'test_word' présentes dans 'ref_word' 
@@ -160,7 +177,7 @@ class IA_Computer():
         ok_letters = list(map(lambda s:s[0], list(filter(lambda w:w[0]==w[1], \
                                         list(zip(enumerate(ref_word),enumerate(test_word)))))))
         if ok_letters:
-            self.__update_search_OK_words(ok_letters)
+            IA_Computer.__update_search_OK_words(self, ok_letters)
         return ok_letters
         
     def __look_for_NO_letters(self,ref_word:str, test_word:str) -> list:

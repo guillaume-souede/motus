@@ -95,7 +95,6 @@ class Chronometre(tk.Frame):
         self.__rebour:bool = newmode != "easy"
         self.__time = self.__max_time
         self.configure(relief='ridge' if not self.__rebour else 'sunken')
-        #self.chrono_lbl.configure(bg='grey90' if not self.__rebour else 'ivory')
         self.chrono_lbl.configure(bg=self.cget('bg'), fg="black" if self.__rebour else "grey75")
         self.reset_chrono(start=False)
         
@@ -186,7 +185,7 @@ class Win_MessageBox(tk.Toplevel):
         
         tk.Message(self,bg='wheat',width=500,aspect=100,justify=tk.CENTER,font=("Courier New",14,"bold","italic"),
                                            textvariable=self.__vmessage).grid(padx=10,pady=10,sticky="nsew")
-        tk.Button(self,width = 8,bg='tan',text='Ok',command=self.Quit).grid()
+        tk.Button(self,width = 8,bg='tan',text='Ok',font=('TkDefaultFont 12 bold italic'),command=self.Quit).grid()
         self.bind('<Return>', self.Quit)
         self.withdraw()
     
@@ -422,212 +421,6 @@ class Motus_PopupMenu(tk.Menu):
             else:
                 self.add_command(label=command[0],accelerator=command[1],command=command[2])   
         
-
-class Parameters_Box(tk.Toplevel):
-    
-    def __init__(self, master, parameters:App_Options, *args, **kwargs):
-         
-        self.__master = master
-        self.__parameters = parameters
-        # ---------------------------------------------------------------------
-        self.vfullscreen = tk.IntVar(value=int(parameters.fullscreen))
-        self.vparamfile =  op.join(getcwd(),parameters.dicopath,parameters.paramfilename)
-        self.vdicofile = tk.StringVar(value=parameters.dicofilename)
-        self.vhelpfile = tk.StringVar(value=parameters.helpfilename)
-        self.vbackfile = tk.StringVar(value=parameters.backfilename)
-        self.vdifficulty = tk.StringVar(value=parameters.difficulty)
-        self.vimagepath = tk.StringVar(value=parameters.imagepath)
-        self.vaccentchar = tk.IntVar(value=parameters.accentchar)
-        self.vgamemode = tk.StringVar(value=parameters.gamemode)
-        self.vdatapath = tk.StringVar(value=parameters.dicopath)
-        self.vnblettres = tk.IntVar(value=wordlengthlist[0]) 
-        self.vnbtries = tk.IntVar(value=wordlengthlist[0])
-        # ---------------------------------------------------------------------
-        tab_options:dict = {'bd':3,'bg':'ivory','relief':'ridge','name':"!my_appParameters"}        
-        for key in list(tab_options.keys()):
-            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
-        super().__init__(master, *args, **kwargs)
-        # ---------------------------------------------------------------------        
-        self.protocol("WM_DELETE_WINDOW", self.no_command)
-        # ---------------------------------------------------------------------        
-        self.txt_font = ('Courier\ New 12 bold italic')
-        self.btn_font = ('Arial 12 bold roman')
-        self.lbl_font = ('Serif 12 normal italic')
-        self.spb_font = ('Serif 11 normal italic')
-        # ---------------------------------------------------------------------        
-        self.minsize(master.app_size[0]//3, master.app_size[1]//3)
-        [self.columnconfigure(index=i, weight=1) for i in range(20)]
-        self.rowconfigure(index=0, weight=1)
-        # ---------------------------------------------------------------------        
-        title = "Paramétrage de MOTUS v4.0 (c)AMOUROUX Bernard 05/2025"
-        self.bind("<Return>", self.ok_command)
-        self.bind("<Escape>", self.no_command)
-        self.title(title)
-        # ---------------------------------------------------------------------
-        self.create_widgets()
-    
-    def create_widgets(self):
-        # ---------------------------------------------------------------------
-        frame0 = My_LabelFrame(self,0,0,cspan=20,rspan=20,bg='wheat',bd=2,relief="groove")
-        tk.Label(frame0,bg='tan',bd=0,font=self.lbl_font,justify="center",anchor="center",width=32,
-                    text=f"\tFichier de configuration :").grid(row=0,columnspan=12,sticky='nsew')
-        tk.Label(frame0,bg='tan',bd=0,font=self.txt_font,text=f"\t{self.__parameters.paramfilename}",
-                   width=38,justify="center",anchor="w").grid(column=12,row=0,columnspan=8,sticky='nsew')
-        # ---------------------------------------------------------------------
-        frame1 = My_LabelFrame(frame0,0,1,cspan=20,rspan=9,bg='wheat',bd=2,relief="ridge",pad=(2,2,0,0))
-        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Fichier dictionnaire  :",anchor="sw",
-                           width=22,font=self.lbl_font).grid(column=0,row=0,columnspan=5,sticky='nsew')
-        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vdicofile,state="readonly").grid(row=0,
-                                                           ipady=3,column=5,columnspan=10,sticky='sew')
-        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
-                     command=self.sel_Dictfile,).grid(row=0,column=15,columnspan=4,padx=10,sticky="se")
-        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Fichier d'aide MOTUS  :",anchor="sw",
-                           width=22,font=self.lbl_font).grid(column=0,row=1,columnspan=5,sticky='nsew')
-        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vhelpfile,state="readonly").grid(row=1,
-                                                           ipady=3,column=5,columnspan=10,sticky='sew')
-        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
-                      command=self.sel_helpfile).grid(row=1,column=15,columnspan=4,padx=10,sticky="se")
-        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Image de fond d'écran :",anchor="sw",
-                           width=22,font=self.lbl_font).grid(column=0,row=2,columnspan=5,sticky='nsew')
-        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vbackfile,state="readonly").grid(row=2,
-                                                           ipady=3,column=5,columnspan=10,sticky='sew')
-        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
-                      command=self.sel_backfile).grid(row=2,column=15,columnspan=4,padx=10,sticky="se")
-        # ---------------------------------------------------------------------
-        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,anchor="s",width=40,
-                    text=f"{'Dossiers des dictionnaires, paramètres et images :'}",
-                          font=self.lbl_font).grid(column=0,row=3,rowspan=3,columnspan=20,sticky='nsew')
-        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Dossier des données :",anchor="sw",
-                            width=22,font=self.lbl_font).grid(column=0,row=6,columnspan=5,sticky='nsew')
-        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vdatapath,state="readonly").grid(row=6,
-                                                            ipady=3,column=5,columnspan=10,sticky='sew')
-        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
-                       command=self.sel_datapath).grid(row=6,column=15,columnspan=4,padx=10,sticky="se")
-        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Dossier des images  :",anchor="sw",
-                            width=22,font=self.lbl_font).grid(column=0,row=7,columnspan=5,sticky='nsew')
-        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vimagepath,state="readonly").grid(row=7,
-                                                            ipady=3,column=5,columnspan=10,sticky='sew')
-        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
-                      command=self.sel_imagepath).grid(row=7,column=15,columnspan=4,padx=10,sticky="se")
-        # ---------------------------------------------------------------------
-        chkboxlbl = My_LabelFrame(frame1,0,8,cspan=20,rspan=2,bg=frame0.cget('bg'),
-                                      relief="ridge",text=' Paramètres divers',pad=(0,0,0,0))
-        tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vaccentchar,
-                                indicatoron=1,font=self.spb_font,text=" : mots accentués",
-                                        anchor='w',).grid(column=0,row=0,columnspan=3,sticky='nsew')
-        tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vfullscreen,
-                                indicatoron=1,font=self.spb_font,text=" : mode plein écran/fenêtré",
-                                        width=26,anchor='center',).grid(column=3,row=0,columnspan=8,sticky='nsew') 
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Nombre d'essais : ",anchor='e',
-                                font=self.spb_font).grid(column=11,columnspan=8,row=0,padx=10,sticky="w")
-        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnbtries,wrap=True,
-                                      from_=wordlengthlist[0],to=11,state='readonly',width=2,
-                                              font=self.txt_font).grid(column=19,row=0,sticky='e')
-        # ---------------------------------------------------------------------        
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f" Mode de jeu : ",
-                                font=self.spb_font).grid(column=0,columnspan=2,row=1,sticky="nsew")
-        gamemode = gamemodelist[0] if self.__parameters.gamemode=="human" else \
-                        gamemodelist[1] if self.__parameters.gamemode=="computer" else gamemodelist[2]
-        self.spbgmode = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
-                                textvariable=self.vgamemode,values=gamemodelist,wrap=True,width=15)
-        while self.spbgmode.get() != gamemode: self.spbgmode.invoke('buttonup')
-        self.spbgmode.grid(column=2,row=1,columnspan=2,sticky="ew")
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"    Difficulté : ", anchor="w",
-                                font=self.spb_font).grid(column=4,columnspan=1,row=1,sticky="nsew")
-        self.spbdifficulty = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
-                                textvariable=self.vdifficulty,values=gamehardlist,wrap=True,width=10)
-        while self.spbdifficulty.get() != self.__parameters.difficulty: self.spbdifficulty.invoke('buttonup')
-        self.spbdifficulty.grid(column=6,row=1,columnspan=2,sticky="ew")
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Longueur du mot : ",anchor="e",
-                    font=self.spb_font).grid(column=17,columnspan=2,row=1,padx=10,sticky="nsew")
-        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnblettres,wrap=True,
-                              from_=wordlengthlist[0],to=wordlengthlist[-1],state='readonly',
-                                    width=2,font=self.txt_font).grid(column=19,row=1,sticky='w')    
-        # ---------------------------------------------------------------------        
-        tk.Button(frame0,bg='tan',bd=3,activebackground="lightgreen",state="active",width=12,font=self.btn_font,
-                      text="Valider",command=self.ok_command).grid(column=2,row=19,columnspan=3,pady=5,sticky="w")
-        tk.Button(frame0,bg='tan',activebackground="red",text="Annuler",font=self.btn_font,bd=3,width=12,
-                               command=self.no_command).grid(column=15,row=19,columnspan=4,pady=5,sticky="e")
-        # ---------------------------------------------------------------------        
-    
-    def sel_Dictfile(self):
-        fname = tkFileDialog.askopenfilename(parent=self,initialdir = op.join(getcwd(),self.vdatapath.get()),
-                                        title = "Choix du dictionnaire MOTUS",initialfile=self.vdicofile.get(),
-                                                      filetypes = (("Motus dico","*.txt"),("Tous types","*.*")))
-        if fname:
-            self.vdicofile.set(op.basename(fname))
-    
-    def sel_helpfile(self):
-        fname = tkFileDialog.askopenfilename(parent=self, initialdir = op.join(getcwd(),self.vdatapath.get()),
-                                        title = "Choix du fichier d'aide MOTUS",initialfile=self.vhelpfile.get(),
-                                                        filetypes = (("Aide Motus","*.txt"),("Tous types","*.*")))
-        if fname:
-            self.vhelpfile.set(op.basename(fname))
-    
-    def sel_backfile(self):
-        fname = tkFileDialog.askopenfilename(parent=self, initialdir = op.join(getcwd(),self.vimagepath.get()),
-                                      title = "Choix de l'Image de fond d'écran",initialfile=self.vbackfile.get(),
-                                        filetypes = (("Image PNG","*.png"),("Image GIF","*.gif"),("Tous types","*.*")))
-        if fname:
-            self.vbackfile.set(op.basename(fname))
-    
-    def sel_datapath(self):
-        pname = tkFileDialog.askdirectory(initialdir = op.join(getcwd(),self.vdatapath.get()),
-                                                parent = self, title = "Choix du dossier des données")
-        if pname:
-            self.vdatapath.set(op.basename(pname))
-    
-    def sel_imagepath(self):
-        pname = tkFileDialog.askdirectory(initialdir=op.join(getcwd(),self.vimagepath.get()),
-                                                        parent=self,title="Choix du dossier des images")
-        if pname:
-            self.vimagepath.set(op.basename(pname))
-    
-    def __valid_parameters(self, event=None) -> App_Options:
-        # ---------------------------------------------------------------------
-        index = gamemodelist.index(self.vgamemode.get())
-        self.__parameters.gamemode = "human" if index == 0 else "computer" if index == 1 else "fighters"
-        # ---------------------------------------------------------------------
-        self.__parameters.fullscreen = bool(self.vfullscreen.get())
-        self.__parameters.difficulty = self.vdifficulty.get()
-        self.__parameters.dicofilename = self.vdicofile.get()
-        self.__parameters.helpfilename = self.vhelpfile.get()
-        self.__parameters.backfilename = self.vbackfile.get()
-        self.__parameters.accentchar = self.vaccentchar.get()
-        self.__parameters.nb_letters = self.vnblettres.get()
-        self.__parameters.imagepath = self.vimagepath.get()
-        self.__parameters.dicopath = self.vdatapath.get()
-        self.__parameters.nb_tries = self.vnbtries.get()
-        # ---------------------------------------------------------------------
-        return self.__parameters
-
-    def go(self) -> App_Options:
-        """ Methode qui permet de garder le focus sur la fenetre de choix
-            de l'huile qui lors du choix renvoi le nom de l'huile choisie
-            et ferme la fenetre Toplevel.
-        """
-        self.lift(self.__master)            # mise au premier plan de la Toplevel
-        self.wait_visibility()
-        self.grab_set() 
-        self.how = self.__valid_parameters  # Nom de la procédure exécutée en sortie
-        self.mainloop()                     # Sortie de la Boucle principale par "self.quit(how)"
-        self.destroy()                      # Fermeture de la fenetre Toplevel
-        return self.how
-        
-    def ok_command(self, event=None):
-        self.Quit(self.__valid_parameters(event))
-        
-    def no_command(self, event=None):
-        self.Quit(event)
-        
-    def Quit(self, how=None):
-        """ Sortie de la boucle principale et non fermeture de la fenetre
-            Exécution de la methode "how" qui permet de récupérer la
-            donnée voulue en sotie en fin de méthode "go()"
-        """
-        self.how = how
-        self.quit()                     # Exit mainloop()
-        
         
 class Difficulty_Popup(tk.Toplevel):
     """ Affichage d'une fenetre popup toujours au premier plan sans boutons système
@@ -707,6 +500,229 @@ class Difficulty_Popup(tk.Toplevel):
         self.how = how
         self.quit()              # Exit mainloop()
         
+        
+class Parameters_Box(tk.Toplevel):
+    
+    def __init__(self, master, parameters:App_Options, *args, **kwargs):
+         
+        self.__master = master
+        self.__parameters = parameters
+        # ---------------------------------------------------------------------
+        self.vfullscreen = tk.IntVar(value=int(parameters.fullscreen))
+        self.vparamfile =  op.join(getcwd(),parameters.dicopath,parameters.paramfilename)
+        self.vdicofile = tk.StringVar(value=parameters.dicofilename)
+        self.vhelpfile = tk.StringVar(value=parameters.helpfilename)
+        self.vbackfile = tk.StringVar(value=parameters.backfilename)
+        self.vdifficulty = tk.StringVar(value=parameters.difficulty)
+        self.vlettersound = tk.IntVar(value=parameters.lettersound)
+        self.vimagepath = tk.StringVar(value=parameters.imagepath)
+        self.vaccentchar = tk.IntVar(value=parameters.accentchar)
+        self.vgamemode = tk.StringVar(value=parameters.gamemode)
+        self.vdatapath = tk.StringVar(value=parameters.dicopath)
+        self.vmusicgame = tk.IntVar(value=parameters.musicgame)
+        self.vsoundgame = tk.IntVar(value=parameters.soundgame)
+        self.vnblettres = tk.IntVar(value=wordlengthlist[0]) 
+        self.vnbtries = tk.IntVar(value=wordlengthlist[0])
+        # ---------------------------------------------------------------------
+        tab_options:dict = {'bd':3,'bg':'ivory','relief':'ridge','name':"!my_appParameters"}        
+        for key in list(tab_options.keys()):
+            if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
+        super().__init__(master, *args, **kwargs)
+        # ---------------------------------------------------------------------        
+        self.protocol("WM_DELETE_WINDOW", self.no_command)
+        # ---------------------------------------------------------------------        
+        self.txt_font = ('Courier\ New 12 bold italic')
+        self.btn_font = ('Arial 12 bold roman')
+        self.lbl_font = ('Serif 12 normal italic')
+        self.spb_font = ('Serif 11 normal italic')
+        # ---------------------------------------------------------------------        
+        self.minsize(master.app_size[0]//3, master.app_size[1]//3)
+        [self.columnconfigure(index=i, weight=1) for i in range(20)]
+        self.rowconfigure(index=0, weight=1)
+        # ---------------------------------------------------------------------        
+        title = "Paramétrage de MOTUS v4.0 (c)AMOUROUX Bernard 05/2025"
+        self.bind("<Return>", self.ok_command)
+        self.bind("<Escape>", self.no_command)
+        self.title(title)
+        # ---------------------------------------------------------------------
+        self.create_widgets()
+    
+    def create_widgets(self):
+        # ---------------------------------------------------------------------
+        frame0 = My_LabelFrame(self,0,0,cspan=20,rspan=21,bg='wheat',bd=2,relief="groove")
+        tk.Label(frame0,bg='tan',bd=0,font=self.lbl_font,justify="center",anchor="center",width=32,
+                    text=f"\tFichier de configuration :").grid(row=0,columnspan=12,sticky='nsew')
+        tk.Label(frame0,bg='tan',bd=0,font=self.txt_font,text=f"\t{self.__parameters.paramfilename}",
+                   width=38,justify="center",anchor="w").grid(column=12,row=0,columnspan=8,sticky='nsew')
+        # ---------------------------------------------------------------------
+        frame1 = My_LabelFrame(frame0,0,1,cspan=20,rspan=9,bg='wheat',bd=2,relief="ridge",pad=(2,2,0,0))
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Fichier dictionnaire  :",anchor="sw",
+                           width=22,font=self.lbl_font).grid(column=0,row=0,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vdicofile,state="readonly").grid(row=0,
+                                                           ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                     command=self.sel_Dictfile,).grid(row=0,column=15,columnspan=4,padx=10,sticky="se")
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Fichier d'aide MOTUS  :",anchor="sw",
+                           width=22,font=self.lbl_font).grid(column=0,row=1,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vhelpfile,state="readonly").grid(row=1,
+                                                           ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                      command=self.sel_helpfile).grid(row=1,column=15,columnspan=4,padx=10,sticky="se")
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Image de fond d'écran :",anchor="sw",
+                           width=22,font=self.lbl_font).grid(column=0,row=2,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vbackfile,state="readonly").grid(row=2,
+                                                           ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                      command=self.sel_backfile).grid(row=2,column=15,columnspan=4,padx=10,sticky="se")
+        # ---------------------------------------------------------------------
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,anchor="s",width=40,
+                    text=f"{'Dossiers des dictionnaires, paramètres et images :'}",
+                          font=self.lbl_font).grid(column=0,row=3,rowspan=3,columnspan=20,sticky='nsew')
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Dossier des données :",anchor="sw",
+                            width=22,font=self.lbl_font).grid(column=0,row=6,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vdatapath,state="readonly").grid(row=6,
+                                                            ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                       command=self.sel_datapath).grid(row=6,column=15,columnspan=4,padx=10,sticky="se")
+        tk.Label(frame1,bg=frame1.cget('bg'),bd=0,text="  Dossier des images  :",anchor="sw",
+                            width=22,font=self.lbl_font).grid(column=0,row=7,columnspan=5,sticky='nsew')
+        tk.Entry(frame1,bg='ivory',width=40,textvariable=self.vimagepath,state="readonly").grid(row=7,
+                                                            ipady=3,column=5,columnspan=10,sticky='sew')
+        tk.Button(frame1,bg='orange',text=' Choisir ',width=12,activebackground="lightblue",
+                      command=self.sel_imagepath).grid(row=7,column=15,columnspan=4,padx=10,sticky="se")
+        # ---------------------------------------------------------------------
+        chkboxlbl = My_LabelFrame(frame1,0,8,cspan=20,rspan=2,bg=frame0.cget('bg'),
+                                      relief="ridge",text=' Paramètres divers',pad=(0,0,0,0))
+        tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vaccentchar,
+                                indicatoron=1,font=self.spb_font,text=" : mots accentués",
+                                        anchor='w',).grid(column=0,row=0,columnspan=3,sticky='nsew')
+        tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vfullscreen,
+                                indicatoron=1,font=self.spb_font,text=" : mode plein écran/fenêtré",
+                                        width=26,anchor='center',).grid(column=3,row=0,columnspan=8,sticky='nsew') 
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Nombre d'essais : ",anchor='e',
+                                font=self.spb_font).grid(column=11,columnspan=8,row=0,padx=10,sticky="w")
+        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnbtries,wrap=True,
+                                      from_=wordlengthlist[0],to=11,state='readonly',width=2,
+                                              font=self.txt_font).grid(column=19,row=0,sticky='e')
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f" Mode de jeu : ",
+                                font=self.spb_font).grid(column=0,columnspan=2,row=1,sticky="nsew")
+        gamemode = gamemodelist[0] if self.__parameters.gamemode=="human" else \
+                        gamemodelist[1] if self.__parameters.gamemode=="computer" else gamemodelist[2]
+        self.spbgmode = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
+                                textvariable=self.vgamemode,values=gamemodelist,wrap=True,width=15)
+        while self.spbgmode.get() != gamemode: self.spbgmode.invoke('buttonup')
+        self.spbgmode.grid(column=2,row=1,columnspan=2,sticky="ew")
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"    Difficulté : ", anchor="w",
+                                font=self.spb_font).grid(column=4,columnspan=1,row=1,sticky="nsew")
+        self.spbdifficulty = tk.Spinbox(chkboxlbl,bg='ivory',activebackground='ivory',state="readonly",
+                                textvariable=self.vdifficulty,values=gamehardlist,wrap=True,width=10)
+        while self.spbdifficulty.get() != self.__parameters.difficulty: self.spbdifficulty.invoke('buttonup')
+        self.spbdifficulty.grid(column=6,row=1,columnspan=2,sticky="ew")
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Longueur du mot : ",anchor="e",
+                    font=self.spb_font).grid(column=17,columnspan=2,row=1,padx=10,sticky="nsew")
+        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnblettres,wrap=True,
+                              from_=wordlengthlist[0],to=wordlengthlist[-1],state='readonly',
+                                    width=2,font=self.txt_font).grid(column=19,row=1,sticky='w')    
+        # ---------------------------------------------------------------------
+        musicframe = My_LabelFrame(frame1,0,10,cspan=20,rspan=2,bg=frame0.cget('bg'),
+                                      relief="ridge",text=' Paramètres effets sonores ',pad=(0,0,0,0))  
+        tk.Checkbutton(musicframe,bg=musicframe.cget('bg'),variable=self.vmusicgame,
+                                indicatoron=1,font=self.spb_font,text=" : lire le générique",
+                                        anchor='w',).grid(column=0,row=0,columnspan=3,sticky='nsew')
+        tk.Checkbutton(musicframe,bg=musicframe.cget('bg'),variable=self.vsoundgame,
+                                indicatoron=1,font=self.spb_font,text=" : gingles gagné/perdu ",
+                                        width=26,anchor='center',).grid(column=3,row=0,columnspan=8,sticky='nsw') 
+        tk.Checkbutton(musicframe,bg=musicframe.cget('bg'),variable=self.vlettersound,
+                                indicatoron=1,font=self.spb_font,text=" : tonalités lettres Motus ",
+                                        width=26,anchor='center',).grid(column=11,row=0,columnspan=8,sticky='nse') 
+        # ---------------------------------------------------------------------        
+        tk.Button(frame0,bg='tan',bd=3,activebackground="lightgreen",state="active",width=12,font=self.btn_font,
+                      text="Valider",command=self.ok_command).grid(column=2,row=21,columnspan=3,pady=5,sticky="w")
+        tk.Button(frame0,bg='tan',activebackground="red",text="Annuler",font=self.btn_font,bd=3,width=12,
+                               command=self.no_command).grid(column=15,row=21,columnspan=4,pady=5,sticky="e")
+        # ---------------------------------------------------------------------        
+    
+    def sel_Dictfile(self):
+        fname = tkFileDialog.askopenfilename(parent=self,initialdir = op.join(getcwd(),self.vdatapath.get()),
+                                        title = "Choix du dictionnaire MOTUS",initialfile=self.vdicofile.get(),
+                                                      filetypes = (("Motus dico","*.txt"),("Tous types","*.*")))
+        if fname:
+            self.vdicofile.set(op.basename(fname))
+    
+    def sel_helpfile(self):
+        fname = tkFileDialog.askopenfilename(parent=self, initialdir = op.join(getcwd(),self.vdatapath.get()),
+                                        title = "Choix du fichier d'aide MOTUS",initialfile=self.vhelpfile.get(),
+                                                        filetypes = (("Aide Motus","*.txt"),("Tous types","*.*")))
+        if fname:
+            self.vhelpfile.set(op.basename(fname))
+    
+    def sel_backfile(self):
+        fname = tkFileDialog.askopenfilename(parent=self, initialdir = op.join(getcwd(),self.vimagepath.get()),
+                                      title = "Choix de l'Image de fond d'écran",initialfile=self.vbackfile.get(),
+                                        filetypes = (("Image PNG","*.png"),("Image GIF","*.gif"),("Tous types","*.*")))
+        if fname:
+            self.vbackfile.set(op.basename(fname))
+    
+    def sel_datapath(self):
+        pname = tkFileDialog.askdirectory(initialdir = op.join(getcwd(),self.vdatapath.get()),
+                                                parent = self, title = "Choix du dossier des données")
+        if pname:
+            self.vdatapath.set(op.basename(pname))
+    
+    def sel_imagepath(self):
+        pname = tkFileDialog.askdirectory(initialdir=op.join(getcwd(),self.vimagepath.get()),
+                                                        parent=self,title="Choix du dossier des images")
+        if pname:
+            self.vimagepath.set(op.basename(pname))
+    
+    def __valid_parameters(self, event=None) -> App_Options:
+        # ---------------------------------------------------------------------
+        index = gamemodelist.index(self.vgamemode.get())
+        self.__parameters.gamemode = "human" if index == 0 else "computer" if index == 1 else "fighters"
+        # ---------------------------------------------------------------------
+        self.__parameters.fullscreen = bool(self.vfullscreen.get())
+        self.__parameters.lettersound = bool(self.vlettersound.get())
+        self.__parameters.musicgame = bool(self.vmusicgame.get())
+        self.__parameters.soundgame = bool(self.vsoundgame.get())
+        self.__parameters.difficulty = self.vdifficulty.get()
+        self.__parameters.dicofilename = self.vdicofile.get()
+        self.__parameters.helpfilename = self.vhelpfile.get()
+        self.__parameters.backfilename = self.vbackfile.get()
+        self.__parameters.accentchar = self.vaccentchar.get()
+        self.__parameters.nb_letters = self.vnblettres.get()
+        self.__parameters.imagepath = self.vimagepath.get()
+        self.__parameters.dicopath = self.vdatapath.get()
+        self.__parameters.nb_tries = self.vnbtries.get()
+        # ---------------------------------------------------------------------
+        return self.__parameters
+
+    def go(self) -> App_Options:
+        """ Methode qui permet de garder le focus sur la fenetre de choix
+            de l'huile qui lors du choix renvoi le nom de l'huile choisie
+            et ferme la fenetre Toplevel.
+        """
+        self.lift(self.__master)            # mise au premier plan de la Toplevel
+        self.wait_visibility()
+        self.grab_set() 
+        self.how = self.__valid_parameters  # Nom de la procédure exécutée en sortie
+        self.mainloop()                     # Sortie de la Boucle principale par "self.quit(how)"
+        self.destroy()                      # Fermeture de la fenetre Toplevel
+        return self.how
+        
+    def ok_command(self, event=None):
+        self.Quit(self.__valid_parameters(event))
+        
+    def no_command(self, event=None):
+        self.Quit(event)
+        
+    def Quit(self, how=None):
+        """ Sortie de la boucle principale et non fermeture de la fenetre
+            Exécution de la methode "how" qui permet de récupérer la
+            donnée voulue en sotie en fin de méthode "go()"
+        """
+        self.how = how
+        self.quit()                     # Exit mainloop()
+        
     
 # ----------------------------- Méthodes diverses -----------------------------    
 
@@ -765,12 +781,13 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     difficulty = Difficulty_Popup(root).go()
     print(f"selected difficulty: {difficulty}")
+    config.options.difficulty = difficulty[1]
     chrono.change_mode(difficulty[1])
     chrono.start_chrono()
 
-    #winparams = Parameters_Box(root,config.options).go()
-    #if winparams:     
-    #    print(f"winparams:\n{winparams}")
+    winparams = Parameters_Box(root,config.options).go()
+    if winparams:     
+        print(f"winparams:\n{winparams}")
     # -------------------------------------------------------------------------
     root.mainloop()
     

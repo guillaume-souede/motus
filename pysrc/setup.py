@@ -17,7 +17,7 @@ os.environ['TK_LIBRARY'] = tk_dir
 
 build_exe_options = {
                          "packages":['tkinter','computer','configs','gameboard','gui_tools','handledico','human'],
-                         "include_files":[(tcl_dir, 'tcl8.6'),(tk_dir, 'tk8.6'),"../data",
+                         "include_files":[(tcl_dir, 'tcl8.6'),(tk_dir, 'tk8.6'),"../data","../audio",
                                                         "../images","../README.md","Licence_gpl-3.0.txt"],
                          "excludes": ["../old_files","../bin","../src","../audio","setup.py",
                                       "motus_v4.0.00.py","configs.py",'computer.py',
@@ -35,6 +35,10 @@ setup(
     description = "Un dérivé du jeu télévisé de France Télévision 'MOTUS'",
     options = {"build_exe": build_exe_options},
     executables = [Executable(  script = "motus_v4.0.00.py",
+                                target_name="Motus_V4",
                                 icon = "../images/motus.gif",
+                                copyright="(c) AMOUROUX Bernard 05/2025",
+                                shortcut_name="../motus_v4.desktop",
+                                shortcut_dir="/usr/share/applications",
                                 base = base)]
       )

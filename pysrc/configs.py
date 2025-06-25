@@ -75,9 +75,34 @@ class App_Options(object):
         self.__nb_letters:int = 6       # -- nombre de caractères défaut
         self.__nb_tries:int = 6         # -- nombre maxi propositions 
         # -------------------------------------------------
+        self.__musicgame:bool = True    # -- musique du générique de début
+        self.__soundgame:bool = True    # -- gingles gagné, perdu
+        self.__lettersound:bool = True  # -- tonalités des lettres du mot Motus
+        # -------------------------------------------------
         self.__fullscreen:bool = False  # -- bascule mode plein écran/fenêtré
         self.__game_difficulty:Gamehardness = "easy" 
         self.__game_mode:PlayerMode = "human"
+    
+    @property
+    def lettersound(self) -> bool:
+        return self.__lettersound
+    @lettersound.setter
+    def lettersound(self, lettersound):
+        self.__lettersound = lettersound   
+    
+    @property
+    def musicgame(self) -> bool:
+        return self.__musicgame
+    @musicgame.setter
+    def musicgame(self, musicgame):
+        self.__musicgame = musicgame   
+    
+    @property
+    def soundgame(self) -> bool:
+        return self.__soundgame
+    @soundgame.setter
+    def soundgame(self, soundgame):
+        self.__soundgame = soundgame
     
     @property
     def fullscreen(self) -> bool:

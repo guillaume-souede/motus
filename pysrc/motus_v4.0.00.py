@@ -35,6 +35,7 @@ import tkinter as tk
 import tkinter.font as tkFont
 
 from handledico import Handle_DicoMotus
+from simpleaudio import WaveObject, stop_all
 from unicodedata import normalize,category
 from computer import IA_Computer
 from gameboard import GameBoard
@@ -142,6 +143,9 @@ class Application(tk.Tk):
         self.attributes("-fullscreen",self.__fullscreen)
     
     def cree_widgets(self):
+        play_obj = WaveObject.from_wave_file(op.join(getcwd(),"audio","generique.wav"))
+        self.generique = play_obj.play() if self.app_Parameters.options.musicgame else None
+        #play_obj.wait_done()  # Attend que le son se termine
         # -----------------------------------------------------------------------------------------
         frameletters = My_LabelFrame(self,bd=2,bg="wheat",cspan=9,pad=(2,2,0,0))
         tk.Label(frameletters, bd=0, bg='wheat',font=self.labelFont,
@@ -170,7 +174,7 @@ class Application(tk.Tk):
         self.playButton = tk.Button(framegames,bg='orange',activebackground='orange',
                                         name='!playButton',font=self.labelFont,text=' Jouer ',
                                             width=12,state='active',command=self.create_GameBoard)
-        self.playButton.grid(column=8,row=0,padx=5,columnspan=4,sticky="nsew")
+        self.playButton.grid(column=8,row=0,padx=5,pady=2,columnspan=4,sticky="nsew")
         # -----------------------------------------------------------------------------------------
         self.chronometre.grid(column=21,row=0,columnspan=3,sticky="we")
         # -----------------------------------------------------------------------------------------
@@ -184,7 +188,7 @@ class Application(tk.Tk):
         self.entryRequest.grid(column=4,row=0,columnspan=4,sticky='e')
         self.validButton = tk.Button(frameEntry,bg='ivory',text=" Valider ",state="disabled")
         self.validButton.configure(activebackground="lightgreen",font=self.labelFont,command=self.playGame)
-        self.validButton.grid(column=11,row=0,columnspan=2,padx=10,sticky='nsew')
+        self.validButton.grid(column=11,row=0,columnspan=2,pady=2,padx=10,sticky='ew')
         self.validButton.__funcID = self.bind("<Return>", self.playGame)
         # -----------------------------------------------------------------------------------------
         self.abortButton = tk.Button(self,text='Quitter le jeu',bg='wheat',activebackground='red')
@@ -225,7 +229,7 @@ class Application(tk.Tk):
         self.barre_Etat.get_message = message
     
     def invalid_word(self, word:str):
-        self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{word}' est invalide",5)
+        self.barre_Etat.update_vltexte(f" ---> le mot que vous venez de proposer '{word}' est invalide.",5)
     
     def valide_word(self, word:str) -> bool:
         return word in self.dico_MOTUS.dico_MOTUS[f"{self.vnblettres.get()}"]
@@ -282,6 +286,9 @@ class Application(tk.Tk):
             # -----------------------------------------------------------------
             if self.__human_status == "winner":
                 self.gameBoard.grid_remove()
+                # --------------- Lecture du son Gagnant MOTUS ----------------
+                if self.app_Parameters.options.soundgame:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","gagnant.wav")).play()
                 message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{self.MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"
                 winner_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
                                                        image=self.winnerImage, anchor="center", tags='img_winner')
@@ -289,6 +296,9 @@ class Application(tk.Tk):
                 self.gameBoard.grid()
             if self.__human_status == "loser":
                 self.gameBoard.grid_remove()
+                # ------------- Lecture du son de la Boule Noire = perdu --------------
+                if self.app_Parameters.options.soundgame:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","perdu.wav")).play()
                 message = f"\n{'Vous avez perdu le mot MOTUS est :':100}\n{self.MOTUS_word.upper():90}\n{'Nouvelle partie ?':100}\n"    
                 loser_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
                                                        image=self.loserImage, anchor="center", tags='img_winner')
@@ -326,6 +336,8 @@ class Application(tk.Tk):
         self.create_GameBoard()
             
     def create_GameBoard(self, playgame:bool=True):
+        # -------------------- Arret lecture du générique ---------------------
+        if self.generique != None: self.generique.stop()
         # --------------- Fonction de validation du tk.Entry() ----------------
         def _validateCmd(value:str, max:int):            
            return bool(len(value) <= int(max))
@@ -405,6 +417,9 @@ class Application(tk.Tk):
         self.abortButton.configure(state="normal",text="Quitter le jeu",command=self.Quit)
         self.validButton.configure(state="disabled")
         self.playButton.configure(state="active")
+        # ------------- Lecture du son de la Boule Noire = perdu --------------
+        if self.app_Parameters.options.soundgame:
+            WaveObject.from_wave_file(op.join(getcwd(),"audio","perdu.wav")).play()
         # --------------- Gameboard en 6x6 pour la présentation --------------- 
         self.dico_Letters.update(self.gameBoard.create_GameBoard(self.gameBoard.bbox(),6,6))
         dommage_img = self.background.create_image(self.app_size[0]//2, self.app_size[1]//2, 
@@ -441,7 +456,7 @@ class Application(tk.Tk):
                 self.messageBox.message = f"\n  Le temps imparti est dépassé\t\n\nLe mot MOTUS était : {self.__MOTUS_word.upper()}\n\nVous avez perdu\n"
                 self.messageBox.lift()
             self.after(1000, self.update_idletasks)
-        return super().update_idletasks()
+        return super().update_idletasks()   # -- Arret de la boucle du décomptage du temps --
         
     def Quit(self):
         self.quit()

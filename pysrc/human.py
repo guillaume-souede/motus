@@ -28,10 +28,13 @@ __date__ = "$Date: 2025/05/18 07:00 $"
 __copyright__ = "Copyright (c) 2025 Bernard AMOUROUX"
 __license__ = "GPL 3"
 
+
 import tkinter as tk
 
+from os import getcwd
 from gameboard import GameBoard
 from gui_tools import My_MessageBox
+from simpleaudio import WaveObject
 from configs import *
 
 class Human_Player():
@@ -39,8 +42,8 @@ class Human_Player():
     def __init__(self, master:tk.Tk, gameboard:GameBoard):
         
         self.__master = master
-        self.__dico_Letters = master.dico_Letters
         self.__gameboard:GameBoard = gameboard
+        self.__dico_Letters = master.dico_Letters
         self.__nb_letters = self.__gameboard.nb_Letters
         self.__nb_tries = self.__gameboard.nb_Tries
         self.__human_status:PlayerStatus = "idle"
@@ -68,7 +71,10 @@ class Human_Player():
             qui ne sont pas dans le mot MOTUS.
         """
         for idx,button in buttons:
+            # ------------ Lecture du son lettre pas dans mot -------------
             button.configure(bg=COLOR_NO,relief='flat',activebackground=COLOR_NO)
+            if self.__master.app_Parameters.options.lettersound:
+                WaveObject.from_wave_file(op.join(getcwd(),"audio","10748.wav")).play()
             button.flash()
             self.NO = len(buttons)
         return buttons
@@ -80,7 +86,10 @@ class Human_Player():
         found:list = ([])
         for idx,button in buttons:
             if button.cget('text').lower() in self.__master.MOTUS_word:
+                # -------------- Lecture du son lettre dans mot ---------------
                 button.configure(bg=COLOR_IS,relief='flat',activebackground=COLOR_IS)
+                if self.__master.app_Parameters.options.lettersound:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","10758.wav")).play()
                 found.append((idx,button))
                 button.flash()
         self.IS = len(found)
@@ -94,7 +103,10 @@ class Human_Player():
         found:list = ([])
         for idx,button in buttons:
             if button.cget('text').lower() == self.__master.MOTUS_word[idx[0] % self.__nb_letters]:
+                # ----------- Lecture du son lettre placé dans mot ------------
                 button.configure(bg=COLOR_OK,relief='flat',activebackground=COLOR_OK)
+                if self.__master.app_Parameters.options.lettersound:
+                    WaveObject.from_wave_file(op.join(getcwd(),"audio","10769.wav")).play()
                 found.append((idx,button))
                 button.flash()
         self.OK = len(found)
