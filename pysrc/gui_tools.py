@@ -33,6 +33,7 @@ import tkinter as tk
 import tkinter.font as tkFont
 import tkinter.filedialog as tkFileDialog
 
+from simpleaudio import WaveObject, PlayObject
 from time import time
 from os import getcwd
 from configs import *
@@ -40,22 +41,31 @@ from configs import *
 
 class Chronometre(tk.Frame):
     
-    def __init__(self, master, mode:Gamehardness, *args, **kwargs):
+    ticSound:PlayObject = None
+    
+    def __init__(self, master, mode:Gamehardness, ticsound:bool=False, *args, **kwargs):
         
         self.master = master
+        self.ticsound = ticsound
         self.__dict_modes:dict = {"easy":0,"normal":120,"hardu":60,"terrible":30,'infaisable':10} 
+        # ---------------------------------------------------------------------
+        self.__off_img = tk.PhotoImage(file=op.join(getcwd(),"images","ticoff_128.png")).subsample(4)
+        self.__on_img = tk.PhotoImage(file=op.join(getcwd(),"images","ticon_128.png")).subsample(4)
         # ---------------------------------------------------------------------
         tab_options:dict = {'bg':'grey90' if mode == "easy" else 'ivory', 'bd':3, 
                                      'relief':'sunken' if mode == "easy" else 'ridge'}
         for key in list(tab_options.keys()):
             if kwargs.get(key, None) == None: kwargs[key] = tab_options.get(key, None)
         super().__init__(master, *args, **kwargs)
+        self.grid_configure(columnspan=3, pady=3, sticky="nsew")
+        self.grid_columnconfigure(2, weight=1)
+        # ---------------------------------------------------------------------
+        self.__ticsound = WaveObject.from_wave_file(wave_file=op.join(getcwd(),"audio","10759.wav"))
         # ---------------------------------------------------------------------
         self.__vchrono = tk.StringVar(value="00:00")     # temps en secondes
-        self.__rebour:bool = mode != "easy"
         self.__max_time = self.__dict_modes.get(mode, 'normal')
+        self.__rebour:bool = mode != "easy"
         self.__time = self.__max_time
-        self.__mode = mode
         self.actif = False
         # ---------------------------------------------------------------------
         self.create_widget()
@@ -64,11 +74,20 @@ class Chronometre(tk.Frame):
     def elapsed_time(self) -> int:
         return self.__time
 
+    def __toggle_ticsound(self, event:tk.Event=None):
+        self.chrono_btn['image'] = self.__off_img if self.ticsound else self.__on_img
+        self.ticsound = not self.ticsound
+
     def create_widget(self):
         lbl_font = tkFont.Font(family='Sans Serif',size=16,weight='normal',slant='roman')
-        self.chrono_lbl = tk.Label(self,bg=self.cget('bg'),font=lbl_font,textvariable=self.__vchrono,border=0)
+        frame = My_LabelFrame(self, bg=self.cget('bg'), bd=2, cspan=2, relief='groove')
+        self.chrono_lbl = tk.Label(frame,bg=frame.cget('bg'),font=lbl_font,textvariable=self.__vchrono,border=0)
         self.chrono_lbl.configure(fg="black" if self.__rebour else "grey75")
-        self.chrono_lbl.grid(column=0,row=0,sticky="nsew")
+        self.chrono_lbl.grid(column=0,row=0,sticky="w")
+        self.chrono_btn = tk.Button(frame,relief='solid',overrelief='solid',bd=2,width=-1,height=-1)
+        self.chrono_btn['image'] = self.__on_img if self.ticsound else self.__off_img
+        self.chrono_btn.bind("<Button-1>", self.__toggle_ticsound)
+        self.chrono_btn.grid(column=1,row=0,sticky="e")
         self.update_idle()
 
     def __format_time(self):
@@ -80,14 +99,19 @@ class Chronometre(tk.Frame):
         if self.actif and not self.__rebour:
             self.__time += 1 
         if self.actif and self.__rebour and self.__time > 0:
+            if self.ticsound:
+                Chronometre.ticSound = self.__ticsound.play()
             self.__time -= 1
-        self.__vchrono.set(self.__format_time())
+        elif Chronometre.ticSound: Chronometre.ticSound.stop()
+        self.__vchrono.set(self.__format_time())            
         self.after(1000, self.update_idle)
 
     def start_chrono(self):
         self.actif = True
 
     def pause_chrono(self):
+        if self.ticsound:
+            Chronometre.ticSound.stop()
         self.actif = False
 
     def change_mode(self, newmode:Gamehardness):
@@ -432,7 +456,7 @@ class Difficulty_Popup(tk.Toplevel):
         self.__difficulty = master.app_Parameters.options.difficulty
         self.__difficulty_list:list[Gamehardness] = gamehardlist
         self.vgamedif = tk.StringVar(value=self.__difficulty_list)
-        self.lst_font = tk.font.Font(family='Courier New',size=10,weight='bold',slant='italic')    
+        self.lst_font = tk.font.Font(family='Courier New',size=14,weight='bold',slant='italic')    
         # ---------------------------------------------------------------------
         tab_options:dict = {'bd':2, 'bg':'orange', 'relief':'flat'}        
         for key in list(tab_options.keys()):
@@ -507,6 +531,7 @@ class Parameters_Box(tk.Toplevel):
          
         self.__master = master
         self.__parameters = parameters
+        print(f"\nParameter_Box(): {parameters.__str__()}")
         # ---------------------------------------------------------------------
         self.vfullscreen = tk.IntVar(value=int(parameters.fullscreen))
         self.vparamfile =  op.join(getcwd(),parameters.dicopath,parameters.paramfilename)
@@ -521,8 +546,9 @@ class Parameters_Box(tk.Toplevel):
         self.vdatapath = tk.StringVar(value=parameters.dicopath)
         self.vmusicgame = tk.IntVar(value=parameters.musicgame)
         self.vsoundgame = tk.IntVar(value=parameters.soundgame)
-        self.vnblettres = tk.IntVar(value=wordlengthlist[0]) 
-        self.vnbtries = tk.IntVar(value=wordlengthlist[0])
+        self.vticsound = tk.IntVar(value=parameters.ticsound)
+        self.vnblettres = tk.IntVar(value=parameters.nb_letters) 
+        self.vnbtries = tk.IntVar(value=parameters.nb_tries)
         # ---------------------------------------------------------------------
         tab_options:dict = {'bd':3,'bg':'ivory','relief':'ridge','name':"!my_appParameters"}        
         for key in list(tab_options.keys()):
@@ -599,11 +625,12 @@ class Parameters_Box(tk.Toplevel):
         tk.Checkbutton(chkboxlbl,bg=chkboxlbl.cget('bg'),variable=self.vfullscreen,
                                 indicatoron=1,font=self.spb_font,text=" : mode plein écran/fenêtré",
                                         width=26,anchor='center',).grid(column=3,row=0,columnspan=8,sticky='nsew') 
-        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Nombre d'essais : ",anchor='e',
+        tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f" Nombre d'essais : ",anchor='e',
                                 font=self.spb_font).grid(column=11,columnspan=8,row=0,padx=10,sticky="w")
-        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnbtries,wrap=True,
-                                      from_=wordlengthlist[0],to=11,state='readonly',width=2,
-                                              font=self.txt_font).grid(column=19,row=0,sticky='e')
+        spbtries = tk.Spinbox(chkboxlbl,bd=2,textvariable=self.vnbtries,wrap=True,
+                                          relief='sunken',from_=wordlengthlist[0],to=11,
+                                                state='readonly',width=2,font=self.txt_font)
+        spbtries.grid(column=19,row=0,sticky='e')
         tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f" Mode de jeu : ",
                                 font=self.spb_font).grid(column=0,columnspan=2,row=1,sticky="nsew")
         gamemode = gamemodelist[0] if self.__parameters.gamemode=="human" else \
@@ -620,21 +647,25 @@ class Parameters_Box(tk.Toplevel):
         self.spbdifficulty.grid(column=6,row=1,columnspan=2,sticky="ew")
         tk.Label(chkboxlbl,bg=chkboxlbl.cget('bg'),text=f"Longueur du mot : ",anchor="e",
                     font=self.spb_font).grid(column=17,columnspan=2,row=1,padx=10,sticky="nsew")
-        tk.Spinbox(chkboxlbl,bd=2,relief='sunken',textvariable=self.vnblettres,wrap=True,
-                              from_=wordlengthlist[0],to=wordlengthlist[-1],state='readonly',
-                                    width=2,font=self.txt_font).grid(column=19,row=1,sticky='w')    
+        spbletters = tk.Spinbox(chkboxlbl,relief='sunken',textvariable=self.vnblettres,
+                                        bd=2,from_=wordlengthlist[0],to=wordlengthlist[-1],
+                                            state='readonly',wrap=True,width=2,font=self.txt_font)
+        spbletters.grid(column=19,row=1,sticky='w')
         # ---------------------------------------------------------------------
         musicframe = My_LabelFrame(frame1,0,10,cspan=20,rspan=2,bg=frame0.cget('bg'),
                                       relief="ridge",text=' Paramètres effets sonores ',pad=(0,0,0,0))  
         tk.Checkbutton(musicframe,bg=musicframe.cget('bg'),variable=self.vmusicgame,
-                                indicatoron=1,font=self.spb_font,text=" : lire le générique",
-                                        anchor='w',).grid(column=0,row=0,columnspan=3,sticky='nsew')
+                                indicatoron=1,font=self.spb_font,text=" : Générique ",
+                                        anchor='w',).grid(column=0,row=0,columnspan=2,sticky='nsew')
         tk.Checkbutton(musicframe,bg=musicframe.cget('bg'),variable=self.vsoundgame,
-                                indicatoron=1,font=self.spb_font,text=" : gingles gagné/perdu ",
-                                        width=26,anchor='center',).grid(column=3,row=0,columnspan=8,sticky='nsw') 
+                                indicatoron=1,font=self.spb_font,text=" : jingles ",
+                                        width=16,anchor='center',).grid(column=2,row=0,columnspan=2,sticky='nsew') 
         tk.Checkbutton(musicframe,bg=musicframe.cget('bg'),variable=self.vlettersound,
-                                indicatoron=1,font=self.spb_font,text=" : tonalités lettres Motus ",
-                                        width=26,anchor='center',).grid(column=11,row=0,columnspan=8,sticky='nse') 
+                                indicatoron=1,font=self.spb_font,text=" : tonalités lettres ",
+                                        width=16,anchor='center',).grid(column=4,row=0,columnspan=2,sticky='nsew') 
+        tk.Checkbutton(musicframe,bg=musicframe.cget('bg'),variable=self.vticsound,
+                                indicatoron=1,font=self.spb_font,text=f" : Chronomètre",
+                                        width=16,anchor='center',).grid(column=6,row=0,columnspan=2,sticky='nsew') 
         # ---------------------------------------------------------------------        
         tk.Button(frame0,bg='tan',bd=3,activebackground="lightgreen",state="active",width=12,font=self.btn_font,
                       text="Valider",command=self.ok_command).grid(column=2,row=21,columnspan=3,pady=5,sticky="w")
@@ -684,6 +715,7 @@ class Parameters_Box(tk.Toplevel):
         self.__parameters.lettersound = bool(self.vlettersound.get())
         self.__parameters.musicgame = bool(self.vmusicgame.get())
         self.__parameters.soundgame = bool(self.vsoundgame.get())
+        self.__parameters.ticsound = bool(self.vticsound.get())
         self.__parameters.difficulty = self.vdifficulty.get()
         self.__parameters.dicofilename = self.vdicofile.get()
         self.__parameters.helpfilename = self.vhelpfile.get()
@@ -750,9 +782,15 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.app_size = root.maxsize()
     
+    # -------------------------------------------------------------------------
+    config = Saveload_CFG()
+    root.app_Parameters = config
+    # -------------------------------------------------------------------------
     chrono = Chronometre(root, mode="normal")
-    chrono.start_chrono()
-    chrono.grid()
+    tk.Button(root, text=" Stop ", width=8, command=chrono.pause_chrono).grid(column=0,row=1,sticky="sw")
+    tk.Button(root,text=" Start ", width=8, command=chrono.start_chrono).grid(column=1,row=1,sticky='se')
+    chrono.grid(column=0,row=0,columnspan=2,sticky="n")
+    if config.options.ticsound: chrono.start_chrono()
     
     #rules = Game_Rules(root,default_help_filename)
     # -------------------------------------------------------------------------
@@ -772,12 +810,6 @@ if __name__ == "__main__":
     #msgbox.lift(root)
     #message = f"\n{'Vous avez trouvé le mot MOTUS':100}\n{'Nouvelle partie ?':100}\n"
     #print(My_MessageBox(root,"Faites votre choix de partie",message,0).go())
-    # -------------------------------------------------------------------------
-    #dicofile = Select_Dictionary_File(root)
-    config = Saveload_CFG()
-    root.app_Parameters = config
-    #print(f"Dico filename: {dicofile}")
-    #if dicofile: config.options.dicofilename = op.basename(dicofile)
     # -------------------------------------------------------------------------
     difficulty = Difficulty_Popup(root).go()
     print(f"selected difficulty: {difficulty}")

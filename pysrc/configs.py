@@ -78,10 +78,18 @@ class App_Options(object):
         self.__musicgame:bool = True    # -- musique du générique de début
         self.__soundgame:bool = True    # -- gingles gagné, perdu
         self.__lettersound:bool = True  # -- tonalités des lettres du mot Motus
+        self.__ticsound:bool = False    # -- tonalité du décompte temps
         # -------------------------------------------------
         self.__fullscreen:bool = False  # -- bascule mode plein écran/fenêtré
         self.__game_difficulty:Gamehardness = "easy" 
         self.__game_mode:PlayerMode = "human"
+    
+    @property
+    def ticsound(self) -> bool:
+        return self.__ticsound
+    @ticsound.setter
+    def ticsound(self, ticsound):
+        self.__ticsound = ticsound   
     
     @property
     def lettersound(self) -> bool:

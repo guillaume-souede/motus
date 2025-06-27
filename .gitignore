@@ -1146,3 +1146,5 @@ pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/test_audio/left_right.wav
 pysrc/build/exe.linux-x86_64-3.9/lib/simpleaudio/test_audio/notes_2_16_44.wav
 motus_v4.desktop
 audio/Générique Motus (A2, 1991).wav
+images/ticoff.png
+images/ticon.png
